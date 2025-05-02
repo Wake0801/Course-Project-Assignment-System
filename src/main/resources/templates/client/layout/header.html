@@ -1,0 +1,54 @@
+
+<th:block th:fragment="headContent">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/client/images/favicon.ico}" />
+  <!-- bootstrap.min css -->
+  <link rel="stylesheet" th:href="@{/client/plugins/bootstrap/css/bootstrap.min.css}" />
+  <!-- Icon Font Css -->
+  <link rel="stylesheet" th:href="@{/client/plugins/icofont/icofont.min.css}"/>
+  <!-- Slick Slider  CSS -->
+  <link rel="stylesheet" th:href="@{/client/plugins/slick-carousel/slick/slick.css}"/>
+  <link rel="stylesheet" th:href="@{/client/plugins/slick-carousel/slick/slick-theme.css}"/>
+  <!-- FONT AWESOME -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- CUSTOM CSS SAU CÙNG -->
+  <link rel="stylesheet" th:href="@{/client/css/style.css}"/>
+
+</th:block>
+
+<header th:fragment="header">
+  <nav class="navbar-expand-lg" id="navbar">
+    <div class="collapse navbar-collapse" id="navbarmain">
+    <div class="container container1">
+      <a class="navbar-brand" href="home.html">
+      <img th:src="@{/client/images/z6425388337729_4b57f431a7c60d62672c90a6b28f44ee.jpg}" alt="" class="img-fluid">
+      </a>
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" th:href="@{/client/home}">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/client/topic}">Quản lý đề tài</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/client/studentgroup}">Quản lý nhóm</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/client/studentlist}">Danh sách sinh viên</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/client/notification}">Thông báo</a></li>
+        
+      </ul>
+    </div>
+      <!-- Signup-->
+      <!-- <div class="user-info">
+      <img src="images/Sample_User_Icon.png" alt="User">
+      <span>Login</span>
+      </div> -->
+      <!-- Already Signup-->
+      
+      <li class="user-info nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-right:30px">
+          <img th:src="@{/client/images/61f75ea9a680def2ed1c6929fe75aeee.jpg}" alt="User">
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" th:href="@{/client/userinfo}">Thông tin cá nhân</a>
+
+          <a class="dropdown-item" th:href="@{/other/login}">Đăng xuất</a>
+      </li>
+    </div>
+  </nav>
+</header>
+   

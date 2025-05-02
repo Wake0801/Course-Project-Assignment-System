@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Orbitor,business,company,agency,modern,bootstrap4,tech,software">
+  <meta name="author" content="themefisher.com">
+
+  <title>Quản lý đề tài</title>
+  <th:block th:replace="~{client/layout/header :: headContent}"></th:block>
+</head>
+<body id="top">
+<div th:replace="~{client/layout/header :: header}"></div>
+
+<section class="studentlist">
+	<div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Danh sách sinh viên</div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="form-group">
+                    <label for="semester-select" class="form-label">Học kỳ</label>
+                    <select id="semester-select" class="form-control">
+                        <option value="">Chọn học kỳ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="course-select" class="form-label">Lớp tín chỉ</label>
+                    <select id="course-select" class="form-control" disabled>
+                        <option value="">Chọn lớp tín chỉ</option>
+                    </select>
+                </div>
+                <div class="form-group search-box">
+                    <label for="search-input" class="form-label">Tìm kiếm</label>
+                    <div>
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="form-control search-input" placeholder="Tìm theo Mã SV hoặc Tên...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mã SV</th>
+                            <th>Họ tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Ngành</th>
+                            <th>Lớp</th>
+                            <th>Nhóm (trong lớp tín chỉ đã chọn)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                        <tr class="loading-row">
+                            <td colspan="6">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <p>Không tìm thấy sinh viên nào phù hợp.</p>
+                </div>
+            </div>
+        </div>
+	</div>
+</section>
+<div th:replace="~{client/layout/footer :: footer}"></div>
+<th:block th:replace="~{client/layout/footer :: scriptContent}"></th:block>
+    <script th:src="@{client/js/studentlist.js}"></script>
+  </body>
+  </html>

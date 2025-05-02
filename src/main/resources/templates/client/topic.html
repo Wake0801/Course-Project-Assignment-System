@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Orbitor,business,company,agency,modern,bootstrap4,tech,software">
+  <meta name="author" content="themefisher.com">
+
+  <title>Quản lý đề tài</title>
+  <th:block th:replace="~{client/layout/header :: headContent}"></th:block>
+  <div th:replace="~{client/layout/header :: header}"></div>
+</head>
+<body id="top">
+
+<div class="main-layout">
+	<!-- Main Content Area -->
+	<div class="main-content">
+	  
+	  <!-- Content -->
+	  <main class="content">
+		<!-- Filters -->
+		<div class="search-card">
+		  <h2>Tìm kiếm đề tài</h2>
+		  <div class="search-filters">
+			<div class="filter-group">
+			  <label>Học kỳ</label>
+			  <select>
+				<option>Tất cả</option>
+				<option>Học kỳ 1 - 2023</option>
+				<option>Học kỳ 2 - 2023</option>
+				<option>Học kỳ hè - 2023</option>
+				<option>Học kỳ 1 - 2024</option>
+			  </select>
+			</div>
+			<div class="filter-group">
+			  <label>Lớp tín chỉ</label>
+			  <select>
+				<option>Tất cả</option>
+				<option>IT001.1</option>
+				<option>IT001.2</option>
+				<option>IT002.1</option>
+				<option>CS001.1</option>
+			  </select>
+			</div>
+			<div class="filter-group">
+			  <label>Môn học</label>
+			  <select>
+				<option>Tất cả</option>
+				<option>Lập trình Web</option>
+				<option>Cơ sở dữ liệu</option>
+				<option>Trí tuệ nhân tạo</option>
+				<option>Hệ điều hành</option>
+			  </select>
+			</div>
+			<div class="filter-group">
+			  <label>Tên đề tài</label>
+			  <input type="text" placeholder="Nhập tên đề tài...">
+			</div>
+		  </div>
+		  <div class="filter-group">
+			<label>Mô tả</label>
+			<input type="text" placeholder="Nhập từ khóa mô tả...">
+		  </div>
+		  <div class="search-actions">
+			<button class="btn btn-outline">
+			  <i class="fas fa-redo"></i>Đặt lại
+			</button>
+			<button class="btn btn-primary">
+			  <i class="fas fa-search"></i>Tìm kiếm
+			</button>
+		  </div>
+		</div>
+		
+		<!-- Actions -->
+		<div class="topics-header">
+		  <div>
+			<h2>Danh sách đề tài</h2>
+			<p>Tổng cộng 12 đề tài</p>
+		  </div>
+		  <button onclick="openAddModal()" class="btn btn-primary">
+			<i class="fas fa-plus"></i>Thêm đề tài
+		  </button>
+		</div>
+		
+		<!-- Topics List -->
+		<div class="topics-grid">
+		  <!-- Topic Card 1 -->
+		  <div class="topic-card">
+			<div class="topic-card-content">
+			  <div class="topic-card-header">
+				<span class="topic-badge badge-web">Lập trình Web</span>
+				<div class="topic-actions">
+				  <button onclick="openEditModal()" class="edit">
+					<i class="fas fa-edit"></i>
+				  </button>
+				  <button class="delete">
+					<i class="fas fa-trash"></i>
+				  </button>
+				</div>
+			  </div>
+			  <h3>Xây dựng website bán hàng</h3>
+			  <p>Xây dựng website thương mại điện tử với đầy đủ chức năng quản lý sản phẩm, đơn hàng và thanh toán.</p>
+			  <div class="topic-meta">
+				<span><i class="fas fa-users"></i> 3/5 SV</span>
+				<span><i class="fas fa-calendar-alt"></i> HK1-2023</span>
+			  </div>
+			</div>
+			<div class="topic-footer">
+			  <button>
+				<span>Xem chi tiết</span>
+				<i class="fas fa-chevron-right"></i>
+			  </button>
+			</div>
+		  </div>
+		  
+		  <!-- Topic Card 2 -->
+		  <div class="topic-card">
+			<div class="topic-card-content">
+			  <div class="topic-card-header">
+				<span class="topic-badge badge-db">Cơ sở dữ liệu</span>
+				<div class="topic-actions">
+				  <button class="edit">
+					<i class="fas fa-edit"></i>
+				  </button>
+				  <button class="delete">
+					<i class="fas fa-trash"></i>
+				  </button>
+				</div>
+			  </div>
+			  <h3>Hệ thống quản lý thư viện</h3>
+			  <p>Thiết kế cơ sở dữ liệu và giao diện quản lý sách, mượn trả cho thư viện trường học.</p>
+			  <div class="topic-meta">
+				<span><i class="fas fa-users"></i> 2/4 SV</span>
+				<span><i class="fas fa-calendar-alt"></i> HK2-2023</span>
+			  </div>
+			</div>
+			<div class="topic-footer">
+			  <button>
+				<span>Xem chi tiết</span>
+				<i class="fas fa-chevron-right"></i>
+			  </button>
+			</div>
+		  </div>
+		  
+		  <!-- Topic Card 3 -->
+		  <div class="topic-card">
+			<div class="topic-card-content">
+			  <div class="topic-card-header">
+				<span class="topic-badge badge-ai">Trí tuệ nhân tạo</span>
+				<div class="topic-actions">
+				  <button class="edit">
+					<i class="fas fa-edit"></i>
+				  </button>
+				  <button class="delete">
+					<i class="fas fa-trash"></i>
+				  </button>
+				</div>
+			  </div>
+			  <h3>Nhận diện khuôn mặt với CNN</h3>
+			  <p>Nghiên cứu và triển khai mô hình CNN để nhận diện khuôn mặt với độ chính xác cao.</p>
+			  <div class="topic-meta">
+				<span><i class="fas fa-users"></i> 4/4 SV</span>
+				<span><i class="fas fa-calendar-alt"></i> HK1-2024</span>
+			  </div>
+			</div>
+			<div class="topic-footer">
+			  <button>
+				<span>Xem chi tiết</span>
+				<i class="fas fa-chevron-right"></i>
+			  </button>
+			</div>
+		  </div>
+		  
+		  <!-- Topic Card 4 -->
+		  <div class="topic-card">
+			<div class="topic-card-content">
+			  <div class="topic-card-header">
+				<span class="topic-badge badge-os">Hệ điều hành</span>
+				<div class="topic-actions">
+				  <button class="edit">
+					<i class="fas fa-edit"></i>
+				  </button>
+				  <button class="delete">
+					<i class="fas fa-trash"></i>
+				  </button>
+				</div>
+			  </div>
+			  <h3>Mô phỏng thuật toán định thời CPU</h3>
+			  <p>Xây dựng chương trình mô phỏng các thuật toán định thời CPU như FCFS, SJF, Round Robin.</p>
+			  <div class="topic-meta">
+				<span><i class="fas fa-users"></i> 1/3 SV</span>
+				<span><i class="fas fa-calendar-alt"></i> HK2-2023</span>
+			  </div>
+			</div>
+			<div class="topic-footer">
+			  <button>
+				<span>Xem chi tiết</span>
+				<i class="fas fa-chevron-right"></i>
+			  </button>
+			</div>
+		  </div>
+		  
+		  <!-- Topic Card 5 -->
+		  <div class="topic-card">
+			<div class="topic-card-content">
+			  <div class="topic-card-header">
+				<span class="topic-badge badge-mobile">Lập trình di động</span>
+				<div class="topic-actions">
+				  <button class="edit">
+					<i class="fas fa-edit"></i>
+				  </button>
+				  <button class="delete">
+					<i class="fas fa-trash"></i>
+				  </button>
+				</div>
+			  </div>
+			  <h3>Ứng dụng quản lý chi tiêu cá nhân</h3>
+			  <p>Phát triển ứng dụng di động giúp người dùng theo dõi và quản lý chi tiêu hàng ngày.</p>
+			  <div class="topic-meta">
+				<span><i class="fas fa-users"></i> 0/2 SV</span>
+				<span><i class="fas fa-calendar-alt"></i> HK hè-2023</span>
+			  </div>
+			</div>
+			<div class="topic-footer">
+			  <button>
+				<span>Xem chi tiết</span>
+				<i class="fas fa-chevron-right"></i>
+			  </button>
+			</div>
+		  </div>
+		  
+		  <!-- Add New Topic Card -->
+		  <div class="add-topic-card" onclick="openAddModal()">
+			<div class="add-topic-content">
+			  <div class="add-topic-icon">
+				<i class="fas fa-plus"></i>
+			  </div>
+			  <h3>Thêm đề tài mới</h3>
+			  <p>Tạo đề tài nghiên cứu mới</p>
+			</div>
+		  </div>
+		</div>
+		
+		<!-- Pagination -->
+		<div class="pagination">
+		  <div class="pagination-info">
+			Hiển thị <span>1-5</span> của <span>12</span> đề tài
+		  </div>
+		  <nav class="pagination-nav">
+			<a href="#" class="pagination-link">
+			  <i class="fas fa-chevron-left"></i>
+			</a>
+			<a href="#" class="pagination-link active">1</a>
+			<a href="#" class="pagination-link">2</a>
+			<a href="#" class="pagination-link">3</a>
+			<a href="#" class="pagination-link">
+			  <i class="fas fa-chevron-right"></i>
+			</a>
+		  </nav>
+		</div>
+	  </main>
+	</div>
+  </div>
+  
+  <!-- Add Topic Modal -->
+  <div id="addModal" class="modal">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<h3>Thêm đề tài mới</h3>
+		<button onclick="closeAddModal()">
+		  <i class="fas fa-times"></i>
+		</button>
+	  </div>
+	  <form>
+		<div class="modal-body">
+		  <div class="modal-grid">
+			<div class="form-group">
+			  <label>Học kỳ*</label>
+			  <select required>
+				<option value="">Chọn học kỳ</option>
+				<option>Học kỳ 1 - 2023</option>
+				<option>Học kỳ 2 - 2023</option>
+				<option>Học kỳ hè - 2023</option>
+				<option>Học kỳ 1 - 2024</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Lớp tín chỉ*</label>
+			  <select required>
+				<option value="">Chọn lớp tín chỉ</option>
+				<option>IT001.1</option>
+				<option>IT001.2</option>
+				<option>IT002.1</option>
+				<option>CS001.1</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Môn học*</label>
+			  <select required>
+				<option value="">Chọn môn học</option>
+				<option>Lập trình Web</option>
+				<option>Cơ sở dữ liệu</option>
+				<option>Trí tuệ nhân tạo</option>
+				<option>Hệ điều hành</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Số lượng SV tối đa*</label>
+			  <input type="number" min="1" max="10" required placeholder="Nhập số lượng">
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label>Tên đề tài*</label>
+			<input type="text" required placeholder="Nhập tên đề tài">
+		  </div>
+		  <div class="form-group">
+			<label>Mô tả*</label>
+			<textarea rows="4" required placeholder="Nhập mô tả chi tiết đề tài"></textarea>
+		  </div>
+		  <div class="form-group">
+			<label>Yêu cầu</label>
+			<textarea rows="2" placeholder="Nhập yêu cầu đối với sinh viên (nếu có)"></textarea>
+		  </div>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" onclick="closeAddModal()" class="btn btn-outline">
+			Hủy bỏ
+		  </button>
+		  <button type="submit" class="btn btn-primary">
+			<i class="fas fa-save"></i>Lưu đề tài
+		  </button>
+		</div>
+	  </form>
+	</div>
+  </div>
+  
+  <!-- Edit Topic Modal -->
+  <div id="editModal" class="modal">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<h3>Chỉnh sửa đề tài</h3>
+		<button onclick="closeEditModal()">
+		  <i class="fas fa-times"></i>
+		</button>
+	  </div>
+	  <form>
+		<div class="modal-body">
+		  <div class="modal-grid">
+			<div class="form-group">
+			  <label>Học kỳ*</label>
+			  <select required>
+				<option value="">Chọn học kỳ</option>
+				<option selected>Học kỳ 1 - 2023</option>
+				<option>Học kỳ 2 - 2023</option>
+				<option>Học kỳ hè - 2023</option>
+				<option>Học kỳ 1 - 2024</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Lớp tín chỉ*</label>
+			  <select required>
+				<option value="">Chọn lớp tín chỉ</option>
+				<option selected>IT001.1</option>
+				<option>IT001.2</option>
+				<option>IT002.1</option>
+				<option>CS001.1</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Môn học*</label>
+			  <select required>
+				<option value="">Chọn môn học</option>
+				<option selected>Lập trình Web</option>
+				<option>Cơ sở dữ liệu</option>
+				<option>Trí tuệ nhân tạo</option>
+				<option>Hệ điều hành</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label>Số lượng SV tối đa*</label>
+			  <input type="number" min="1" max="10" value="5" required>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label>Tên đề tài*</label>
+			<input type="text" value="Xây dựng website bán hàng" required>
+		  </div>
+		  <div class="form-group">
+			<label>Mô tả*</label>
+			<textarea rows="4" required>Xây dựng website thương mại điện tử với đầy đủ chức năng quản lý sản phẩm, đơn hàng và thanh toán.</textarea>
+		  </div>
+		  <div class="form-group">
+			<label>Yêu cầu</label>
+			<textarea rows="2">Sinh viên cần có kiến thức cơ bản về HTML, CSS, JavaScript và một ngôn ngữ backend như PHP hoặc Node.js</textarea>
+		  </div>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" onclick="closeEditModal()" class="btn btn-outline">
+			Hủy bỏ
+		  </button>
+		  <button type="submit" class="btn btn-primary">
+			<i class="fas fa-save"></i>Cập nhật
+		  </button>
+		</div>
+	  </form>
+	</div>
+  </div>
+
+<!-- footer Start -->
+<div th:replace="~{client/layout/footer :: footer}"></div>
+<th:block th:replace="~{client/layout/footer :: scriptContent}"></th:block>
+</body>
+</html>

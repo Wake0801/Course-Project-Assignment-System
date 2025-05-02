@@ -1,0 +1,129 @@
+
+<footer class="footer section gray-bg" th:fragment="footer">
+<div class="container">
+	<div class="row">
+		<div class="col-lg-4 mr-auto col-sm-6">
+			<div class="widget mb-5 mb-lg-0">
+				<div class="logo mb-4">
+					<img th:src="@{/client/images/ptit-logo.png}" alt="" class="img-fluid" style="margin-left: 60px;">
+				</div>
+				<div class="footer-contact-block mb-4">
+					<div class="icon d-flex align-items-center">
+						<i class="icofont-university mr-3"></i>
+						<span class="h6 mb-0">Học viện Công Nghệ Bưu Chính Viễn Thông TP. Hồ Chí Minh</span>
+					</div>
+				</div>
+				<div class="footer-contact-block mb-4">
+					<div class="icon d-flex align-items-center">
+						<i class="icofont-location-pin mr-3"></i>
+						<span class="h6 mb-0">Cơ sở Quận 1: 11 Nguyễn Đình Chiểu, Phường Đa Kao, Quận 1</span>
+					</div>
+				</div>
+				<div class="footer-contact-block mb-4">
+					<div class="icon d-flex align-items-center">
+						<i class="icofont-location-pin mr-3"></i>
+						<span class="h6 mb-0">Cơ sở Thủ Đức: 97 Man Thiện, Phường Hiệp Phú, Thủ Đức</span>
+					</div>
+				</div>
+
+
+				<ul class="list-inline footer-socials mt-4">
+					<li class="list-inline-item"><a href="https://www.facebook.com/ptithochiminh"><i class="icofont-facebook"></i></a></li>
+					<li class="list-inline-item"><a href="https://ptithcm.edu.vn"><i class="icofont-web"></i></a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-lg-2 col-md-6 col-sm-6">
+			<div class="widget mb-5 mb-lg-0">
+				<h4 class="text-capitalize mb-3">Ngành đào tạo</h4>
+				<div class="divider mb-4"></div>
+
+				<ul class="list-unstyled footer-menu lh-35">
+					<li><a href="#">Công nghệ thông tin</a></li>
+					<li><a href="#">Điện tử viễn thông</a></li>
+					<li><a href="#">Kế toán</a></li>
+					<li><a href="#">Báo chí</a></li>
+					<li><a href="#">Thương mại điện tử</a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-lg-2 col-md-6 col-sm-6">
+			<div class="widget mb-5 mb-lg-0">
+				<h4 class="text-capitalize mb-3">Hỗ trợ</h4>
+				<div class="divider mb-4"></div>
+
+				<ul class="list-unstyled footer-menu lh-35">
+					<li><a href="#">Điều khoản sử dụng</a></li>
+					<li><a href="#">Chính sách bảo mật</a></li>
+					<li><a href="#">Hỗ trợ khách hàng</a></li>
+					<li><a href="#">Câu hỏi thường gặp</a></li>
+					<li><a href="#">Giấy phép hoạt động</a></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-lg-3 col-md-6 col-sm-6">
+			<div class="widget widget-contact mb-5 mb-lg-0">
+				<h4 class="text-capitalize mb-3">Liên hệ</h4>
+				<div class="divider mb-4"></div>
+
+				<div class="footer-contact-block mb-4">
+					<div class="icon d-flex align-items-center">
+						<i class="icofont-email mr-3"></i>
+						<span class="h6 mb-0">Hỗ trợ 24/7</span>
+					</div>
+					<h4 class="mt-2"><a href="mailto:support@ptithcm.edu.vn">support@ptithcm.edu.vn</a></h4>
+				</div>
+
+				<div class="footer-contact-block">
+					<div class="icon d-flex align-items-center">
+						<i class="icofont-support mr-3"></i>
+						<span class="h6 mb-0">Thứ 2 - Thứ 6 : 08:30 - 17:30</span>
+					</div>
+					<h4 class="mt-2"><a href="tel:+84-28-38297220">+84-28-38297220</a></h4>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="footer-btm py-4 mt-5">
+		<div class="row align-items-center justify-content-between">
+			<div class="col-lg-6">
+				<div class="copyright">
+					&copy; Copyright Reserved to <span class="text-color">Bà xã</span> by <a href="#" target="_blank">Bà xã group</a>
+				</div>
+			</div>
+
+		<div class="row">
+			<div class="col-lg-4">
+				<a class="backtop js-scroll-trigger" href="#top">
+					<i class="icofont-long-arrow-up"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+</footer>
+<th:block th:fragment="scriptContent">
+
+ <!-- Main jQuery -->
+ <script th:src="@{/client/plugins/jquery/jquery.js}"></script>
+ <!-- Bootstrap 4.3.2 -->
+ <script th:src="@{/client/plugins/bootstrap/js/popper.js}"></script>
+ <script th:src="@{/client/plugins/bootstrap/js/bootstrap.min.js}"></script>
+ <script th:src="@{/client/plugins/counterup/jquery.easing.js}"></script>
+ <!-- Slick Slider -->
+ <script th:src="@{/client/plugins/slick-carousel/slick/slick.min.js}"></script>
+ <!-- Counterup -->
+ <script th:src="@{/client/plugins/counterup/jquery.waypoints.min.js}"></script>
+ 
+ <script th:src="@{/client/plugins/shuffle/shuffle.min.js}"></script>
+ <script th:src="@{/client/plugins/counterup/jquery.counterup.min.js}"></script>
+ <!-- Google Map -->
+ <script th:src="@{/client/plugins/google-map/map.js}"></script>
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkeLMlsiwzp6b3Gnaxd86lvakimwGA6UA&callback=initMap"></script>    
+ 
+ <script th:src="@{/client/js/script.js}"></script>
+ <script th:src="@{/client/js/contact.js}"></script>
+</th:block>

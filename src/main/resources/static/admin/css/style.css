@@ -8031,7 +8031,9 @@ a {
 
 .footer {
   padding-left: 17.1875rem;
-  background-color: rgba(88, 115, 254, 0.04); }
+  background-color: rgba(88, 115, 254, 0.04); 
+  bottom: 0;
+  }
   .footer .copyright {
     padding: 0.9375rem; }
     .footer .copyright p {

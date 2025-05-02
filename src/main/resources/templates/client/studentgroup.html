@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Orbitor,business,company,agency,modern,bootstrap4,tech,software">
+  <meta name="author" content="themefisher.com">
+
+  <title>Quản lý đề tài</title>
+  <th:block th:replace="~{client/layout/header :: headContent}"></th:block>
+</head>
+
+<body id="top">
+    <div th:replace="~{client/layout/header :: header}"></div>
+
+<section class="studentlist">
+    <div class="container"></div>
+        <div id="alert-container"></div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Quản lý nhóm</div>
+                <button id="save-all-button" class="btn btn-secondary" disabled>Lưu tất cả thay đổi</button>
+                 </div>
+            <div class="filter-bar">
+                 <div class="form-group">
+                    <label for="semester-select" class="form-label">Học kỳ</label>
+                    <select id="semester-select" class="form-control">
+                        <option value="">Chọn học kỳ</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="course-select" class="form-label">Lớp tín chỉ</label>
+                    <select id="course-select" class="form-control" disabled>
+                        <option value="">Chọn lớp tín chỉ</option>
+                         </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="add-group-section" class="card" style="display: none;">
+             <div class="card-header">
+                 <div class="card-title">Thêm nhóm mới</div>
+             </div>
+             <form id="add-group-form">
+                 <div class="form-group">
+                     <label for="new-group-name" class="form-label">Tên nhóm (tùy chọn)</label>
+                     <input type="text" id="new-group-name" class="form-control" placeholder="Mặc định: Nhóm X">
+                 </div>
+                 <div class="form-group">
+                      <label for="new-group-max-size" class="form-label">Số lượng tối đa</label>
+                     <input type="number" id="new-group-max-size" class="form-control" min="1" value="4">
+                 </div>
+                 <button type="submit" class="btn btn-primary">Thêm nhóm</button>
+             </form>
+        </div>
+
+        <div id="group-list-section" class="card" style="display: none;">
+            <div class="card-header">
+                <div id="group-list-title" class="card-title">Danh sách nhóm</div>
+                  <div id="topic-assignment-section" style="display: none;">
+                     <button id="assign-topic-button" class="btn btn-primary">Phân công đề tài</button>
+                     </div>
+            </div>
+            <div id="group-list-container" class="group-list-container">
+                <p id="group-list-loading" style="display: none; color: #666; grid-column: 1 / -1; text-align: center;">Đang tải danh sách nhóm...</p>
+            </div>
+             <div id="group-empty-state" class="empty-state" style="display: none;">
+                 <div class="empty-state-icon">👥</div>
+                 <p>Chưa có nhóm nào cho lớp tín chỉ này. Hãy thêm nhóm mới ở trên.</p>
+             </div>
+        </div>
+
+
+        <div id="group-details-section" class="card" style="display: none;">
+            <div class="card-header">
+                 <div id="selected-group-title" class="card-title">Chi tiết nhóm</div>
+            </div>
+            <div id="group-details-container" class="group-details-container">
+                <div class="group-column" id="unassigned-students-column">
+                    <div class="group-column-header">Sinh viên chưa có nhóm</div>
+                    <div id="unassigned-students-list">
+                         <p id="unassigned-loading" style="color: #666;">Đang tải...</p>
+                    </div>
+                    <div id="unassigned-empty-state" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">✔️</div>
+                        <p>Tất cả sinh viên đã có nhóm.</p>
+                    </div>
+                </div>
+                <div class="group-column" id="group-members-column">
+                    <div class="group-column-header">Thành viên nhóm (<span id="member-count">0</span>/<span id="max-size">0</span>)</div>
+                    <div id="group-members-list" >
+                         <p id="members-loading" style="color: #666;">Đang tải...</p>
+                    </div>
+                    <div id="members-empty-state" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">👤</div>
+                        <p>Chưa có thành viên nào.</p>
+                    </div>
+                    <div id="group-full-warning" class="alert alert-warning" style="display: none; margin-top:10px; text-align:center;">
+                        Nhóm đã đủ số lượng thành viên tối đa!
+                    </div>
+                </div>
+                <div class="group-column" id="other-groups-column">
+                    <div class="group-column-header">Nhóm khác trong lớp</div>
+                    <div id="other-groups-list">
+                        <p id="other-groups-loading" style="color: #666;">Đang tải...</p>
+                    </div>
+                    <div id="other-groups-empty-state" class="empty-state" style="display: none;">
+                         <p>Không có nhóm nào khác.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<!-- footer Start -->
+<div th:replace="~{client/layout/footer :: footer}"></div>
+<th:block th:replace="~{client/layout/footer :: scriptContent}"></th:block>
+<script th:src="@{client/js/studentgroup.js}"></script>
+  </body>
+  </html>

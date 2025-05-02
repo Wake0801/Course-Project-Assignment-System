@@ -410,21 +410,21 @@ img {
   font-size: 16px;
   transition: all .25s ease;
 }
+.nav-item a:active{
+  color: #e12454; 
+}
 
 .dropdown-toggle::after {
   display: none;
 }
 
-.navbar-brand {
-
-}
 
 .dropdown .dropdown-menu {
   position: absolute;
   display: block;
   background: #fff;
-  min-width: 240px;
-  top: 130%;
+  min-width: 180px;
+  top: 100%;
   left: 0;
   right: 0px;
   opacity: 0;
@@ -1077,9 +1077,8 @@ img {
 
 .container1 {
   display:flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-
 }
 .fade-carousel .carousel-inner .item .hero {
   opacity: 0;
@@ -1144,35 +1143,6 @@ background-image: url(../images/hoc-vien-cong-nghe-buu-chinh-vien-thong-co-so-ph
 }
 
 /*# Quản lý đề tài */
-.sidebar {
-  width: 256px;
-  background: white; /* Changed to white */
-  color: black; /* Text color set to black */
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-}
-
-.sidebar.collapsed {
-  width: 70px;
-}
-
-.sidebar.collapsed .sidebar-text {
-  display: none;
-}
-
-.sidebar.collapsed .logo-text {
-  display: none;
-}
-
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-}
-
-.main-content {
-  transition: margin-left 0.3s ease;
-}
-
 .topic-card {
   transition: all 0.3s ease;
 }
@@ -1990,5 +1960,903 @@ background-image: url(../images/hoc-vien-cong-nghe-buu-chinh-vien-thong-co-so-ph
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }
+.user-info{
+  display:inline;
+  color:#000000;
+  margin-right:50px;
+ }
+.user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-/*# sourceMappingURL=maps/style.css.map */
+/* Adjust user-info alignment to match the navbar */
+.user-info {
+  display: flex;
+  align-items: center; /* Align vertically */
+  justify-content: flex-end; /* Align to the right */
+  margin-right: 75px; /* Adjust spacing */
+}
+
+/* Highlight the active header link for 'Quản lý đề tài' */
+.navbar-nav .nav-item .nav-link.active {
+  color: red; /* Change text color to red */
+}
+
+/* Profile Section */
+.profile-section {
+    margin: 40px 0;
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.profile-image {
+    text-align: center;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.change-avatar-btn {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.change-avatar-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.profile-info {
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.profile-info p {
+    margin: 5px 0;
+}
+
+.change-password-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.change-password-btn:hover {
+    background-color: #f0f0f0;
+}
+
+/* Scope all styles to the .studentlist class */
+.studentlist {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --success-color: #27ae60;
+}
+
+.studentlist body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6; /* Thêm line-height mặc định */
+}
+
+.studentlist .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.studentlist .header {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.studentlist .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Cho phép wrap nếu cần */
+    gap: 10px; /* Khoảng cách nếu wrap */
+}
+
+.studentlist .logo {
+    font-size: 24px;
+    font-weight: bold;
+    white-space: nowrap; /* Không ngắt dòng logo */
+}
+
+.studentlist .header-content nav { /* Bọc các link vào nav để dễ quản lý */
+    display: flex;
+    gap: 5px; /* Khoảng cách giữa các link */
+}
+
+.studentlist .nav-link {
+    color: var(--light-color);
+    text-decoration: none;
+    padding: 8px 12px; /* Tăng padding */
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+    white-space: nowrap;
+}
+
+.studentlist .nav-link:hover,
+.studentlist .nav-link.active { /* Class active cần được thêm bằng JS hoặc set cứng cho trang hiện tại */
+    background-color: rgba(236, 240, 241, 0.2);
+    color: white;
+    text-decoration: none; /* Bỏ gạch chân khi hover */
+}
+
+.studentlist .card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); /* Tăng shadow nhẹ */
+    padding: 20px 25px; /* Tăng padding ngang */
+    margin-bottom: 25px; /* Tăng khoảng cách */
+}
+
+.studentlist .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px; /* Tăng padding đáy */
+    border-bottom: 1px solid #e9ecef; /* Màu border nhạt hơn */
+    flex-wrap: wrap;
+    gap: 15px; /* Tăng khoảng cách */
+}
+
+.studentlist .card-title {
+    font-size: 1.15rem; /* Dùng rem thay px */
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.studentlist .filter-bar {
+    display: flex;
+    gap: 20px; /* Tăng khoảng cách filter */
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.studentlist .form-group {
+    flex: 1;
+    min-width: 220px; /* Tăng chiều rộng tối thiểu */
+}
+
+.studentlist .form-label {
+    display: block;
+    margin-bottom: 8px; /* Tăng khoảng cách */
+    font-weight: 500;
+    font-size: 0.9rem; /* Kích thước chữ label */
+}
+
+.studentlist .form-control {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px; /* Điều chỉnh padding */
+    border: 1px solid #ced4da; /* Màu border chuẩn hơn */
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    height: 42px;
+}
+
+.studentlist .form-control:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25); /* Hiệu ứng focus */
+}
+
+.studentlist .form-control:disabled {
+    background-color: #e9ecef; /* Màu nền khi disable */
+    opacity: 0.7;
+}
+
+.studentlist .group-meta > span:first-child {
+    display: inline-flex;
+    align-items: center;
+}
+
+.studentlist .group-topic {
+    font-size: 0.85rem;
+    color: #495057;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #dee2e6;
+    font-style: italic;
+    word-break: break-word;
+}
+
+.studentlist .status-indicator {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.studentlist .status-saved { background-color: var(--success-color); }
+.studentlist .status-unsaved { background-color: var(--warning-color); }
+
+.studentlist #group-details-section {
+    margin-top: 30px;
+}
+.studentlist .group-details-container {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.studentlist .group-column {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+.studentlist .group-column-header {
+    font-weight: 600;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 1rem;
+    color: var(--dark-color);
+    flex-shrink: 0;
+}
+
+.studentlist #unassigned-students-list,
+.studentlist #group-members-list,
+.studentlist #other-groups-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 400px;
+    padding-right: 5px;
+}
+
+.studentlist #unassigned-students-list::-webkit-scrollbar,
+.studentlist #group-members-list::-webkit-scrollbar,
+.studentlist #other-groups-list::-webkit-scrollbar {
+    width: 6px;
+}
+.studentlist #unassigned-students-list::-webkit-scrollbar-thumb,
+.studentlist #group-members-list::-webkit-scrollbar-thumb,
+.studentlist #other-groups-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.studentlist .student-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: white;
+    border: 1px solid #e9ecef;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+.studentlist .student-item:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.studentlist .student-item.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: default;
+    background-color: #f8f9fa;
+}
+
+.studentlist .student-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: var(--dark-color);
+    font-weight: bold;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.studentlist .student-info {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.studentlist .student-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #343a40;
+}
+
+.studentlist .student-id {
+    font-size: 0.8rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.studentlist .student-item .btn {
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.studentlist .empty-state {
+    text-align: center;
+    padding: 30px 15px;
+    color: #6c757d;
+    font-size: 0.9rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.studentlist .empty-state-icon {
+    font-size: 40px;
+    color: #ced4da;
+    margin-bottom: 12px;
+}
+.studentlist .empty-state p {
+    margin: 0;
+}
+
+.studentlist #group-full-warning {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+}
+
+.studentlist .alert {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+}
+.studentlist .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
+.studentlist .alert-danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
+.studentlist .alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
+
+.studentlist #alert-container {
+    position: fixed;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: auto;
+    min-width: 320px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.studentlist #topic-assignment-section {
+    margin-left: auto;
+}
+
+@media (max-width: 992px) {
+    .studentlist .group-details-container {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .studentlist .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .studentlist .header-content nav {
+        margin-top: 10px;
+    }
+    .studentlist .filter-bar {
+        flex-direction: column;
+    }
+    .studentlist .form-group {
+        min-width: 100%;
+    }
+    .studentlist .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .studentlist .group-list-container {
+        grid-template-columns: 1fr;
+    }
+    .studentlist .group-details-container {
+        grid-template-columns: 1fr;
+    }
+    .studentlist #add-group-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .studentlist #add-group-form .form-group {
+        flex-basis: auto;
+    }
+    .studentlist #add-group-form input[type="number"].form-control {
+        max-width: none;
+    }
+    .studentlist #topic-assignment-section {
+        margin-left: 0;
+        margin-top: 15px;
+        width: 100%;
+    }
+    .studentlist #topic-assignment-section button {
+        width: 100%;
+    }
+    .studentlist #alert-container {
+        width: 90%;
+        max-width: 90%;
+        top: 10px;
+        left: 5%;
+        transform: none;
+    }
+}
+
+.studentlist input[type="number"].form-control {
+    max-width: 120px;
+}
+
+.studentlist .search-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.studentlist .search-box > div {
+     position: relative;
+}
+
+.studentlist .search-icon {
+    position: absolute;
+    left: 12px; /* Điều chỉnh vị trí icon */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd; /* Màu icon nhạt hơn */
+    pointer-events: none;
+    font-size: 1rem; /* Kích thước icon */
+}
+
+.studentlist .search-input {
+    padding-left: 40px !important; /* Đảm bảo đủ chỗ cho icon */
+}
+
+.studentlist .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.studentlist .table th, .studentlist .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6; /* Màu border bảng */
+    vertical-align: middle;
+}
+
+.studentlist .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057; /* Màu chữ header bảng */
+    font-size: 0.9rem;
+    text-transform: uppercase; /* Viết hoa chữ header */
+    letter-spacing: 0.5px; /* Giãn chữ nhẹ */
+}
+
+.studentlist .table tbody tr:hover {
+    background-color: #f1f5f8;
+}
+
+.studentlist .table tbody tr.loading-row td {
+    text-align: center;
+    color: #6c757d; /* Màu chữ loading */
+    font-style: italic;
+    padding: 25px; /* Tăng padding */
+}
+
+.studentlist .badge {
+    display: inline-block;
+    padding: 0.3em 0.7em; /* Dùng em cho padding */
+    border-radius: 10rem; /* Bo tròn tối đa */
+    font-size: 0.8rem; /* Kích thước chữ badge */
+    font-weight: 600; /* Đậm hơn */
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+.studentlist .badge-primary { background-color: var(--primary-color); color: white; }
+.studentlist .badge-warning { background-color: var(--warning-color); color: white; }
+.studentlist .badge-success { background-color: var(--success-color); color: white; }
+.studentlist .badge-danger { background-color: var(--danger-color); color: white; }
+/* Thêm màu badge khác nếu cần */
+.studentlist .badge-secondary { background-color: #6c757d; color: white;}
+
+.studentlist .btn {
+    display: inline-block; /* Quan trọng cho padding/margin */
+    padding: 10px 18px; /* Tăng padding ngang */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem; /* Đồng bộ font size */
+    text-align: center;
+    vertical-align: middle;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    user-select: none; /* Tránh chọn text trong nút */
+}
+.studentlist .btn:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25); /* Focus giống input */
+}
+
+.studentlist .btn-primary { background-color: var(--primary-color); color: white; }
+.studentlist .btn-primary:hover:not(:disabled) { background-color: #2980b9; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+
+.studentlist .btn-secondary { background-color: var(--secondary-color); color: white; }
+.studentlist .btn-secondary:hover:not(:disabled) { background-color: #27ae60; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+
+.studentlist .btn-danger { background-color: var(--danger-color); color: white; }
+.studentlist .btn-danger:hover:not(:disabled) { background-color: #c0392b; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+
+.studentlist .btn-sm {
+    padding: 5px 10px;
+    font-size: 0.8rem; /* Nhỏ hơn */
+    border-radius: 3px;
+}
+.studentlist .btn-sm:focus {
+    box-shadow: 0 0 0 0.15rem rgba(52, 152, 219, 0.25);
+}
+
+.studentlist .btn:disabled {
+    background-color: #bdc3c7 !important;
+    border-color: #bdc3c7 !important; /* Thêm border color nếu có border */
+    color: #7f8c8d !important; /* Màu chữ mờ */
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none !important; /* Không có hiệu ứng hover */
+    box-shadow: none !important;
+}
+
+.studentlist #add-group-form {
+    display: flex;
+    gap: 15px; /* Tăng khoảng cách */
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.studentlist #add-group-form .form-group {
+     flex-grow: 1;
+     margin-bottom: 0; /* Bỏ margin bottom khi nằm trong form */
+}
+.studentlist #add-group-form .form-group:last-of-type {
+     flex-grow: 0;
+     flex-basis: 120px;
+}
+.studentlist #add-group-form button {
+     flex-shrink: 0;
+}
+
+.studentlist .group-list-container {
+    margin-top: 25px; /* Tăng khoảng cách */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px; /* Tăng khoảng cách thẻ */
+}
+
+.studentlist .group-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07); /* Shadow nhẹ hơn */
+    padding: 18px 20px; /* Điều chỉnh padding */
+    margin-bottom: 0;
+    transition: all 0.25s ease-in-out;
+    cursor: pointer;
+    border: 1px solid #e9ecef;
+    border-left: 5px solid transparent; /* Border dày hơn */
+    display: flex;
+    flex-direction: column;
+}
+
+.studentlist .group-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.studentlist .group-card.active {
+    border-left-color: var(--primary-color);
+    background-color: #f0f8ff;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.15);
+}
+
+.studentlist .group-card.loading {
+     opacity: 0.6;
+     pointer-events: none;
+     cursor: default;
+     transform: none !important; /* Bỏ hiệu ứng hover khi loading */
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07) !important;
+}
+
+.studentlist .group-title {
+    font-weight: 600;
+    font-size: 1.05rem; /* Tăng size tên nhóm */
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.studentlist .group-title span:first-child {
+    flex-grow: 1;
+    word-break: break-word;
+    color: #343a40; /* Màu tên nhóm đậm hơn */
+}
+.studentlist .group-title button { /* Nút xóa trong title */
+     opacity: 0.6; /* Mờ đi mặc định */
+     transition: opacity 0.2s;
+}
+.studentlist .group-card:hover .group-title button {
+     opacity: 1; /* Hiện rõ khi hover thẻ */
+}
+
+.studentlist .group-meta {
+    font-size: 0.85rem; /* Chữ nhỏ hơn */
+    color: #6c757d;
+    margin-bottom: 10px; /* Tăng khoảng cách */
+    display: flex; /* Sắp xếp status và số lượng */
+    align-items: center;
+    gap: 8px;
+}
+.teachernotification {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f7fa;
+  color: #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 5px;
+}
+
+.teachernotification h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+}
+
+.teachernotification .tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.teachernotification .tab {
+  padding: 12px 25px;
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border-radius: 5px 5px 0 0;
+  margin-right: 5px;
+}
+
+.teachernotification .tab:hover {
+  background-color: #d6eaf8;
+  color: #3498db;
+}
+
+.teachernotification .tab.active {
+  background-color: #3498db;
+  color: white;
+}
+
+.teachernotification .section {
+  display: none;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.teachernotification .section.active {
+  display: block;
+}
+
+.teachernotification h2 {
+  color: #2980b9;
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.teachernotification h3 {
+  color: #16a085;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.teachernotification form {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.teachernotification label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.teachernotification textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 100px;
+  margin-bottom: 15px;
+  font-family: inherit;
+}
+
+.teachernotification input[type="text"],
+.teachernotification input[type="number"],
+.teachernotification input[type="date"],
+.teachernotification select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 15px;
+}
+
+.teachernotification button {
+  padding: 10px 20px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.teachernotification button:hover {
+  background-color: #27ae60;
+}
+
+.teachernotification table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.teachernotification th {
+  background-color: #3498db;
+  color: white;
+  padding: 12px;
+  text-align: center;
+}
+
+.teachernotification td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.teachernotification tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.teachernotification tr:hover {
+  background-color: #e8f4fc;
+}
+
+.teachernotification input[type="number"] {
+  width: 60px;
+  padding: 5px;
+  text-align: center;
+}
+
+.teachernotification input[type="checkbox"] {
+  transform: scale(1.3);
+}
+
+.teachernotification .notes {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.teachernotification .notes p {
+  margin: 5px 0;
+}
+
+.teachernotification .delete-btn {
+  background-color: #e74c3c;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+
+.teachernotification .delete-btn:hover {
+  background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .teachernotification .tabs {
+      flex-direction: column;
+  }
+  
+  .teachernotification .tab {
+      border-radius: 0;
+      margin-right: 0;
+      margin-bottom: 2px;
+  }
+  
+  .teachernotification table {
+      font-size: 14px;
+  }
+  
+  .teachernotification th, 
+  .teachernotification td {
+      padding: 8px 5px;
+  }
+}
