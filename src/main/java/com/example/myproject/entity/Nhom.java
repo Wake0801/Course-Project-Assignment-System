@@ -4,9 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Getter
 @Setter
@@ -22,5 +22,8 @@ public class Nhom {
 
     @Column(name = "SoLuongTVToiDa", nullable = false)
     private int soLuongTVToiDa;
+
+    @Transient
+    private long soThanhVienHienTai;
 
 }

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đề tài</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for table */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 5rem);
+            margin-top: 5rem;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}"></div>
+        <div class="flex-1 ml-[17.1875rem] p-4">
+            <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý đề tài</h1>
+
+                <!-- Controls section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <!-- Add button -->
+                    <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm đề tài</span>
+                    </button>
+
+                    <!-- Filter section -->
+                    <div class="flex flex-wrap gap-4 w-full md:w-auto">
+                        <form th:action="@{/topics}" method="get" class="flex flex-wrap gap-4 w-full">
+                            <!-- Khoa filter -->
+                            <div class="flex-1 min-w-[200px]">
+                                <select name="filterKhoa" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                    <option value="">Tất cả khoa</option>
+                                    <option th:each="khoa : ${khoaList}" 
+                                            th:value="${khoa.maKhoa}" 
+                                            th:text="${khoa.tenKhoa}"
+                                            th:selected="${filterKhoa == khoa.maKhoa}">Khoa CNTT</option>
+                                </select>
+                            </div>
+
+                            <!-- Giảng viên filter -->
+                            <div class="flex-1 min-w-[200px]">
+                                <select name="filterGiangVien" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                    <option value="">Tất cả giảng viên</option>
+                                    <option th:each="gv : ${giangVienList}" 
+                                            th:value="${gv.maGV}" 
+                                            th:text="${gv.ho + ' ' + gv.ten}"
+                                            th:selected="${filterGiangVien == gv.maGV}">GV A</option>
+                                </select>
+                            </div>
+
+                            <!-- Search box -->
+                            <div class="flex-1 min-w-[200px]">
+                                <div class="relative">
+                                    <input type="text" name="keyword" 
+                                           th:value="${keyword}" 
+                                           placeholder="Tìm kiếm..." 
+                                           class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2">
+                                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            <!-- Submit button -->
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                                <i class="fas fa-filter mr-2"></i>Lọc
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Table container -->
+                <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã ĐT</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên đề tài</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giảng viên</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khoa/Viện</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày bắt đầu</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="dt : ${deTaiList}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm font-medium text-blue-600" th:text="${dt.maDT}">DT001</td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="${dt.tenDT}">Tên đề tài</div>
+                                    <div class="text-xs text-gray-500" th:text="${dt.moTa}">Mô tả đề tài...</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="${dt.lopTinChi.giangVien.ho + ' ' + dt.lopTinChi.giangVien.ten}">Nguyễn Văn A</div>
+                                    <div class="text-xs text-gray-500" th:text="${dt.lopTinChi.giangVien.hocVi}">PGS.TS</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${dt.lopTinChi.giangVien.khoa.tenKhoa}">CNTT</td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${#dates.format(dt.ngayBatDau, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td class="px-6 py-4 text-right text-sm font-medium">
+                                    <a th:href="@{'/topics/edit/' + ${dt.maDT}}" class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:href="@{'/topics/delete/' + ${dt.maDT}}" 
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa đề tài này?')" 
+                                       class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div th:if="${totalPages > 0}" class="mt-6 flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Hiển thị 
+                            <span class="font-medium" th:text="${currentPage * 10 - 9}">1</span>
+                            đến
+                            <span class="font-medium" th:text="${currentPage * 10 > totalItems ? totalItems : currentPage * 10}">10</span>
+                            của
+                            <span class="font-medium" th:text="${totalItems}">50</span>
+                            kết quả
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a th:if="${currentPage > 1}"
+                           th:href="@{/topics(page=${currentPage-1}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
+                           class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        
+                        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                            <a th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                               th:href="@{/topics(page=${i}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
+                               th:text="${i}"
+                               th:class="${i == currentPage ? 'px-3 py-1 border border-blue-500 rounded-md bg-blue-50 text-blue-600 font-medium' : 'px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50'}">
+                            </a>
+                        </th:block>
+
+                        <a th:if="${currentPage < totalPages}"
+                           th:href="@{/topics(page=${currentPage+1}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
+                           class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div id="deTaiModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="flex justify-between items-center border-b px-6 py-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm đề tài</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="deTaiForm" th:action="@{/topics/save}" th:object="${deTai}" method="post" class="grid grid-cols-1 gap-4">
+                    <!-- Mã đề tài -->
+                    <div>
+                        <label for="maDT" class="block text-sm font-medium text-gray-700 mb-1">Mã đề tài</label>
+                        <input type="text" id="maDT" name="maDT" th:field="*{maDT}"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+
+                    <!-- Tên đề tài -->
+                    <div>
+                        <label for="tenDT" class="block text-sm font-medium text-gray-700 mb-1">Tên đề tài</label>
+                        <input type="text" id="tenDT" name="tenDT" th:field="*{tenDT}"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div>
+                        <label for="moTa" class="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                        <textarea id="moTa" name="moTa" th:field="*{moTa}" rows="3"
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                    </div>
+
+                    <!-- Ngày bắt đầu -->
+                    <div>
+                        <label for="ngayBatDau" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
+                        <input type="date" id="ngayBatDau" name="ngayBatDau" th:field="*{ngayBatDau}"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+
+                    <!-- Lớp tín chỉ -->
+                    <div>
+                        <label for="maLopTC" class="block text-sm font-medium text-gray-700 mb-1">Lớp tín chỉ</label>
+                        <input type="text" id="maLopTC" name="lopTinChi.maLopTC" th:field="*{lopTinChi.maLopTC}"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end border-t px-6 py-4 gap-3">
+                <button type="button" id="cancelBtn" 
+                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                    Hủy
+                </button>
+                <button type="submit" form="deTaiForm"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{admin/layout/footer :: footer}"></div>
+
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('deTaiModal');
+            const addBtn = document.getElementById('addBtn');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const modalTitle = document.getElementById('modalTitle');
+
+            // Show modal when clicking Add button
+            addBtn.addEventListener('click', function() {
+                modal.classList.remove('hidden');
+                modalTitle.textContent = 'Thêm đề tài';
+            });
+
+            // Close modal functions
+            function closeModalHandler() {
+                modal.classList.add('hidden');
+            }
+
+            closeModal.addEventListener('click', closeModalHandler);
+            cancelBtn.addEventListener('click', closeModalHandler);
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModalHandler();
+                }
+            });
+
+            // Close modal when pressing Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModalHandler();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

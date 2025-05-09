@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sinh viên</title>
+    <title>Quản lý giảng viên</title>
     <script src="https://cdn.tailwindcss.com"></script>
         <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
         <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
@@ -40,14 +40,14 @@
         <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
         <div class="flex-1 ml-[17.1875rem] p-4">
             <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý sinh viên</h1>
+                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý giảng viên</h1>
                 
                 <!-- Controls section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <!-- Add button -->
                     <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
                         <i class="fas fa-plus"></i>
-                        <span>Thêm sinh viên</span>
+                        <span>Thêm giảng viên</span>
                     </button>
                     
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
@@ -56,7 +56,7 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-gray-400"></i>
                             </div>
-                            <form th:action="@{/students}" method="get" class="flex gap-2">
+                            <form th:action="@{/lecturers}" method="get" class="flex gap-2">
                                 <input type="text" name="search" placeholder="Tìm kiếm..."
                                     th:value="${keyword}" class="pl-10 pr-4 py-2 border rounded-md" />
                                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Tìm</button>
@@ -66,7 +66,7 @@
                         <!-- Rows per page selector -->
                         <div class="flex items-center gap-2">
                             <label for="rowsPerPage" class="text-gray-600 whitespace-nowrap">Hiển thị:</label>
-                            <form th:action="@{/students}" method="get" class="ml-4">
+                            <form th:action="@{/lecturers}" method="get" class="ml-4">
                                 <select name="size" onchange="this.form.submit()" class="border rounded-md px-2 py-1">
                                 <option th:selected="${size==10}" value="10">10</option>
                                 <option th:selected="${size==30}" value="30">30</option>
@@ -83,34 +83,30 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã SV</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã GV</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giới Tính</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số ĐT</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa Chỉ</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Sinh</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Lớp</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Học Vị</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Khoa</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã TK</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr th:each="sv : ${ListStudents}" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.maSV}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.ho}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.ten}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.gioiTinh != null} ? (${sv.gioiTinh} ? 'Nam' : 'Nữ') : 'N/A'"></td></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.soDT}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.diaChi}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.ngaySinh != null} ? ${#temporals.format(sv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.email}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.lop != null} ? ${sv.lop.maLop} : 'N/A'"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${sv.taiKhoan != null} ? ${sv.taiKhoan.maTK} : 'Chưa có TK'"></td>
+                            <tr th:each="gv : ${ListLecturers}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.maGV}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ho}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ten}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.soDT}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ngaySinh != null} ? ${#temporals.format(gv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.hocVi}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.khoa != null} ? ${gv.khoa.maKhoa} : 'N/A'"></td>
+                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.taiKhoan != null} ? ${gv.taiKhoan.maTK} : 'Chưa có TK'"></td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
-                                <a th:href="@{'/students/edit/' + ${sv.maSV}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
-                                <a th:href="@{'/students/delete/' + ${sv.maSV}}" onclick="return confirm('Bạn chắc chắn muốn xóa?')" class="text-red-600 hover:text-red-800">Xóa</a>
+                                <a th:href="@{'/lecturers/edit/' + ${gv.maGV}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
+                                <a th:href="@{'/lecturers/delete/' + ${gv.maGV}}" onclick="return confirm('Bạn chắc chắn muốn xóa?')" class="text-red-600 hover:text-red-800">Xóa</a>
                             </td>
                             </tr>
                         </tbody>
@@ -121,7 +117,7 @@
                 <!-- Pagination -->
                 <div class="mt-6 flex justify-center gap-2">
                     <a th:each="i : ${#numbers.sequence(1, totalPages)}"
-                    th:href="@{|/students?page=${i}&size=${size}&search=${keyword}|}"
+                    th:href="@{|/lecturers?page=${i}&size=${size}&search=${keyword}|}"
                     th:text="${i}"
                     th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
                     class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
@@ -131,21 +127,20 @@
             </div>
         </div>
         <!-- Modal for Add/Edit -->
-        <div id="studentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div id="lecturerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
                 <div class="flex justify-between items-center border-b px-6 py-4">
-                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm sinh viên</h3>
+                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm giảng viên</h3>
                     <button id="closeModal" class="text-gray-400 hover:text-gray-500">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="p-6">
-                    <form id="studentForm" th:action="@{/students/save}" th:object="${editStudent}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Mã SV -->
+                    <form id="lecturerForm" th:action="@{/lecturers/save}" th:object="${editLecturer}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Mã GV -->
                         <div>
-                            <label for="maSV" class="block text-sm font-medium text-gray-700 mb-1">Mã SV</label>
-                            <input type="text" id="maSV" name="maSV" th:value="${editStudent?.maSV}" 
-                                   th:disabled="${editStudent?.maSV != null}" required
+                            <label for="maGV" class="block text-sm font-medium text-gray-700 mb-1">Mã GV</label>
+                            <input type="text" id="maGV" th:field="*{maGV}" th:readonly="${editLecturer != null && editLecturer.maGV != null}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
@@ -163,15 +158,6 @@
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
-                        <!-- Giới Tính -->
-                        <div>
-                            <label for="gioiTinh" class="block text-sm font-medium text-gray-700 mb-1">Giới Tính</label>
-                            <select id="gioiTinh" name="gioiTinh" class="w-full border...">
-                                <option value="true" th:selected="${editStudent?.gioiTinh == true}">Nam</option>
-                                <option value="false" th:selected="${editStudent?.gioiTinh == false}">Nữ</option>
-                            </select>
-                        </div>
-                        
                         <!-- Số ĐT -->
                         <div>
                             <label for="soDT" class="block text-sm font-medium text-gray-700 mb-1">Số ĐT</label>
@@ -179,39 +165,32 @@
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
-                        <!-- Địa Chỉ -->
-                        <div>
-                            <label for="diaChi" class="block text-sm font-medium text-gray-700 mb-1">Địa Chỉ</label>
-                            <input type="text" id="diaChi" th:field="*{diaChi}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
-                        </div>
-                        
                         <!-- Ngày Sinh -->
                         <div>
                             <label for="ngaySinh" class="block text-sm font-medium text-gray-700 mb-1">Ngày Sinh</label>
                             <input type="date" id="ngaySinh" th:field="*{ngaySinh}" 
-                                th:value="${editStudent?.ngaySinh != null} ? ${#temporals.format(editStudent.ngaySinh, 'yyyy-MM-dd')} : ''" required
+                                th:value="${editLecturer?.ngaySinh != null} ? ${#temporals.format(editLecturer.ngaySinh, 'yyyy-MM-dd')} : ''" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
-                        <!-- Email -->
+                        <!-- Học Vị -->
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="email" th:field="*{email}"
+                            <label for="hocVi" class="block text-sm font-medium text-gray-700 mb-1">Học Vị</label>
+                            <input type="text" id="hocVi" th:field="*{hocVi}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
-                        <!-- Mã Lớp -->
+                        <!-- Mã Khoa -->
                         <div>
-                            <label for="maLop" class="block text-sm font-medium text-gray-700 mb-1">Mã Lớp</label>
-                            <input type="text" id="maLop" th:field="*{lop.maLop}" required
+                            <label for="maKhoa" class="block text-sm font-medium text-gray-700 mb-1">Mã Khoa</label>
+                            <input type="text" id="maKhoa" th:field="*{khoa.maKhoa}" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
                         <!-- Mã TK -->
                         <div>
                             <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã TK</label>
-                            <input type="text" id="maTK" th:field="*{taiKhoan.maTK}" required
+                            <input type="number" id="maTK" th:field="*{taiKhoan.maTK}" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                     </form>
@@ -220,9 +199,9 @@
                                 class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                             Hủy
                         </button>
-                        <button type="submit" form="studentForm" 
+                        <button type="submit" form="lecturerForm" 
                                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                            <span th:text="${editStudent?.maSV != null} ? 'Cập nhật' : 'Thêm mới'"></span>
+                            <span th:text="${editLecturer?.maGV != null} ? 'Cập nhật' : 'Thêm mới'"></span>
                         </button>
                     </div>
                 </div>
@@ -232,23 +211,23 @@
     <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let editing = /*[[${editStudent != null}]]*/ false;
+        let editing = /*[[${editLecturer != null && editLecturer.maGV != null}]]*/ false;
     
         document.addEventListener("DOMContentLoaded", function () {
-            const modal = document.getElementById("studentModal");
+            const modal = document.getElementById("lecturerModal");
     
             // Nếu đang sửa thì mở modal và đổi tiêu đề
             if (editing) {
                 modal.classList.remove("hidden");
-                document.getElementById("modalTitle").textContent = "Sửa thông tin sinh viên";
+                document.getElementById("modalTitle").textContent = "Sửa thông tin giảng viên";
             }
     
-            // Mở modal khi bấm nút "Thêm sinh viên"
+            // Mở modal khi bấm nút "Thêm giảng viên"
             const addBtn = document.getElementById("addBtn");
             if (addBtn) {
                 addBtn.addEventListener("click", function () {
                     modal.classList.remove("hidden");
-                    document.getElementById("modalTitle").textContent = "Thêm sinh viên";
+                    document.getElementById("modalTitle").textContent = "Thêm giảng viên";
                 });
             }
     

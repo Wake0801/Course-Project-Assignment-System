@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for table */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 5rem); /* Trừ chiều cao header */
+            margin-top: 5rem; /* Chiều cao header */
+            position: relative;
+        }
+        /* Thêm style cho modal backdrop giống manageStudent.html nếu cần */
+        /* Tuy nhiên, manageStudent.html dùng class bg-gray-600 bg-opacity-50 trực tiếp */
+
+        /* Đảm bảo modal content có z-index cao hơn backdrop nếu backdrop được thêm riêng */
+         .modal-content-custom {
+            z-index: 51; /* Hoặc giá trị cao hơn backdrop */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-4">
+            <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý tài khoản</h1>
+
+                <div th:if="${successMessage}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${successMessage}"></span>
+                </div>
+                <div th:if="${errorMessage}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${errorMessage}"></span>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <button id="addAccountBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm mới tài khoản</span>
+                    </button>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <form th:action="@{/accounts}" method="get" class="flex gap-2">
+                                <input type="text" name="searchKeyword" placeholder="Tìm theo tên đăng nhập..."
+                                       th:value="${searchKeyword}" class="pl-10 pr-4 py-2 border rounded-md w-full md:w-64 focus:ring-blue-500 focus:border-blue-500" /> 
+                                       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Tìm</button> 
+                                </form>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <label for="rowsPerPageAccounts" class="text-gray-600 whitespace-nowrap">Hiển thị:</label>
+                            <form th:action="@{/accounts}" method="get" class="ml-4">
+                                <input type="hidden" name="searchKeyword" th:value="${searchKeyword}" />
+                                <select name="size" id="rowsPerPageAccounts" onchange="this.form.submit()" class="border rounded-md px-2 py-1">
+                                    <option th:selected="${size == 10}" value="10">10</option>
+                                    <option th:selected="${size == 30}" value="30">30</option>
+                                    <option th:selected="${size == 50}" value="50">50</option>
+                                    <option th:selected="${size == 100}" value="100">100</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100"> <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th> <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã TK</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Đăng Nhập</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ Tên</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại TK</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quyền</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th> </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="tk, iterStat : ${ListAccounts}" class="hover:bg-gray-50 transition duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${iterStat.count + (currentPage - 1) * size}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold" th:text="${tk.maTK}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${tk.username}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    <span th:if="${userMaps.get(tk.maTK)?.get('hoTen')}" th:text="${userMaps.get(tk.maTK).get('hoTen')}">N/A</span>
+                                    <span th:unless="${userMaps.get(tk.maTK)?.get('hoTen')}">Chưa liên kết</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    <span th:if="${userMaps.get(tk.maTK)?.get('email')}" th:text="${userMaps.get(tk.maTK).get('email')}">N/A</span>
+                                    <span th:unless="${userMaps.get(tk.maTK)?.get('email')}">Không có</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.loaiTK}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.quyen?.tenQuyen ?: 'N/A'}"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center"> <button th:onclick="'openEditModal(\'' + ${tk.maTK} + '\', \'' + ${tk.username} + '\', \'' + ${tk.loaiTK} + '\', \'' + (${tk.quyen != null ? tk.quyen.maQuyen : ''}) + '\')'" class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i> Sửa</button>
+                                    <a th:href="@{'/accounts/delete/' + ${tk.maTK}}" 
+                                       onclick="return confirm('Bạn chắc chắn muốn xóa tài khoản này? Việc này có thể ảnh hưởng đến người dùng liên quan.')" 
+                                       class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(ListAccounts)}">
+                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">Không có tài khoản nào để hiển thị.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex justify-center items-center gap-2" th:if="${totalPages > 0}">
+                    <a th:if="${currentPage > 1}" th:href="@{/accounts(page=${currentPage - 1}, size=${size}, searchKeyword=${searchKeyword})}"
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                        Trước
+                    </a>
+                    <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                       th:href="@{/accounts(page=${i}, size=${size}, searchKeyword=${searchKeyword})}"
+                       th:text="${i}"
+                       th:classappend="${i == currentPage} ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-600 border-gray-300'"
+                       class="px-4 py-2 border rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    </a>
+                    <a th:if="${currentPage < totalPages}" th:href="@{/accounts(page=${currentPage + 1}, size=${size}, searchKeyword=${searchKeyword})}"
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                        Sau
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{admin/layout/footer :: footer}"></div>
+
+    <div id="accountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto modal-content-custom"> <div class="flex justify-between items-center border-b px-6 py-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm mới tài khoản</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times fa-lg"></i></button> </div>
+            <div class="p-6">
+                <form id="accountForm" th:action="@{/accounts/save}" th:object="${newAccount}" method="post" class="space-y-4">
+                    <input type="hidden" id="maTKHidden" name="maTKHidden" th:field="*{maTK}"/>
+
+                    <div>
+                        <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã Tài Khoản:</label>
+                        <input type="text" id="maTK" th:field="*{maTK}" required
+                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                        <small th:if="${#fields.hasErrors('maTK')}" th:errors="*{maTK}" class="text-red-500 text-xs"></small>
+                    </div>
+                    
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên Đăng Nhập:</label>
+                        <input type="text" id="username" th:field="*{username}" required
+                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                        <small th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-500 text-xs"></small>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật Khẩu:</label>
+                        <input type="password" id="password" name="password" 
+                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
+                        <small id="passwordHelp" class="text-xs text-gray-500">Để trống nếu không muốn thay đổi mật khẩu khi sửa.</small>
+                    </div>
+
+                    <div>
+                        <label for="loaiTK" class="block text-sm font-medium text-gray-700 mb-1">Loại Tài Khoản:</label>
+                        <select id="loaiTK" th:field="*{loaiTK}" required
+                                class="form-select w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                            <option value="">-- Chọn loại tài khoản --</option>
+                            <option value="SINHVIEN">Sinh Viên</option>
+                            <option value="GIANGVIEN">Giảng Viên</option>
+                            <option value="NHANVIENPKT">Nhân Viên PKT</option>
+                            <option value="ADMIN">Quản trị viên</option> 
+                        </select>
+                        <small th:if="${#fields.hasErrors('loaiTK')}" th:errors="*{loaiTK}" class="text-red-500 text-xs"></small>
+                    </div>
+
+                    <div>
+                        <label for="quyen" class="block text-sm font-medium text-gray-700 mb-1">Quyền:</label>
+                        <select id="quyen" name="quyen.maQuyen" required
+                                class="form-select w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                            <option value="">-- Chọn quyền --</option>
+                            <option th:each="q : ${ListQuyen}" th:value="${q.maQuyen}" th:text="${q.tenQuyen}" th:selected="${newAccount.quyen != null && newAccount.quyen.maQuyen == q.maQuyen}"></option>
+                        </select>
+                         <small th:if="${#fields.hasErrors('quyen')}" th:errors="*{quyen}" class="text-red-500 text-xs"></small>
+                    </div>
+                </form>
+                <div class="flex justify-end border-t px-6 py-4 gap-3 mt-6">
+                    <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Hủy</button> <button type="submit" form="accountForm" id="saveAccountBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                       <span th:text="${newAccount.maTK == null || #strings.isEmpty(newAccount.maTK)} ? 'Thêm mới' : 'Cập nhật'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("accountModal");
+        const addAccountBtn = document.getElementById("addAccountBtn");
+        const closeModalBtn = document.getElementById("closeModalBtn"); // Giữ lại hoặc đổi thành "closeModal" nếu đồng bộ JS
+        const cancelModalBtn = document.getElementById("cancelModalBtn"); // Giữ lại hoặc đổi thành "cancelBtn"
+        const modalTitle = document.getElementById("modalTitle");
+        const accountForm = document.getElementById("accountForm");
+        const saveAccountBtn = document.getElementById("saveAccountBtn");
+        const saveAccountBtnText = saveAccountBtn.querySelector("span"); // Lấy thẻ span bên trong nút lưu
+        const maTKInput = document.getElementById("maTK");
+        const maTKHiddenInput = document.getElementById("maTKHidden");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const passwordHelpText = document.getElementById("passwordHelp");
+        const loaiTKSelect = document.getElementById("loaiTK");
+        const quyenSelect = document.getElementById("quyen");
+
+        function openModal() {
+            modal.classList.remove("hidden");
+        }
+
+        function closeModal() {
+            modal.classList.add("hidden");
+            accountForm.reset();
+            maTKInput.disabled = false;
+            // Reset các thông báo lỗi cũ (nếu có)
+            document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
+
+            // Đặt lại trạng thái cho việc thêm mới
+            modalTitle.textContent = "Thêm mới tài khoản";
+            if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
+            else saveAccountBtn.textContent = "Thêm mới"; // Fallback nếu không có span
+            passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
+            passwordInput.setAttribute('required', 'required');
+            passwordHelpText.textContent = ""; 
+            maTKHiddenInput.value = ''; 
+        }
+
+        if (addAccountBtn) {
+            addAccountBtn.addEventListener("click", function () {
+                accountForm.reset(); 
+                document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
+                
+                modalTitle.textContent = "Thêm mới tài khoản";
+                 if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
+                else saveAccountBtn.textContent = "Thêm mới";
+                
+                maTKInput.disabled = false;
+                maTKInput.value = ''; 
+                maTKHiddenInput.value = ''; // Xóa giá trị hidden khi thêm mới
+                usernameInput.value = '';
+                passwordInput.value = '';
+                passwordInput.setAttribute('required', 'required');
+                passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
+                passwordHelpText.textContent = ""; 
+                loaiTKSelect.value = "";
+                quyenSelect.value = "";
+                openModal();
+            });
+        }
+        
+        // Xử lý nếu có lỗi validation từ server và cần mở lại modal
+        // Giả định rằng nếu có lỗi, newAccount.maTK (th:field="*{maTK}") sẽ có giá trị nếu là edit mode,
+        // hoặc maTKHidden có giá trị.
+        const hasErrors = document.querySelector('#accountForm .text-red-500.text-xs') !== null && 
+                          Array.from(document.querySelectorAll('#accountForm .text-red-500.text-xs')).some(el => el.textContent.trim() !== '');
+
+        if (hasErrors) {
+            const isEditMode = !!maTKHiddenInput.value || (maTKInput.value && maTKInput.disabled);
+            if(isEditMode) {
+                modalTitle.textContent = "Sửa thông tin tài khoản";
+                if(saveAccountBtnText) saveAccountBtnText.textContent = "Cập nhật";
+                else saveAccountBtn.textContent = "Cập nhật";
+                maTKInput.disabled = true;
+                passwordInput.removeAttribute('required');
+                passwordInput.setAttribute('placeholder', 'Để trống nếu không đổi');
+                passwordHelpText.textContent = "Để trống nếu không muốn thay đổi mật khẩu khi sửa.";
+            } else {
+                modalTitle.textContent = "Thêm mới tài khoản";
+                 if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
+                else saveAccountBtn.textContent = "Thêm mới";
+                maTKInput.disabled = false;
+                passwordInput.setAttribute('required', 'required');
+                passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
+                passwordHelpText.textContent = "";
+            }
+            openModal();
+        }
+
+        if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
+        if (cancelModalBtn) cancelModalBtn.addEventListener("click", closeModal);
+        
+        // Đóng modal khi click ra ngoài (vùng backdrop)
+        modal.addEventListener("click", function (e) {
+            if (e.target === modal) { // Chỉ đóng khi click trực tiếp vào backdrop
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+                closeModal();
+            }
+        });
+    });
+
+    // Hàm openEditModal giữ nguyên logic nhưng đảm bảo reset form và các thông báo lỗi
+    function openEditModal(maTK, username, loaiTK, maQuyen) {
+        const modal = document.getElementById("accountModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const saveAccountBtn = document.getElementById("saveAccountBtn");
+        const saveAccountBtnText = saveAccountBtn.querySelector("span");
+        const accountForm = document.getElementById("accountForm");
+        const maTKInput = document.getElementById("maTK");
+        const maTKHiddenInput = document.getElementById("maTKHidden");
+        const passwordInput = document.getElementById("password");
+        const passwordHelpText = document.getElementById("passwordHelp");
+
+        accountForm.reset();
+        document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
+        
+        modalTitle.textContent = "Sửa thông tin tài khoản";
+        if(saveAccountBtnText) saveAccountBtnText.textContent = "Cập nhật";
+        else saveAccountBtn.textContent = "Cập nhật";
+
+        maTKInput.value = maTK;
+        maTKInput.disabled = true; 
+        maTKHiddenInput.value = maTK; 
+
+        document.getElementById("username").value = username;
+        passwordInput.value = ""; 
+        passwordInput.removeAttribute('required'); 
+        passwordInput.setAttribute('placeholder', 'Để trống nếu không đổi');
+        passwordHelpText.textContent = "Để trống nếu không muốn thay đổi mật khẩu khi sửa.";
+
+        document.getElementById("loaiTK").value = loaiTK;
+        document.getElementById("quyen").value = maQuyen;
+        
+        modal.classList.remove("hidden");
+    }
+    </script>
+</body>
+</html>
