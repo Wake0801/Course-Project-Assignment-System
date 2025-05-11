@@ -3,9 +3,11 @@ package com.example.myproject.service;
 import com.example.myproject.entity.DeTai;
 import com.example.myproject.entity.GiangVien;
 import com.example.myproject.entity.Khoa;
+import com.example.myproject.entity.LopTinChi;
 import com.example.myproject.repository.DeTaiRepository;
 import com.example.myproject.repository.GiangVienRepository;
 import com.example.myproject.repository.KhoaRepository;
+import com.example.myproject.repository.LopTinChiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,9 @@ public class DeTaiService {
 
     @Autowired
     private KhoaRepository khoaRepository;
+    
+    @Autowired
+    private LopTinChiRepository lopTinChiRepository;
 
     public Page<DeTai> findAllDeTai(int page, int size, String keyword, String filterKhoa, String filterGiangVien) {
         Pageable pageable = PageRequest.of(page - 1, size);
@@ -47,12 +52,22 @@ public class DeTaiService {
     public List<GiangVien> getAllGiangVien() {
         return giangVienRepository.findAll();
     }
+    
+    public List<LopTinChi> getAllLopTinChi() {
+        return lopTinChiRepository.findAll();
+    }
 
     public Optional<DeTai> findById(String maDT) {
         return deTaiRepository.findById(maDT);
     }
 
     public DeTai save(DeTai deTai) {
+        // Validate LopTinChi if needed
+        if (deTai.getLopTinChi() != null && deTai.getLopTinChi().getMaLopTC() != null) {
+            LopTinChi lopTinChi = lopTinChiRepository.findById(deTai.getLopTinChi().getMaLopTC())
+                .orElseThrow(() -> new IllegalArgumentException("Lớp tín chỉ không tồn tại"));
+            deTai.setLopTinChi(lopTinChi);
+        }
         return deTaiRepository.save(deTai);
     }
 

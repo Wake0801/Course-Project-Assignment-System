@@ -121,14 +121,8 @@
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${dt.lopTinChi.giangVien.khoa.tenKhoa}">CNTT</td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${#dates.format(dt.ngayBatDau, 'dd/MM/yyyy')}">01/01/2024</td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <a th:href="@{'/topics/edit/' + ${dt.maDT}}" class="text-blue-600 hover:text-blue-800 mr-3">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a th:href="@{'/topics/delete/' + ${dt.maDT}}" 
-                                       onclick="return confirm('Bạn có chắc chắn muốn xóa đề tài này?')" 
-                                       class="text-red-600 hover:text-red-800">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <a th:href="@{'/topics/edit/' + ${dt.maDT}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
+                                    <a th:href="@{'/topics/delete/' + ${dt.maDT}}" onclick="return confirm('Bạn chắc chắn muốn xóa đề tài này?')" class="text-red-600 hover:text-red-800">Xóa</a>
                                 </td>
                             </tr>
                         </tbody>
@@ -136,145 +130,141 @@
                 </div>
 
                 <!-- Pagination -->
-                <div th:if="${totalPages > 0}" class="mt-6 flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-gray-700">
-                            Hiển thị 
-                            <span class="font-medium" th:text="${currentPage * 10 - 9}">1</span>
-                            đến
-                            <span class="font-medium" th:text="${currentPage * 10 > totalItems ? totalItems : currentPage * 10}">10</span>
-                            của
-                            <span class="font-medium" th:text="${totalItems}">50</span>
-                            kết quả
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
-                        <a th:if="${currentPage > 1}"
-                           th:href="@{/topics(page=${currentPage-1}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
-                           class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                        
-                        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-                            <a th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
-                               th:href="@{/topics(page=${i}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
-                               th:text="${i}"
-                               th:class="${i == currentPage ? 'px-3 py-1 border border-blue-500 rounded-md bg-blue-50 text-blue-600 font-medium' : 'px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50'}">
-                            </a>
-                        </th:block>
+                <div class="mt-6 flex justify-center gap-2">
+                    <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                    th:href="@{|/topics?page=${i}&keyword=${keyword}&filterKhoa=${filterKhoa}&filterGiangVien=${filterGiangVien}|}"
+                    th:text="${i}"
+                    th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    </a>
+                </div>
+            </div>
+        </div>
 
-                        <a th:if="${currentPage < totalPages}"
-                           th:href="@{/topics(page=${currentPage+1}, keyword=${keyword}, filterKhoa=${filterKhoa}, filterGiangVien=${filterGiangVien})}"
-                           class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
+        <!-- Modal for Add/Edit -->
+        <div id="topicModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm đề tài</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form id="topicForm" th:action="@{/topics/save}" th:object="${editTopic}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Mã đề tài -->
+                        <div>
+                            <label for="maDT" class="block text-sm font-medium text-gray-700 mb-1">Mã đề tài</label>
+                            <input type="text" id="maDT" name="maDT" th:value="${editTopic?.maDT}" 
+                                   th:disabled="${editTopic?.maDT != null}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+
+                        <!-- Tên đề tài -->
+                        <div class="md:col-span-2">
+                            <label for="tenDT" class="block text-sm font-medium text-gray-700 mb-1">Tên đề tài</label>
+                            <input type="text" id="tenDT" th:field="*{tenDT}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div class="md:col-span-2">
+                            <label for="moTa" class="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                            <textarea id="moTa" th:field="*{moTa}" rows="3"
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"></textarea>
+                        </div>
+
+                        <!-- Ngày bắt đầu -->
+                        <div>
+                            <label for="ngayBatDau" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
+                            <input type="date" id="ngayBatDau" th:field="*{ngayBatDau}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+
+                        <!-- Lớp tín chỉ -->
+                        <div>
+                            <label for="maLopTC" class="block text-sm font-medium text-gray-700 mb-1">Lớp tín chỉ</label>
+                            <select id="maLopTC" th:field="*{lopTinChi.maLopTC}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                                <option value="">-- Chọn lớp tín chỉ --</option>
+                                <option th:each="lopTC : ${lopTCList}" 
+                                        th:value="${lopTC.maLopTC}"
+                                        th:text="${lopTC.tenLopTC + ' - ' + lopTC.giangVien.ho + ' ' + lopTC.giangVien.ten}">
+                                </option>
+                            </select>
+                        </div>
+                    </form>
+                    <div class="flex justify-end border-t px-6 py-4 gap-3">
+                        <button type="button" id="cancelBtn" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Hủy
+                        </button>
+                        <button type="submit" form="topicForm"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <span th:text="${editTopic?.maDT != null} ? 'Cập nhật' : 'Thêm mới'"></span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal for Add/Edit -->
-    <div id="deTaiModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div class="flex justify-between items-center border-b px-6 py-4">
-                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm đề tài</h3>
-                <button id="closeModal" class="text-gray-400 hover:text-gray-500">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-6">
-                <form id="deTaiForm" th:action="@{/topics/save}" th:object="${deTai}" method="post" class="grid grid-cols-1 gap-4">
-                    <!-- Mã đề tài -->
-                    <div>
-                        <label for="maDT" class="block text-sm font-medium text-gray-700 mb-1">Mã đề tài</label>
-                        <input type="text" id="maDT" name="maDT" th:field="*{maDT}"
-                               class="w-full border border-gray-300 rounded-md px-3 py-2">
-                    </div>
-
-                    <!-- Tên đề tài -->
-                    <div>
-                        <label for="tenDT" class="block text-sm font-medium text-gray-700 mb-1">Tên đề tài</label>
-                        <input type="text" id="tenDT" name="tenDT" th:field="*{tenDT}"
-                               class="w-full border border-gray-300 rounded-md px-3 py-2">
-                    </div>
-
-                    <!-- Mô tả -->
-                    <div>
-                        <label for="moTa" class="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                        <textarea id="moTa" name="moTa" th:field="*{moTa}" rows="3"
-                                  class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
-                    </div>
-
-                    <!-- Ngày bắt đầu -->
-                    <div>
-                        <label for="ngayBatDau" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
-                        <input type="date" id="ngayBatDau" name="ngayBatDau" th:field="*{ngayBatDau}"
-                               class="w-full border border-gray-300 rounded-md px-3 py-2">
-                    </div>
-
-                    <!-- Lớp tín chỉ -->
-                    <div>
-                        <label for="maLopTC" class="block text-sm font-medium text-gray-700 mb-1">Lớp tín chỉ</label>
-                        <input type="text" id="maLopTC" name="lopTinChi.maLopTC" th:field="*{lopTinChi.maLopTC}"
-                               class="w-full border border-gray-300 rounded-md px-3 py-2">
-                    </div>
-                </form>
-            </div>
-            <div class="flex justify-end border-t px-6 py-4 gap-3">
-                <button type="button" id="cancelBtn" 
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                    Hủy
-                </button>
-                <button type="submit" form="deTaiForm"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Lưu
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div th:replace="~{admin/layout/footer :: footer}"></div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let editing = /*[[${editTopic != null}]]*/ false;
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("topicModal");
+    
+            // Nếu đang sửa thì mở modal và đổi tiêu đề
+            if (editing) {
+                modal.classList.remove("hidden");
+                document.getElementById("modalTitle").textContent = "Sửa thông tin đề tài";
+            }
+    
+            // Mở modal khi bấm nút "Thêm đề tài"
+            const addBtn = document.getElementById("addBtn");
+            if (addBtn) {
+                addBtn.addEventListener("click", function () {
+                    modal.classList.remove("hidden");
+                });
+            }
+    
+            // Đóng modal khi bấm ra ngoài
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    modal.classList.add("hidden");
+                }
+            });
+    
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    modal.classList.add("hidden");
+                }
+            });
+    
+            // Đóng modal khi bấm nút đóng
+            const closeModal = document.getElementById("closeModal");
+            if (closeModal) {
+                closeModal.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+    
+            // Đóng modal khi bấm nút hủy
+            const cancelBtn = document.getElementById("cancelBtn");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+        });
+        /*]]>*/
+    </script>
 
     <script th:src="@{/admin/vendor/global/global.min.js}"></script>
     <script th:src="@{/admin/js/quixnav-init.js}"></script>
     <script th:src="@{/admin/js/custom.min.js}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('deTaiModal');
-            const addBtn = document.getElementById('addBtn');
-            const closeModal = document.getElementById('closeModal');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const modalTitle = document.getElementById('modalTitle');
-
-            // Show modal when clicking Add button
-            addBtn.addEventListener('click', function() {
-                modal.classList.remove('hidden');
-                modalTitle.textContent = 'Thêm đề tài';
-            });
-
-            // Close modal functions
-            function closeModalHandler() {
-                modal.classList.add('hidden');
-            }
-
-            closeModal.addEventListener('click', closeModalHandler);
-            cancelBtn.addEventListener('click', closeModalHandler);
-
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeModalHandler();
-                }
-            });
-
-            // Close modal when pressing Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                    closeModalHandler();
-                }
-            });
-        });
-    </script>
 </body>
 </html>

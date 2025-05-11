@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý giảng viên</title>
     <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
-        <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
-        <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
-        <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
-        <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Custom scrollbar for table */
@@ -34,13 +34,21 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans" >
+<body class="bg-gray-50 font-sans">
     <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
     <div class="layout flex">
         <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
         <div class="flex-1 ml-[17.1875rem] p-4">
             <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
                 <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý giảng viên</h1>
+                
+                <!-- Success and Error Messages -->
+                <div th:if="${success}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <span th:text="${error}"></span>
+                </div>
                 
                 <!-- Controls section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -96,21 +104,20 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr th:each="gv : ${ListLecturers}" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.maGV}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ho}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ten}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.soDT}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ngaySinh != null} ? ${#temporals.format(gv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.hocVi}"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.khoa != null} ? ${gv.khoa.maKhoa} : 'N/A'"></td>
-                            <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.taiKhoan != null} ? ${gv.taiKhoan.maTK} : 'Chưa có TK'"></td>
-                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                <a th:href="@{'/lecturers/edit/' + ${gv.maGV}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
-                                <a th:href="@{'/lecturers/delete/' + ${gv.maGV}}" onclick="return confirm('Bạn chắc chắn muốn xóa?')" class="text-red-600 hover:text-red-800">Xóa</a>
-                            </td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.maGV}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ho}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ten}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.soDT}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.ngaySinh != null} ? ${#temporals.format(gv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.hocVi}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.khoa != null} ? ${gv.khoa.maKhoa} : 'N/A'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${gv.taiKhoan != null} ? ${gv.taiKhoan.maTK} : 'Chưa có TK'"></td>
+                                <td class="px-6 py-4 text-right text-sm font-medium">
+                                    <a th:href="@{'/lecturers/edit/' + ${gv.maGV}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
+                                    <a th:href="@{'/lecturers/delete/' + ${gv.maGV}}" onclick="return confirm('Bạn chắc chắn muốn xóa?')" class="text-red-600 hover:text-red-800">Xóa</a>
+                                </td>
                             </tr>
                         </tbody>
-                        
                     </table>
                 </div>
                 
@@ -126,6 +133,7 @@
                 
             </div>
         </div>
+        
         <!-- Modal for Add/Edit -->
         <div id="lecturerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
@@ -140,7 +148,8 @@
                         <!-- Mã GV -->
                         <div>
                             <label for="maGV" class="block text-sm font-medium text-gray-700 mb-1">Mã GV</label>
-                            <input type="text" id="maGV" th:field="*{maGV}" th:readonly="${editLecturer != null && editLecturer.maGV != null}" required
+                            <input type="text" id="maGV" name="maGV" th:value="${editLecturer?.maGV}" 
+                                   th:disabled="${editLecturer?.maGV != null}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
@@ -183,14 +192,20 @@
                         <!-- Mã Khoa -->
                         <div>
                             <label for="maKhoa" class="block text-sm font-medium text-gray-700 mb-1">Mã Khoa</label>
-                            <input type="text" id="maKhoa" th:field="*{khoa.maKhoa}" required
+                            <select id="maKhoa" th:field="*{khoa.maKhoa}" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                                <option value="">-- Chọn khoa --</option>
+                                <option th:each="khoa : ${listKhoa}" 
+                                        th:value="${khoa.maKhoa}"
+                                        th:text="${khoa.tenKhoa}">
+                                </option>
+                            </select>
                         </div>
                         
                         <!-- Mã TK -->
                         <div>
                             <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã TK</label>
-                            <input type="number" id="maTK" th:field="*{taiKhoan.maTK}" required
+                            <input type="text" id="maTK" th:field="*{taiKhoan.maTK}" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                     </form>
@@ -211,7 +226,7 @@
     <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let editing = /*[[${editLecturer != null && editLecturer.maGV != null}]]*/ false;
+        let editing = /*[[${editLecturer != null}]]*/ false;
     
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("lecturerModal");
@@ -227,7 +242,6 @@
             if (addBtn) {
                 addBtn.addEventListener("click", function () {
                     modal.classList.remove("hidden");
-                    document.getElementById("modalTitle").textContent = "Thêm giảng viên";
                 });
             }
     
@@ -238,14 +252,13 @@
                 }
             });
     
-            // Đóng modal khi bấm ESC
             document.addEventListener("keydown", function (e) {
                 if (e.key === "Escape") {
                     modal.classList.add("hidden");
                 }
             });
     
-            // Đóng modal khi bấm nút "X"
+            // Đóng modal khi bấm nút đóng
             const closeModal = document.getElementById("closeModal");
             if (closeModal) {
                 closeModal.addEventListener("click", function () {
@@ -253,7 +266,7 @@
                 });
             }
     
-            // Đóng modal khi bấm nút "Hủy"
+            // Đóng modal khi bấm nút hủy
             const cancelBtn = document.getElementById("cancelBtn");
             if (cancelBtn) {
                 cancelBtn.addEventListener("click", function () {
@@ -263,11 +276,9 @@
         });
         /*]]>*/
     </script>
-    
-    
+
     <script th:src="@{/admin/vendor/global/global.min.js}"></script>
     <script th:src="@{/admin/js/quixnav-init.js}"></script>
     <script th:src="@{/admin/js/custom.min.js}"></script>
-
 </body>
 </html>
