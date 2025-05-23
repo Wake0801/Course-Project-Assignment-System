@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Service
 @Transactional
@@ -31,7 +32,13 @@ public class NhanVienPKTService {
     }
 
     public NhanVienPKT save(NhanVienPKT nhanVien) {
-        if (nhanVien.getTaiKhoan() != null && nhanVien.getTaiKhoan().getMaTK() != null) {
+        // Kiểm tra ngày sinh
+        if (nhanVien.getNgaySinh() == null) {
+            throw new IllegalArgumentException("Ngày sinh không được để trống");
+        }
+        
+        // Kiểm tra tài khoản
+        if (nhanVien.getTaiKhoan() != null && nhanVien.getTaiKhoan().getMaTK() != null && !nhanVien.getTaiKhoan().getMaTK().trim().isEmpty()) {
             TaiKhoan tk = taiKhoanRepository.findById(nhanVien.getTaiKhoan().getMaTK())
                                         .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại"));
             nhanVien.setTaiKhoan(tk);

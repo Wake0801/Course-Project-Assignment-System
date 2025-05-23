@@ -48,8 +48,47 @@ public class TaiKhoanController {
             model.addAttribute("newAccount", newAccount);
         }
         model.addAttribute("ListQuyen", quyenRepository.findAll());
+        
+        // Kiểm tra nếu có attribute showEditModal và thêm vào model
+        boolean showEditModal = model.getAttribute("editModalOpen") != null && (boolean) model.getAttribute("editModalOpen")
+                || model.getAttribute("errorModalOpen") != null && (boolean) model.getAttribute("errorModalOpen");
+        model.addAttribute("showEditModal", showEditModal);
 
         return "admin/manageAccounts";
+    }
+    
+    @GetMapping("/new")
+    public String newAccount(Model model) {
+        TaiKhoan newAccount = new TaiKhoan();
+        newAccount.setQuyen(new Quyen());
+        model.addAttribute("newAccount", newAccount);
+        model.addAttribute("ListQuyen", quyenRepository.findAll());
+        model.addAttribute("showEditModal", true);
+        return "admin/manageAccounts";
+    }
+    
+    @GetMapping("/edit/{maTK}")
+    public String editAccount(@PathVariable String maTK, Model model) {
+        Optional<TaiKhoan> taiKhoan = taiKhoanService.getTaiKhoanById(maTK);
+        
+        if (taiKhoan.isPresent()) {
+            model.addAttribute("newAccount", taiKhoan.get());
+            model.addAttribute("ListQuyen", quyenRepository.findAll());
+            model.addAttribute("showEditModal", true);
+            
+            // Lấy danh sách tài khoản cho bảng
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<TaiKhoan> accountPage = taiKhoanService.listAll(pageable, null);
+            model.addAttribute("ListAccounts", accountPage.getContent());
+            model.addAttribute("userMaps", taiKhoanService.getUserDetailsMap(accountPage));
+            model.addAttribute("currentPage", accountPage.getNumber() + 1);
+            model.addAttribute("totalPages", accountPage.getTotalPages());
+            model.addAttribute("size", 10);
+            
+            return "admin/manageAccounts";
+        }
+        
+        return "redirect:/accounts";
     }
 
     @PostMapping("/save")
@@ -95,7 +134,7 @@ public class TaiKhoanController {
             model.addAttribute("ListQuyen", quyenRepository.findAll());
             model.addAttribute("org.springframework.validation.BindingResult.newAccount", bindingResult);
             model.addAttribute("newAccount", taiKhoan); 
-            model.addAttribute(isEditMode ? "editModalOpen" : "errorModalOpen", true);
+            model.addAttribute("showEditModal", true);
             return "admin/manageAccounts";
         }
 
@@ -106,7 +145,7 @@ public class TaiKhoanController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
             redirectAttributes.addFlashAttribute("newAccount", taiKhoan);
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.newAccount", bindingResult);
-            redirectAttributes.addFlashAttribute(isEditMode ? "editModalOpen" : "errorModalOpen", true);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         return "redirect:/accounts";
     }

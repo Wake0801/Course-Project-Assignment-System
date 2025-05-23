@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,14 +41,22 @@
         <div class="flex-1 ml-[17.1875rem] p-4">
             <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
                 <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý đề tài</h1>
+                
+                <!-- Success and Error Messages -->
+                <div th:if="${success}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <span th:text="${error}"></span>
+                </div>
 
                 <!-- Controls section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <!-- Add button -->
-                    <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                    <a href="/topics/new" id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm đề tài</span>
-                    </button>
+                    </a>
 
                     <!-- Filter section -->
                     <div class="flex flex-wrap gap-4 w-full md:w-auto">
@@ -119,7 +127,7 @@
                                     <div class="text-xs text-gray-500" th:text="${dt.lopTinChi.giangVien.hocVi}">PGS.TS</div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${dt.lopTinChi.giangVien.khoa.tenKhoa}">CNTT</td>
-                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${#dates.format(dt.ngayBatDau, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${dt.ngayBatDau != null} ? ${#temporals.format(dt.ngayBatDau, 'dd/MM/yyyy')} : 'N/A'">01/01/2024</td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
                                     <a th:href="@{'/topics/edit/' + ${dt.maDT}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
                                     <a th:href="@{'/topics/delete/' + ${dt.maDT}}" onclick="return confirm('Bạn chắc chắn muốn xóa đề tài này?')" class="text-red-600 hover:text-red-800">Xóa</a>
@@ -158,6 +166,7 @@
                             <input type="text" id="maDT" name="maDT" th:value="${editTopic?.maDT}" 
                                    th:disabled="${editTopic?.maDT != null}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                            <input type="hidden" name="maDT" th:if="${editTopic?.maDT != null}" th:value="${editTopic.maDT}" />
                         </div>
 
                         <!-- Tên đề tài -->
@@ -177,7 +186,8 @@
                         <!-- Ngày bắt đầu -->
                         <div>
                             <label for="ngayBatDau" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
-                            <input type="date" id="ngayBatDau" th:field="*{ngayBatDau}" required
+                            <input type="date" id="ngayBatDau" th:field="*{ngayBatDau}" 
+                                   th:value="${editTopic?.ngayBatDau != null} ? ${#temporals.format(editTopic.ngayBatDau, 'yyyy-MM-dd')} : ''" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
 
@@ -189,7 +199,7 @@
                                 <option value="">-- Chọn lớp tín chỉ --</option>
                                 <option th:each="lopTC : ${lopTCList}" 
                                         th:value="${lopTC.maLopTC}"
-                                        th:text="${lopTC.tenLopTC + ' - ' + lopTC.giangVien.ho + ' ' + lopTC.giangVien.ten}">
+                                        th:text="${lopTC.maLopTC + ' - ' + lopTC.monHoc.tenMon + ' - ' + lopTC.giangVien.ho + ' ' + lopTC.giangVien.ten}">
                                 </option>
                             </select>
                         </div>
@@ -212,25 +222,24 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let editing = /*[[${editTopic != null}]]*/ false;
+        let showEditModal = /*[[${showEditModal}]]*/ false;
+        let isEditMode = /*[[${editTopic?.maDT != null}]]*/ false;
         
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("topicModal");
     
-            // Nếu đang sửa thì mở modal và đổi tiêu đề
-            if (editing) {
+            // Kiểm tra nếu cần hiển thị modal chỉnh sửa/thêm mới
+            if (showEditModal === true) {
                 modal.classList.remove("hidden");
-                document.getElementById("modalTitle").textContent = "Sửa thông tin đề tài";
+                if (isEditMode) {
+                    document.getElementById("modalTitle").textContent = "Sửa thông tin đề tài";
+                } else {
+                    document.getElementById("modalTitle").textContent = "Thêm đề tài";
+                }
             }
     
-            // Mở modal khi bấm nút "Thêm đề tài"
-            const addBtn = document.getElementById("addBtn");
-            if (addBtn) {
-                addBtn.addEventListener("click", function () {
-                    modal.classList.remove("hidden");
-                });
-            }
-    
+            // Nút thêm đề tài đã được chuyển thành link đến /topics/new
+            
             // Đóng modal khi bấm ra ngoài
             modal.addEventListener("click", function (e) {
                 if (e.target === modal) {

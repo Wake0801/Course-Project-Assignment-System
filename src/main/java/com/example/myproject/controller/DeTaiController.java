@@ -34,6 +34,7 @@ public class DeTaiController {
         
         if (!model.containsAttribute("editTopic")) {
             model.addAttribute("editTopic", new DeTai());
+            model.addAttribute("showEditModal", false);
         }
         
         model.addAttribute("deTaiList", deTaiPage.getContent());
@@ -55,15 +56,13 @@ public class DeTaiController {
     }
 
     @GetMapping("/edit/{maDT}")
-    public String showEditTopicForm(@PathVariable String maDT, Model model, RedirectAttributes redirectAttributes) {
+    public String showEditTopicForm(@PathVariable String maDT, RedirectAttributes redirectAttributes) {
         try {
             Optional<DeTai> deTaiOpt = deTaiService.findById(maDT);
             if (deTaiOpt.isPresent()) {
-                model.addAttribute("editTopic", deTaiOpt.get());
-                model.addAttribute("khoaList", deTaiService.getAllKhoa());
-                model.addAttribute("giangVienList", deTaiService.getAllGiangVien());
-                model.addAttribute("lopTCList", deTaiService.getAllLopTinChi());
-                
+                redirectAttributes.addFlashAttribute("editTopic", deTaiOpt.get());
+                redirectAttributes.addFlashAttribute("showEditModal", true);
+                redirectAttributes.addFlashAttribute("success", "Đã tải thông tin đề tài. Vui lòng thực hiện chỉnh sửa.");
                 return "redirect:/topics";
             } else {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy đề tài với mã: " + maDT);
@@ -81,6 +80,8 @@ public class DeTaiController {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editTopic", result);
             redirectAttributes.addFlashAttribute("editTopic", editTopic);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/topics";
         }
         
@@ -90,10 +91,17 @@ public class DeTaiController {
         } catch (DataIntegrityViolationException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: Dữ liệu đề tài vi phạm ràng buộc toàn vẹn");
             redirectAttributes.addFlashAttribute("editTopic", editTopic);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            return "redirect:/topics";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("editTopic", editTopic);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
             return "redirect:/topics";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi lưu đề tài: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editTopic", editTopic);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
             return "redirect:/topics";
         }
         return "redirect:/topics";
@@ -111,6 +119,13 @@ public class DeTaiController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa đề tài: " + e.getMessage());
         }
+        return "redirect:/topics";
+    }
+    
+    @GetMapping("/new")
+    public String newTopic(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("editTopic", new DeTai());
+        redirectAttributes.addFlashAttribute("showEditModal", true);
         return "redirect:/topics";
     }
 }

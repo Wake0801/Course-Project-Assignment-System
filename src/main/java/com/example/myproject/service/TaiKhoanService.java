@@ -40,7 +40,6 @@ public class TaiKhoanService {
     @Autowired
     private NhanVienPKTRepository nhanVienPKTRepository;
     
-
     public Page<TaiKhoan> listAll(Pageable pageable, String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             return taiKhoanRepository.searchAccounts(keyword, pageable);
@@ -66,24 +65,26 @@ public class TaiKhoanService {
         if (taiKhoan.getLoaiTK() == null || taiKhoan.getLoaiTK().trim().isEmpty()) {
             throw new IllegalArgumentException("Loại tài khoản không được để trống.");
         }
-    //     // Kiểm tra mã TK tồn tại khi thêm mới
-    //     boolean isNew = !taiKhoanRepository.existsById(taiKhoan.getMaTK());
-    //     if (isNew) {
-    //         // Nếu là tài khoản mới, mật khẩu là bắt buộc
-    //         if (!StringUtils.hasText(rawPassword)) {
-    //             throw new IllegalArgumentException("Mật khẩu không được để trống khi tạo mới tài khoản.");
-    //         }
-    //         taiKhoan.setPassword(passwordEncoder.encode(rawPassword));
-    //     } else {
-    //         // Nếu là cập nhật và có cung cấp mật khẩu mới
-    //         if (StringUtils.hasText(rawPassword)) {
-    //             taiKhoan.setPassword(passwordEncoder.encode(rawPassword));
-    //         } else {
-    //             // Giữ lại mật khẩu cũ nếu không cung cấp mật khẩu mới
-    //             TaiKhoan existingTaiKhoan = taiKhoanRepository.findById(taiKhoan.getMaTK())
-    //                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại để cập nhật mật khẩu."));
-    //             taiKhoan.setPassword(existingTaiKhoan.getPassword());
-    //         }
+        
+        // Kiểm tra mã TK tồn tại khi thêm mới
+        boolean isNew = !taiKhoanRepository.existsById(taiKhoan.getMaTK());
+        if (isNew) {
+            // Nếu là tài khoản mới, mật khẩu là bắt buộc
+            if (rawPassword == null || rawPassword.trim().isEmpty()) {
+                throw new IllegalArgumentException("Mật khẩu không được để trống khi tạo mới tài khoản.");
+            }
+            taiKhoan.setPassword(rawPassword); // Lưu mật khẩu trực tiếp hoặc có thể mã hóa nếu cần
+        } else {
+            // Nếu là cập nhật và có cung cấp mật khẩu mới
+            if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+                taiKhoan.setPassword(rawPassword); // Cập nhật mật khẩu mới
+            } else {
+                // Giữ lại mật khẩu cũ nếu không cung cấp mật khẩu mới
+                TaiKhoan existingTaiKhoan = taiKhoanRepository.findById(taiKhoan.getMaTK())
+                    .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại để cập nhật mật khẩu."));
+                taiKhoan.setPassword(existingTaiKhoan.getPassword());
+            }
+        }
         return taiKhoanRepository.save(taiKhoan);
     }
 

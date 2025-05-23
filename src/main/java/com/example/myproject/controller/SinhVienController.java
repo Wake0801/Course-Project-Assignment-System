@@ -35,6 +35,7 @@ public class SinhVienController {
         Page<SinhVien> studentPage = studentService.findSinhViens(keyword, page, size);
         if (!model.containsAttribute("editStudent")) {
             model.addAttribute("editStudent", new SinhVien());
+            model.addAttribute("showEditModal", false);
         }
         studentPage.getContent().forEach(sv -> System.out.println(
         "SV: " + sv.getMaSV() + 
@@ -57,6 +58,8 @@ public class SinhVienController {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editStudent", result);
             redirectAttributes.addFlashAttribute("editStudent", student);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/students";
         }
         
@@ -66,6 +69,7 @@ public class SinhVienController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editStudent", student);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         
         return "redirect:/students";
@@ -81,17 +85,26 @@ public class SinhVienController {
         }
         return "redirect:/students";
     }
+    
     @GetMapping("/edit/{id}")
     public String editStudent(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
-    return studentService.findById(id)
-            .map(sv -> {
-                redirectAttributes.addFlashAttribute("editStudent", sv);
-                return "redirect:/students";
-            })
-            .orElseGet(() -> {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sinh viên");
-                return "redirect:/students";
-            });
+        return studentService.findById(id)
+                .map(sv -> {
+                    redirectAttributes.addFlashAttribute("editStudent", sv);
+                    redirectAttributes.addFlashAttribute("showEditModal", true);
+                    redirectAttributes.addFlashAttribute("success", "Đã tải thông tin sinh viên. Vui lòng thực hiện chỉnh sửa.");
+                    return "redirect:/students";
+                })
+                .orElseGet(() -> {
+                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy sinh viên");
+                    return "redirect:/students";
+                });
     }
-
+    
+    @GetMapping("/new")
+    public String newStudent(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("editStudent", new SinhVien());
+        redirectAttributes.addFlashAttribute("showEditModal", true);
+        return "redirect:/students";
+    }
 }

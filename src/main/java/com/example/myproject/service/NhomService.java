@@ -49,20 +49,46 @@ public class NhomService {
     }
 
     public Nhom save(Nhom nhom) {
+        validateNhom(nhom);
+        
+        // Nếu đang cập nhật và mã nhóm trống, đây là nhóm mới
+        // Lưu và để database tự tạo mã
+        Nhom savedNhom = nhomRepository.save(nhom);
+        
+        // Đảm bảo cập nhật số thành viên hiện tại
+        if (savedNhom.getMaNhom() != null) {
+            savedNhom.setSoThanhVienHienTai(getGroupMemberCount(savedNhom.getMaNhom()));
+        }
+        
+        return savedNhom;
+    }
+    
+    private void validateNhom(Nhom nhom) {
         if (nhom == null) {
             throw new IllegalArgumentException("Nhóm không được để trống");
         }
+        
+        String tenNhom = nhom.getTenNhom();
+        if (tenNhom == null || tenNhom.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên nhóm không được để trống");
+        }
 
-        String maNhom = nhom.getMaNhom();
-        if (maNhom != null && !maNhom.trim().isEmpty() && !isUpdateMode(nhom) && existsById(maNhom)) {
-            throw new RuntimeException("Mã nhóm '" + maNhom + "' đã tồn tại!");
+        if (nhom.getSoLuongTVToiDa() <= 0) {
+            throw new IllegalArgumentException("Số lượng thành viên tối đa phải lớn hơn 0");
         }
         
-        return nhomRepository.save(nhom);
+        // Kiểm tra số thành viên hiện tại chỉ khi cập nhật (mã nhóm đã tồn tại)
+        String maNhom = nhom.getMaNhom();
+        if (maNhom != null && !maNhom.trim().isEmpty()) {
+            Long currentMembers = getGroupMemberCount(maNhom);
+            if (nhom.getSoLuongTVToiDa() < currentMembers) {
+                throw new IllegalArgumentException("Số lượng thành viên tối đa không thể nhỏ hơn số thành viên hiện tại (" + currentMembers + ")");
+            }
+        }
     }
 
     private boolean isUpdateMode(Nhom nhom) {
-        return nhom != null && existsById(nhom.getMaNhom());
+        return nhom != null && nhom.getMaNhom() != null && !nhom.getMaNhom().trim().isEmpty() && existsById(nhom.getMaNhom());
     }
 
     public void deleteById(String maNhom) {

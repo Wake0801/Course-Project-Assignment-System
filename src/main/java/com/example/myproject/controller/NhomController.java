@@ -32,6 +32,7 @@ public class NhomController {
         
         if (!model.containsAttribute("editNhom")) {
             model.addAttribute("editNhom", new Nhom());
+            model.addAttribute("showEditModal", false);
         }
         
         model.addAttribute("ListGroups", nhomPage.getContent());
@@ -52,6 +53,8 @@ public class NhomController {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editNhom", result);
             redirectAttributes.addFlashAttribute("editNhom", nhom);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/groups";
         }
         
@@ -61,6 +64,8 @@ public class NhomController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editNhom", nhom);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            return "redirect:/groups";
         }
         
         return "redirect:/groups";
@@ -84,11 +89,19 @@ public class NhomController {
         return nhomService.findById(id)
                 .map(nhom -> {
                     redirectAttributes.addFlashAttribute("editNhom", nhom);
+                    redirectAttributes.addFlashAttribute("showEditModal", true);
                     return "redirect:/groups";
                 })
                 .orElseGet(() -> {
                     redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhóm");
                     return "redirect:/groups";
                 });
+    }
+    
+    @GetMapping("/new")
+    public String newGroup(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("editNhom", new Nhom());
+        redirectAttributes.addFlashAttribute("showEditModal", true);
+        return "redirect:/groups";
     }
 }

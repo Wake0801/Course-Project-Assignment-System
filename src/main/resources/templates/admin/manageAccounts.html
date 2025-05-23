@@ -57,10 +57,10 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <button id="addAccountBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                    <a href="/accounts/new" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm mới tài khoản</span>
-                    </button>
+                    </a>
                     
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                         <div class="relative flex-grow">
@@ -115,7 +115,10 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.loaiTK}"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.quyen?.tenQuyen ?: 'N/A'}"></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center"> <button th:onclick="'openEditModal(\'' + ${tk.maTK} + '\', \'' + ${tk.username} + '\', \'' + ${tk.loaiTK} + '\', \'' + (${tk.quyen != null ? tk.quyen.maQuyen : ''}) + '\')'" class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i> Sửa</button>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                    <a th:href="@{'/accounts/edit/' + ${tk.maTK}}" class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </a>
                                     <a th:href="@{'/accounts/delete/' + ${tk.maTK}}" 
                                        onclick="return confirm('Bạn chắc chắn muốn xóa tài khoản này? Việc này có thể ảnh hưởng đến người dùng liên quan.')" 
                                        class="text-red-600 hover:text-red-800">
@@ -151,9 +154,9 @@
     </div>
     <div th:replace="~{admin/layout/footer :: footer}"></div>
 
-    <div id="accountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <div id="accountModal" th:class="${showEditModal ? '' : 'hidden'} + ' fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center'">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto modal-content-custom"> <div class="flex justify-between items-center border-b px-6 py-4">
-                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm mới tài khoản</h3>
+                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800" th:text="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Sửa thông tin tài khoản' : 'Thêm mới tài khoản'">Thêm mới tài khoản</h3>
                 <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times fa-lg"></i></button> </div>
             <div class="p-6">
                 <form id="accountForm" th:action="@{/accounts/save}" th:object="${newAccount}" method="post" class="space-y-4">
@@ -162,6 +165,7 @@
                     <div>
                         <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã Tài Khoản:</label>
                         <input type="text" id="maTK" th:field="*{maTK}" required
+                               th:disabled="${newAccount.maTK != null && !newAccount.maTK.isEmpty()}"
                                class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
                         <small th:if="${#fields.hasErrors('maTK')}" th:errors="*{maTK}" class="text-red-500 text-xs"></small>
                     </div>
@@ -175,9 +179,11 @@
 
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật Khẩu:</label>
-                        <input type="password" id="password" name="password" 
+                        <input type="password" id="password" name="password"
+                               th:required="${newAccount.maTK == null || newAccount.maTK.isEmpty()}" 
+                               th:placeholder="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Để trống nếu không đổi' : 'Nhập mật khẩu'"
                                class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
-                        <small id="passwordHelp" class="text-xs text-gray-500">Để trống nếu không muốn thay đổi mật khẩu khi sửa.</small>
+                        <small id="passwordHelp" class="text-xs text-gray-500" th:text="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Để trống nếu không muốn thay đổi mật khẩu khi sửa.' : ''"></small>
                     </div>
 
                     <div>
@@ -205,7 +211,7 @@
                 </form>
                 <div class="flex justify-end border-t px-6 py-4 gap-3 mt-6">
                     <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Hủy</button> <button type="submit" form="accountForm" id="saveAccountBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                       <span th:text="${newAccount.maTK == null || #strings.isEmpty(newAccount.maTK)} ? 'Thêm mới' : 'Cập nhật'"></span>
+                       <span th:text="${newAccount.maTK == null || newAccount.maTK.isEmpty()} ? 'Thêm mới' : 'Cập nhật'"></span>
                     </button>
                 </div>
             </div>
@@ -219,91 +225,12 @@
     <script>
     document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById("accountModal");
-        const addAccountBtn = document.getElementById("addAccountBtn");
-        const closeModalBtn = document.getElementById("closeModalBtn"); // Giữ lại hoặc đổi thành "closeModal" nếu đồng bộ JS
-        const cancelModalBtn = document.getElementById("cancelModalBtn"); // Giữ lại hoặc đổi thành "cancelBtn"
-        const modalTitle = document.getElementById("modalTitle");
-        const accountForm = document.getElementById("accountForm");
-        const saveAccountBtn = document.getElementById("saveAccountBtn");
-        const saveAccountBtnText = saveAccountBtn.querySelector("span"); // Lấy thẻ span bên trong nút lưu
-        const maTKInput = document.getElementById("maTK");
-        const maTKHiddenInput = document.getElementById("maTKHidden");
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
-        const passwordHelpText = document.getElementById("passwordHelp");
-        const loaiTKSelect = document.getElementById("loaiTK");
-        const quyenSelect = document.getElementById("quyen");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+        const cancelModalBtn = document.getElementById("cancelModalBtn");
 
-        function openModal() {
-            modal.classList.remove("hidden");
-        }
-
+        // Đóng modal
         function closeModal() {
-            modal.classList.add("hidden");
-            accountForm.reset();
-            maTKInput.disabled = false;
-            // Reset các thông báo lỗi cũ (nếu có)
-            document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
-
-            // Đặt lại trạng thái cho việc thêm mới
-            modalTitle.textContent = "Thêm mới tài khoản";
-            if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
-            else saveAccountBtn.textContent = "Thêm mới"; // Fallback nếu không có span
-            passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
-            passwordInput.setAttribute('required', 'required');
-            passwordHelpText.textContent = ""; 
-            maTKHiddenInput.value = ''; 
-        }
-
-        if (addAccountBtn) {
-            addAccountBtn.addEventListener("click", function () {
-                accountForm.reset(); 
-                document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
-                
-                modalTitle.textContent = "Thêm mới tài khoản";
-                 if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
-                else saveAccountBtn.textContent = "Thêm mới";
-                
-                maTKInput.disabled = false;
-                maTKInput.value = ''; 
-                maTKHiddenInput.value = ''; // Xóa giá trị hidden khi thêm mới
-                usernameInput.value = '';
-                passwordInput.value = '';
-                passwordInput.setAttribute('required', 'required');
-                passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
-                passwordHelpText.textContent = ""; 
-                loaiTKSelect.value = "";
-                quyenSelect.value = "";
-                openModal();
-            });
-        }
-        
-        // Xử lý nếu có lỗi validation từ server và cần mở lại modal
-        // Giả định rằng nếu có lỗi, newAccount.maTK (th:field="*{maTK}") sẽ có giá trị nếu là edit mode,
-        // hoặc maTKHidden có giá trị.
-        const hasErrors = document.querySelector('#accountForm .text-red-500.text-xs') !== null && 
-                          Array.from(document.querySelectorAll('#accountForm .text-red-500.text-xs')).some(el => el.textContent.trim() !== '');
-
-        if (hasErrors) {
-            const isEditMode = !!maTKHiddenInput.value || (maTKInput.value && maTKInput.disabled);
-            if(isEditMode) {
-                modalTitle.textContent = "Sửa thông tin tài khoản";
-                if(saveAccountBtnText) saveAccountBtnText.textContent = "Cập nhật";
-                else saveAccountBtn.textContent = "Cập nhật";
-                maTKInput.disabled = true;
-                passwordInput.removeAttribute('required');
-                passwordInput.setAttribute('placeholder', 'Để trống nếu không đổi');
-                passwordHelpText.textContent = "Để trống nếu không muốn thay đổi mật khẩu khi sửa.";
-            } else {
-                modalTitle.textContent = "Thêm mới tài khoản";
-                 if(saveAccountBtnText) saveAccountBtnText.textContent = "Thêm mới";
-                else saveAccountBtn.textContent = "Thêm mới";
-                maTKInput.disabled = false;
-                passwordInput.setAttribute('required', 'required');
-                passwordInput.setAttribute('placeholder', 'Nhập mật khẩu');
-                passwordHelpText.textContent = "";
-            }
-            openModal();
+            window.location.href = '/accounts'; // Redirect về trang danh sách
         }
 
         if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
@@ -322,41 +249,6 @@
             }
         });
     });
-
-    // Hàm openEditModal giữ nguyên logic nhưng đảm bảo reset form và các thông báo lỗi
-    function openEditModal(maTK, username, loaiTK, maQuyen) {
-        const modal = document.getElementById("accountModal");
-        const modalTitle = document.getElementById("modalTitle");
-        const saveAccountBtn = document.getElementById("saveAccountBtn");
-        const saveAccountBtnText = saveAccountBtn.querySelector("span");
-        const accountForm = document.getElementById("accountForm");
-        const maTKInput = document.getElementById("maTK");
-        const maTKHiddenInput = document.getElementById("maTKHidden");
-        const passwordInput = document.getElementById("password");
-        const passwordHelpText = document.getElementById("passwordHelp");
-
-        accountForm.reset();
-        document.querySelectorAll('#accountForm .text-red-500.text-xs').forEach(el => el.textContent = '');
-        
-        modalTitle.textContent = "Sửa thông tin tài khoản";
-        if(saveAccountBtnText) saveAccountBtnText.textContent = "Cập nhật";
-        else saveAccountBtn.textContent = "Cập nhật";
-
-        maTKInput.value = maTK;
-        maTKInput.disabled = true; 
-        maTKHiddenInput.value = maTK; 
-
-        document.getElementById("username").value = username;
-        passwordInput.value = ""; 
-        passwordInput.removeAttribute('required'); 
-        passwordInput.setAttribute('placeholder', 'Để trống nếu không đổi');
-        passwordHelpText.textContent = "Để trống nếu không muốn thay đổi mật khẩu khi sửa.";
-
-        document.getElementById("loaiTK").value = loaiTK;
-        document.getElementById("quyen").value = maQuyen;
-        
-        modal.classList.remove("hidden");
-    }
     </script>
 </body>
 </html>

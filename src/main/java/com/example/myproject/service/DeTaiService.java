@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,12 +63,35 @@ public class DeTaiService {
     }
 
     public DeTai save(DeTai deTai) {
-        // Validate LopTinChi if needed
-        if (deTai.getLopTinChi() != null && deTai.getLopTinChi().getMaLopTC() != null) {
+        // Kiểm tra mã đề tài
+        if (deTai.getMaDT() == null || deTai.getMaDT().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã đề tài không được để trống");
+        }
+        
+        // Kiểm tra tên đề tài
+        if (deTai.getTenDT() == null || deTai.getTenDT().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên đề tài không được để trống");
+        }
+        
+        // Kiểm tra mô tả
+        if (deTai.getMoTa() == null || deTai.getMoTa().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mô tả không được để trống");
+        }
+        
+        // Kiểm tra ngày bắt đầu
+        if (deTai.getNgayBatDau() == null) {
+            throw new IllegalArgumentException("Ngày bắt đầu không được để trống");
+        }
+        
+        // Kiểm tra Lớp tín chỉ
+        if (deTai.getLopTinChi() != null && deTai.getLopTinChi().getMaLopTC() != null && !deTai.getLopTinChi().getMaLopTC().trim().isEmpty()) {
             LopTinChi lopTinChi = lopTinChiRepository.findById(deTai.getLopTinChi().getMaLopTC())
                 .orElseThrow(() -> new IllegalArgumentException("Lớp tín chỉ không tồn tại"));
             deTai.setLopTinChi(lopTinChi);
+        } else {
+            throw new IllegalArgumentException("Mã lớp tín chỉ không được để trống");
         }
+        
         return deTaiRepository.save(deTai);
     }
 

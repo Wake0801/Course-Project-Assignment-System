@@ -1,7 +1,8 @@
 package com.example.myproject.entity;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,8 +26,9 @@ public class GiangVien {
     private String soDT;
 
     @Column(name = "NgaySinh", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
-    private Date ngaySinh;
+    private LocalDate ngaySinh;
 
     @Column(name = "HocVi", length = 50)
     private String hocVi;

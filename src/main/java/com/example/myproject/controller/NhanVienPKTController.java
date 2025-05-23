@@ -30,6 +30,7 @@ public class NhanVienPKTController {
         Page<NhanVienPKT> employeePage = employeeService.findNhanViens(keyword, page, size);
         if (!model.containsAttribute("editEmployee")) {
             model.addAttribute("editEmployee", new NhanVienPKT());
+            model.addAttribute("showEditModal", false);
         }
         model.addAttribute("ListEmployees", employeePage.getContent());
         model.addAttribute("currentPage", page);
@@ -46,6 +47,8 @@ public class NhanVienPKTController {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editEmployee", result);
             redirectAttributes.addFlashAttribute("editEmployee", employee);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/employees";
         }
         try {
@@ -54,14 +57,17 @@ public class NhanVienPKTController {
         } catch (DataIntegrityViolationException e) {
              redirectAttributes.addFlashAttribute("error", "Lỗi: Mã NV hoặc Mã TK đã tồn tại.");
              redirectAttributes.addFlashAttribute("editEmployee", employee);
+             redirectAttributes.addFlashAttribute("showEditModal", true);
         } 
         catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editEmployee", employee);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editEmployee", employee);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         return "redirect:/employees";
     }
@@ -86,11 +92,20 @@ public class NhanVienPKTController {
         return employeeService.findById(id)
                 .map(nv -> {
                     redirectAttributes.addFlashAttribute("editEmployee", nv);
+                    redirectAttributes.addFlashAttribute("showEditModal", true);
+                    redirectAttributes.addFlashAttribute("success", "Đã tải thông tin nhân viên. Vui lòng thực hiện chỉnh sửa.");
                     return "redirect:/employees";
                 })
                 .orElseGet(() -> {
                     redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên");
                     return "redirect:/employees";
                 });
+    }
+    
+    @GetMapping("/new")
+    public String newEmployee(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("editEmployee", new NhanVienPKT());
+        redirectAttributes.addFlashAttribute("showEditModal", true);
+        return "redirect:/employees";
     }
 }

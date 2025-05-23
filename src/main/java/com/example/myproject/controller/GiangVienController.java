@@ -36,6 +36,7 @@ public class GiangVienController {
         
         if (!model.containsAttribute("editLecturer")) {
             model.addAttribute("editLecturer", new GiangVien());
+            model.addAttribute("showEditModal", false);
         }
         
         model.addAttribute("ListLecturers", lecturerPage.getContent());
@@ -56,6 +57,8 @@ public class GiangVienController {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editLecturer", result);
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/lecturers";
         }
         
@@ -65,14 +68,17 @@ public class GiangVienController {
         } catch (DataIntegrityViolationException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: Mã GV hoặc Mã TK đã tồn tại hoặc Mã Khoa không hợp lệ.");
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         } 
         catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         }
         
         return "redirect:/lecturers";
@@ -85,8 +91,10 @@ public class GiangVienController {
             GiangVien lecturer = lecturerService.findById(maGV)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giảng viên với mã: " + maGV));
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("success", "Đã tải thông tin giảng viên. Vui lòng thực hiện chỉnh sửa.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi tải thông tin giảng viên: " + e.getMessage());
         }
         return "redirect:/lecturers";
     }
@@ -108,8 +116,9 @@ public class GiangVienController {
     }
 
     @GetMapping("/new")
-    public String newLecturer(Model model) {
-        model.addAttribute("editLecturer", new GiangVien());
+    public String newLecturer(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("editLecturer", new GiangVien());
+        redirectAttributes.addFlashAttribute("showEditModal", true);
         return "redirect:/lecturers";
     }
 }

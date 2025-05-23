@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Service
 @Transactional
@@ -38,8 +39,13 @@ public class GiangVienService {
 
     // Lưu thông tin giảng viên (Thêm mới hoặc cập nhật)
     public GiangVien save(GiangVien giangVien) {
+        // Kiểm tra dữ liệu ngày sinh
+        if (giangVien.getNgaySinh() == null) {
+            throw new IllegalArgumentException("Ngày sinh không được để trống");
+        }
+        
         // Xử lý quan hệ Khoa
-        if (giangVien.getKhoa() != null && giangVien.getKhoa().getMaKhoa() != null) {
+        if (giangVien.getKhoa() != null && giangVien.getKhoa().getMaKhoa() != null && !giangVien.getKhoa().getMaKhoa().trim().isEmpty()) {
             Khoa khoa = khoaRepository.findById(giangVien.getKhoa().getMaKhoa())
                                    .orElseThrow(() -> new IllegalArgumentException("Mã khoa không tồn tại"));
             giangVien.setKhoa(khoa);
@@ -48,13 +54,12 @@ public class GiangVienService {
         }
 
         // Xử lý quan hệ Tài khoản
-        if (giangVien.getTaiKhoan() != null && giangVien.getTaiKhoan().getMaTK() != null) {
+        if (giangVien.getTaiKhoan() != null && giangVien.getTaiKhoan().getMaTK() != null && !giangVien.getTaiKhoan().getMaTK().trim().isEmpty()) {
             TaiKhoan tk = taiKhoanRepository.findById(giangVien.getTaiKhoan().getMaTK())
                                         .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại"));
             giangVien.setTaiKhoan(tk);
         } else {
-            // Có thể cho phép Mã TK null hoặc yêu cầu phải có tùy nghiệp vụ
-             throw new IllegalArgumentException("Mã tài khoản không được để trống");
+            throw new IllegalArgumentException("Mã tài khoản không được để trống");
         }
 
         return giangVienRepository.save(giangVien);

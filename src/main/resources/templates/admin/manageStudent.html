@@ -45,10 +45,10 @@
                 <!-- Controls section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <!-- Add button -->
-                    <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                    <a href="/students/new" id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm sinh viên</span>
-                    </button>
+                    </a>
                     
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                         <!-- Search input -->
@@ -147,6 +147,7 @@
                             <input type="text" id="maSV" name="maSV" th:value="${editStudent?.maSV}" 
                                    th:disabled="${editStudent?.maSV != null}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                            <input type="hidden" name="maSV" th:if="${editStudent?.maSV != null}" th:value="${editStudent.maSV}" />
                         </div>
                         
                         <!-- Họ -->
@@ -232,23 +233,27 @@
     <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let editing = /*[[${editStudent != null}]]*/ false;
+        let showEditModal = /*[[${showEditModal}]]*/ false;
+        let isEditMode = /*[[${editStudent?.maSV != null}]]*/ false;
     
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("studentModal");
     
-            // Nếu đang sửa thì mở modal và đổi tiêu đề
-            if (editing) {
+            // Nếu cần hiển thị modal chỉnh sửa
+            if (showEditModal === true) {
                 modal.classList.remove("hidden");
+                if (isEditMode) {
                 document.getElementById("modalTitle").textContent = "Sửa thông tin sinh viên";
+                } else {
+                    document.getElementById("modalTitle").textContent = "Thêm sinh viên";
+                }
             }
     
             // Mở modal khi bấm nút "Thêm sinh viên"
             const addBtn = document.getElementById("addBtn");
             if (addBtn) {
                 addBtn.addEventListener("click", function () {
-                    modal.classList.remove("hidden");
-                    document.getElementById("modalTitle").textContent = "Thêm sinh viên";
+                    // Nút này giờ đã là link đến /students/new nên không cần xử lý JavaScript nữa
                 });
             }
     

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,13 +46,21 @@
         <div class="flex-1 ml-[17.1875rem] p-4">
             <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
                 <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý nhóm</h1>
+                
+                <!-- Success and Error Messages -->
+                <div th:if="${success}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <span th:text="${error}"></span>
+                </div>
 
                 <!-- Controls section -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <button id="addGroupBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                    <a href="/groups/new" id="addGroupBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm nhóm</span>
-                    </button>
+                    </a>
 
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                         <!-- Search input -->
@@ -161,26 +169,18 @@
                         </div>
                         <div class="p-6">
                             <form id="groupForm" th:action="@{/groups/save}" th:object="${editNhom}" method="post" class="space-y-4">
-                                <input type="hidden" id="maNhomHidden" name="maNhomHidden" th:field="*{maNhom}" />
-
-                                <div>
-                                    <label for="maNhom" class="block text-sm font-medium text-gray-700 mb-1">Mã Nhóm</label>
-                                    <input type="text" id="maNhom" name="maNhom" required
-                                        th:field="*{maNhom}"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
+                                <!-- Giữ trường mã nhóm nhưng ẩn đi -->
+                                <input type="hidden" th:field="*{maNhom}" />
 
                                 <div>
                                     <label for="tenNhom" class="block text-sm font-medium text-gray-700 mb-1">Tên Nhóm</label>
-                                    <input type="text" id="tenNhom" name="tenNhom" required
-                                        th:field="*{tenNhom}"
+                                    <input type="text" id="tenNhom" th:field="*{tenNhom}" required
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
                                 </div>
 
                                 <div>
                                     <label for="soLuongTVToiDa" class="block text-sm font-medium text-gray-700 mb-1">Số lượng thành viên tối đa</label>
-                                    <input type="number" id="soLuongTVToiDa" name="soLuongTVToiDa" required min="1"
-                                        th:field="*{soLuongTVToiDa}"
+                                    <input type="number" id="soLuongTVToiDa" th:field="*{soLuongTVToiDa}" required min="1"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
                                         oninput="validateMaxMembers(this)">
                                     <p id="maxMembersWarning" class="group-member-warning hidden">
@@ -195,7 +195,7 @@
                                     </button>
                                     <button type="submit"
                                             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                        <span th:text="${editNhom.maNhom != null} ? 'Cập nhật' : 'Thêm mới'">Thêm mới</span>
+                                        <span th:text="${editNhom?.maNhom != null} ? 'Cập nhật' : 'Thêm mới'">Thêm mới</span>
                                     </button>
                                 </div>
                             </form>
@@ -214,7 +214,8 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let editing = /*[[${editNhom.maNhom != null}]]*/ false;
+        let showEditModal = /*[[${showEditModal}]]*/ false;
+        let isEditMode = /*[[${editNhom?.maNhom != null}]]*/ false;
         let currentMembers = /*[[${editNhom.soThanhVienHienTai}]]*/ 0;
 
         function validateMaxMembers(input) {
@@ -234,50 +235,41 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("groupModal");
-            const addBtn = document.getElementById("addGroupBtn");
             const closeModal = document.getElementById("closeModal");
             const cancelBtn = document.getElementById("cancelBtn");
-            const maNhomInput = document.getElementById("maNhom");
 
-            // Show modal if editing
-            if (editing) {
+            // Kiểm tra nếu cần hiển thị modal chỉnh sửa/thêm mới
+            if (showEditModal === true) {
                 modal.classList.remove("hidden");
-                document.getElementById("modalTitle").textContent = "Sửa thông tin nhóm";
-                maNhomInput.disabled = true;
-            }
-
-            // Add button click
-            if (addBtn) {
-                addBtn.addEventListener("click", function () {
-                    modal.classList.remove("hidden");
+                if (isEditMode) {
+                    document.getElementById("modalTitle").textContent = "Sửa thông tin nhóm";
+                } else {
                     document.getElementById("modalTitle").textContent = "Thêm nhóm mới";
-                    document.getElementById("groupForm").reset();
-                    maNhomInput.disabled = false;
-                });
+                }
             }
 
-            // Close modal when clicking outside
+            // Đóng modal khi bấm ra ngoài
             modal.addEventListener("click", function (e) {
                 if (e.target === modal) {
                     modal.classList.add("hidden");
                 }
             });
 
-            // Close modal with ESC key
+            // Đóng modal với phím ESC
             document.addEventListener("keydown", function (e) {
                 if (e.key === "Escape") {
                     modal.classList.add("hidden");
                 }
             });
 
-            // Close button click
+            // Nút đóng modal
             if (closeModal) {
                 closeModal.addEventListener("click", function () {
                     modal.classList.add("hidden");
                 });
             }
 
-            // Cancel button click
+            // Nút hủy
             if (cancelBtn) {
                 cancelBtn.addEventListener("click", function () {
                     modal.classList.add("hidden");
