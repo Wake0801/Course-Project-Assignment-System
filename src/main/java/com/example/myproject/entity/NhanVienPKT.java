@@ -22,7 +22,7 @@ public class NhanVienPKT {
     @Column(name = "Ten", nullable = false, length = 50)
     private String ten;
 
-    @Column(name = "SoDT", length = 15)
+    @Column(name = "SoDT", length = 10)
     private String soDT;
 
     @Column(name = "NgaySinh", nullable = false)

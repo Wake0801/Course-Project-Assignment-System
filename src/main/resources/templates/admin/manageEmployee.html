@@ -136,6 +136,7 @@
                 </div>
                 <div class="p-6">
                     <form id="employeeForm" th:action="@{/employees/save}" th:object="${editEmployee}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Mã NV -->
                         <div>
                             <label for="maNV" class="block text-sm font-medium text-gray-700 mb-1">Mã NV</label>
                             <input type="text" id="maNV" name="maNV" th:value="${editEmployee?.maNV}" 
@@ -143,27 +144,32 @@
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                             <input type="hidden" name="maNV" th:if="${editEmployee?.maNV != null}" th:value="${editEmployee.maNV}" />
                         </div>
+                        <!-- Họ -->
                         <div>
                             <label for="ho" class="block text-sm font-medium text-gray-700 mb-1">Họ</label>
                             <input type="text" id="ho" th:field="*{ho}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
+                        <!-- Tên -->
                         <div>
                             <label for="ten" class="block text-sm font-medium text-gray-700 mb-1">Tên</label>
                             <input type="text" id="ten" th:field="*{ten}" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
+                        <!-- Số ĐT -->
                         <div>
                             <label for="soDT" class="block text-sm font-medium text-gray-700 mb-1">Số ĐT</label>
                             <input type="text" id="soDT" th:field="*{soDT}"
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
+                        <!-- Ngày Sinh -->
                         <div>
                             <label for="ngaySinh" class="block text-sm font-medium text-gray-700 mb-1">Ngày Sinh</label>
                             <input type="date" id="ngaySinh" th:field="*{ngaySinh}" 
                                    th:value="${editEmployee?.ngaySinh != null} ? ${#temporals.format(editEmployee.ngaySinh, 'yyyy-MM-dd')} : ''" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
+                        <!-- Mã TK -->
                         <div>
                             <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã TK</label>
                             <input type="text" id="maTK" th:field="*{taiKhoan.maTK}" required

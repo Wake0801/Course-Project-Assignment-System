@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.dao.DataIntegrityViolationException;
+
 @Controller
 @RequestMapping("/students")
 public class SinhVienController {
@@ -65,9 +67,31 @@ public class SinhVienController {
         
         try {
             studentService.save(student);
-            redirectAttributes.addFlashAttribute("success", "Lưu thành công!");
-        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("success", "Lưu sinh viên thành công!");
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = "Lỗi: ";
+            if (e.getMessage().contains("Email")) {
+                errorMessage += "Email đã tồn tại hoặc không được để trống.";
+            } else if (e.getMessage().contains("MaSV")) {
+                errorMessage += "Mã SV đã tồn tại.";
+            } else if (e.getMessage().contains("MaTK")) {
+                errorMessage += "Mã TK đã tồn tại hoặc không hợp lệ.";
+            } else if (e.getMessage().contains("MaLop")) {
+                errorMessage += "Mã Lớp không hợp lệ.";
+            } else {
+                errorMessage += "Dữ liệu bị trùng lặp hoặc không hợp lệ.";
+            }
+            redirectAttributes.addFlashAttribute("error", errorMessage);
+            redirectAttributes.addFlashAttribute("editStudent", student);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+        } 
+        catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("editStudent", student);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
+        }
+        catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
             redirectAttributes.addFlashAttribute("editStudent", student);
             redirectAttributes.addFlashAttribute("showEditModal", true);
         }
@@ -79,9 +103,13 @@ public class SinhVienController {
     public String deleteStudent(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         try {
             studentService.deleteById(id);
-            redirectAttributes.addFlashAttribute("success", "Đã xóa sinh viên thành công");
+            redirectAttributes.addFlashAttribute("success", "Xóa sinh viên thành công!");
         } catch (EmptyResultDataAccessException e) {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sinh viên với ID: " + id);
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sinh viên với mã: " + id);
+        } catch (DataIntegrityViolationException e) {
+            redirectAttributes.addFlashAttribute("error", "Không thể xóa sinh viên này vì đang được sử dụng trong hệ thống!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi xóa sinh viên: " + e.getMessage());
         }
         return "redirect:/students";
     }

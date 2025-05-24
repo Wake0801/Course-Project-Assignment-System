@@ -30,6 +30,9 @@ public class GiangVien {
     @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
+    @Column(name = "Email", length = 100, unique = true)
+    private String email;
+    
     @Column(name = "HocVi", length = 50)
     private String hocVi;
 

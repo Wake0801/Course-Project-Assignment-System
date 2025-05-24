@@ -21,7 +21,8 @@ public interface GiangVienRepository extends JpaRepository<GiangVien, String> {
            "LOWER(g.ho) LIKE %:keyword% OR " +
            "LOWER(g.ten) LIKE %:keyword% OR " + 
            "LOWER(g.hocVi) LIKE %:keyword% OR " +
-           "LOWER(g.khoa.tenKhoa) LIKE %:keyword%") // Thêm tìm kiếm theo tên Khoa nếu cần
+           "LOWER(g.khoa.tenKhoa) LIKE %:keyword% OR " +
+           "LOWER(g.email) LIKE %:keyword%") 
     Page<GiangVien> search(@Param("keyword") String keyword, Pageable pageable);
     
     Optional<GiangVien> findByTaiKhoan_MaTK(String maTK);
