@@ -14,14 +14,49 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SinhVienRepository extends JpaRepository<SinhVien, String> {
     
+    // Tìm kiếm sinh viên
     @Query("SELECT s FROM SinhVien s WHERE " +
-           "LOWER(s.maSV) LIKE %:keyword% OR " +
-           "LOWER(s.ho) LIKE %:keyword% OR " +
-           "LOWER(s.ten) LIKE %:keyword%")
+           "UPPER(TRIM(s.maSV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.email)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ho, ' ', s.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ten, ' ', s.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%'))")
     Page<SinhVien> search(@Param("keyword") String keyword, Pageable pageable);
     
+    // Tìm kiếm với filter theo lớp
+    @Query("SELECT s FROM SinhVien s WHERE s.lop.maLop = :maLop AND (" +
+           "UPPER(TRIM(s.maSV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.email)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ho, ' ', s.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ten, ' ', s.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')))")
+    Page<SinhVien> searchByLop(@Param("keyword") String keyword, @Param("maLop") String maLop, Pageable pageable);
+    
+    // Tìm kiếm với filter theo khoa (qua quan hệ lớp)
+    @Query("SELECT s FROM SinhVien s WHERE s.lop.khoa.maKhoa = :maKhoa AND (" +
+           "UPPER(TRIM(s.maSV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(s.email)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ho, ' ', s.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(s.ten, ' ', s.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')))")
+    Page<SinhVien> searchByKhoa(@Param("keyword") String keyword, @Param("maKhoa") String maKhoa, Pageable pageable);
+    
+    // Filter chỉ theo lớp
+    Page<SinhVien> findByLop_MaLop(String maLop, Pageable pageable);
+    
+    // Filter chỉ theo khoa (qua quan hệ lớp)
+    Page<SinhVien> findByLop_Khoa_MaKhoa(String maKhoa, Pageable pageable);
+    
+    // Tìm kiếm tài khoản sinh viên
     Optional<SinhVien> findByTaiKhoan_MaTK(String maTK);
     
+    // Kiểm tra tồn tại tài khoản sinh viên
     boolean existsByTaiKhoan_MaTK(String maTK);
 
 }

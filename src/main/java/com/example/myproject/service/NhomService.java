@@ -64,7 +64,7 @@ public class NhomService {
         if (nhom == null) {
             throw new IllegalArgumentException("Nhóm không được để trống");
         }
-        
+
         String tenNhom = nhom.getTenNhom();
         if (tenNhom == null || tenNhom.trim().isEmpty()) {
             throw new IllegalArgumentException("Tên nhóm không được để trống");
@@ -79,7 +79,7 @@ public class NhomService {
             Long currentMembers = getGroupMemberCount(maNhom);
             if (nhom.getSoLuongTVToiDa() < currentMembers) {
                 throw new IllegalArgumentException("Số lượng thành viên tối đa không thể nhỏ hơn số thành viên hiện tại (" + currentMembers + ")");
-            }
+        }
         }
     }
 

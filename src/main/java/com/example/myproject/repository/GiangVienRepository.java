@@ -15,15 +15,36 @@ import org.springframework.stereotype.Repository;
 // Sử dụng String làm kiểu dữ liệu cho ID (MaGV) giống như entity GiangVien
 public interface GiangVienRepository extends JpaRepository<GiangVien, String> { 
 
-    // Câu query tìm kiếm tương tự SinhVienRepository nhưng tìm theo các trường của GiangVien
+    // tìm kiếm GiangVien
     @Query("SELECT g FROM GiangVien g WHERE " +
-           "LOWER(g.maGV) LIKE %:keyword% OR " +
-           "LOWER(g.ho) LIKE %:keyword% OR " +
-           "LOWER(g.ten) LIKE %:keyword% OR " + 
-           "LOWER(g.hocVi) LIKE %:keyword% OR " +
-           "LOWER(g.khoa.tenKhoa) LIKE %:keyword% OR " +
-           "LOWER(g.email) LIKE %:keyword%") 
+           "UPPER(TRIM(g.maGV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.email)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.hocVi)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.khoa.tenKhoa)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(g.ho, ' ', g.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(g.ten, ' ', g.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%'))")
     Page<GiangVien> search(@Param("keyword") String keyword, Pageable pageable);
+    
+    // Tìm kiếm với filter theo khoa
+    @Query("SELECT g FROM GiangVien g WHERE g.khoa.maKhoa = :maKhoa AND (" +
+           "UPPER(TRIM(g.maGV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.email)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(g.hocVi)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(g.ho, ' ', g.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(g.ten, ' ', g.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')))")
+    Page<GiangVien> searchByKhoa(@Param("keyword") String keyword, @Param("maKhoa") String maKhoa, Pageable pageable);
+    
+    // Filter chỉ theo khoa
+    Page<GiangVien> findByKhoa_MaKhoa(String maKhoa, Pageable pageable);
+    
+    // Lấy danh sách giảng viên theo khoa (không phân trang - cho dropdown)
+    java.util.List<GiangVien> findByKhoa_MaKhoa(String maKhoa);
     
     Optional<GiangVien> findByTaiKhoan_MaTK(String maTK);
     

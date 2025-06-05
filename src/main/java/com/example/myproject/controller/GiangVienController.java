@@ -28,11 +28,25 @@ public class GiangVienController {
     @GetMapping
     public String listLecturers(
         @RequestParam(value = "search", required = false) String keyword,
+        @RequestParam(value = "maKhoa", required = false) String maKhoa,
         @RequestParam(value = "page", defaultValue = "1") int page,
         @RequestParam(value = "size", defaultValue = "30") int size,
         Model model
     ) {
-        Page<GiangVien> lecturerPage = lecturerService.findGiangViens(keyword, page, size);
+        // Đảm bảo page >= 1
+        if (page < 1) {
+            page = 1;
+        }
+        
+        Page<GiangVien> lecturerPage = lecturerService.findGiangViensWithFilter(keyword, maKhoa, page, size);
+        
+        // Nếu page vượt quá totalPages và có kết quả, redirect về trang cuối
+        if (lecturerPage.getTotalPages() > 0 && page > lecturerPage.getTotalPages()) {
+            return "redirect:/lecturers?page=" + lecturerPage.getTotalPages() + 
+                   "&size=" + size + 
+                   (keyword != null ? "&search=" + keyword : "") +
+                   (maKhoa != null ? "&maKhoa=" + maKhoa : "");
+        }
         
         if (!model.containsAttribute("editLecturer")) {
             model.addAttribute("editLecturer", new GiangVien());
@@ -40,9 +54,11 @@ public class GiangVienController {
         }
         
         model.addAttribute("ListLecturers", lecturerPage.getContent());
-        model.addAttribute("currentPage", page);
+        // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
+        model.addAttribute("currentPage", lecturerPage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", lecturerPage.getTotalPages());
         model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedKhoa", maKhoa);
         model.addAttribute("size", size);
         model.addAttribute("listKhoa", khoaService.getAllKhoa());
         
@@ -63,8 +79,14 @@ public class GiangVienController {
         }
         
         try {
+            boolean isEdit = lecturer.getMaGV() != null && !lecturer.getMaGV().isEmpty();
             lecturerService.save(lecturer);
-            redirectAttributes.addFlashAttribute("success", "Lưu giảng viên thành công!");
+            
+            if (isEdit) {
+                redirectAttributes.addFlashAttribute("success", "Cập nhật giảng viên thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Thêm giảng viên thành công!");
+            }
         } catch (DataIntegrityViolationException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: Mã GV hoặc Mã TK đã tồn tại hoặc Mã Khoa không hợp lệ.");
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
@@ -92,7 +114,6 @@ public class GiangVienController {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giảng viên với mã: " + maGV));
             redirectAttributes.addFlashAttribute("editLecturer", lecturer);
             redirectAttributes.addFlashAttribute("showEditModal", true);
-            redirectAttributes.addFlashAttribute("success", "Đã tải thông tin giảng viên. Vui lòng thực hiện chỉnh sửa.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi tải thông tin giảng viên: " + e.getMessage());
         }

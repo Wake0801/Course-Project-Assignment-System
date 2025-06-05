@@ -15,10 +15,12 @@ import org.springframework.stereotype.Repository;
 public interface NhanVienPKTRepository extends JpaRepository<NhanVienPKT, String> {
 
     @Query("SELECT nv FROM NhanVienPKT nv WHERE " +
-           "LOWER(nv.maNV) LIKE %:keyword% OR " +
-           "LOWER(nv.ho) LIKE %:keyword% OR " +
-           "LOWER(nv.ten) LIKE %:keyword% OR " +
-           "LOWER(nv.soDT) LIKE %:keyword%")
+           "UPPER(TRIM(nv.maNV)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(nv.ho)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(nv.ten)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(nv.soDT)) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(nv.ho, ' ', nv.ten))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%')) OR " +
+           "UPPER(TRIM(CONCAT(nv.ten, ' ', nv.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%'))")
     Page<NhanVienPKT> search(@Param("keyword") String keyword, Pageable pageable);
     
     Optional<NhanVienPKT> findByTaiKhoan_MaTK(String maTK);

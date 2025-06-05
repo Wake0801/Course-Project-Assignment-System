@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
     
+    //Tìm kiếm đơn giản
     @Query("SELECT dt FROM DeTai dt WHERE " +
            "dt.maDT = :keyword OR " +
            "LOWER(dt.tenDT) LIKE %:keyword% OR " +
@@ -21,6 +22,7 @@ public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
            "LOWER(dt.lopTinChi.giangVien.ho) LIKE %:keyword%")
     Page<DeTai> search(@Param("keyword") String keyword, Pageable pageable);
 
+    //Tìm kiếm với các bộ lọc
     @Query("SELECT d FROM DeTai d WHERE " +
            "(:maKhoa IS NULL OR d.lopTinChi.giangVien.khoa.maKhoa = :maKhoa) AND " +
            "(:maGV IS NULL OR d.lopTinChi.giangVien.maGV = :maGV) AND " +

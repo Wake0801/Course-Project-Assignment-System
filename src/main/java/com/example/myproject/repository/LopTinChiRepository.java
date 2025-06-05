@@ -13,4 +13,9 @@ public interface LopTinChiRepository extends JpaRepository<LopTinChi, String> {
 
     Optional<LopTinChi> findByMaLopTC(String maLopTC);
     
+    // Lấy lớp tín chỉ theo khoa (thông qua giảng viên)
+    java.util.List<LopTinChi> findByGiangVien_Khoa_MaKhoa(String maKhoa);
+    
+    // Lấy lớp tín chỉ theo giảng viên
+    java.util.List<LopTinChi> findByGiangVien_MaGV(String maGV);
 } 

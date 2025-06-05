@@ -2,6 +2,8 @@ package com.example.myproject.controller;
 
 import com.example.myproject.entity.SinhVien;
 import com.example.myproject.service.SinhVienService;
+import com.example.myproject.service.KhoaService;
+import com.example.myproject.service.LopService;
 
 import jakarta.validation.Valid;
 
@@ -26,6 +28,12 @@ public class SinhVienController {
 
     @Autowired
     private SinhVienService studentService;
+    
+    @Autowired
+    private KhoaService khoaService;
+    
+    @Autowired
+    private LopService lopService;
 
     @GetMapping
     public String listStudents(
@@ -34,28 +42,44 @@ public class SinhVienController {
         @RequestParam(value = "size", defaultValue = "30") int size,
         Model model
     ) {
+        // Đảm bảo page >= 1
+        if (page < 1) {
+            page = 1;
+        }
+        
         Page<SinhVien> studentPage = studentService.findSinhViens(keyword, page, size);
+        
+        // Nếu page vượt quá totalPages và có kết quả, redirect về trang cuối
+        if (studentPage.getTotalPages() > 0 && page > studentPage.getTotalPages()) {
+            return "redirect:/students?page=" + studentPage.getTotalPages() + 
+                   "&size=" + size + 
+                   (keyword != null ? "&search=" + keyword : "");
+        }
+        
         if (!model.containsAttribute("editStudent")) {
             model.addAttribute("editStudent", new SinhVien());
             model.addAttribute("showEditModal", false);
         }
-        studentPage.getContent().forEach(sv -> System.out.println(
-        "SV: " + sv.getMaSV() + 
-        ", Lop: " + (sv.getLop() != null ? sv.getLop().getMaLop() : "null") +
-        ", TK: " + (sv.getTaiKhoan() != null ? sv.getTaiKhoan().getMaTK() : "null")
-        ));
+        
         model.addAttribute("ListStudents", studentPage.getContent());
-        model.addAttribute("currentPage", page);
+        // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
+        model.addAttribute("currentPage", studentPage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", studentPage.getTotalPages());
         model.addAttribute("keyword", keyword);
         model.addAttribute("size", size);
-        return "admin/manageStudent"; // Thymeleaf template
+        
+        return "admin/manageStudent";
     }
 
     @PostMapping("/save")
     public String saveStudent(@Valid @ModelAttribute("editStudent") SinhVien student,
                             BindingResult result,
                             RedirectAttributes redirectAttributes) {
+        
+        // Chuyển mã SV thành uppercase
+        if (student.getMaSV() != null) {
+            student.setMaSV(student.getMaSV().toUpperCase());
+        }
         
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editStudent", result);
@@ -66,8 +90,14 @@ public class SinhVienController {
         }
         
         try {
+            boolean isEdit = student.getMaSV() != null && !student.getMaSV().isEmpty() && studentService.findById(student.getMaSV()).isPresent();
             studentService.save(student);
-            redirectAttributes.addFlashAttribute("success", "Lưu sinh viên thành công!");
+            
+            if (isEdit) {
+                redirectAttributes.addFlashAttribute("success", "Cập nhật sinh viên thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Thêm sinh viên thành công!");
+            }
         } catch (DataIntegrityViolationException e) {
             String errorMessage = "Lỗi: ";
             if (e.getMessage().contains("Email")) {
@@ -120,7 +150,7 @@ public class SinhVienController {
                 .map(sv -> {
                     redirectAttributes.addFlashAttribute("editStudent", sv);
                     redirectAttributes.addFlashAttribute("showEditModal", true);
-                    redirectAttributes.addFlashAttribute("success", "Đã tải thông tin sinh viên. Vui lòng thực hiện chỉnh sửa.");
+                    // Bỏ thông báo success không cần thiết khi mở form sửa
                     return "redirect:/students";
                 })
                 .orElseGet(() -> {

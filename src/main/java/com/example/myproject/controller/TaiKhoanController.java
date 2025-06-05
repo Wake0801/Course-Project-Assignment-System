@@ -48,7 +48,7 @@ public class TaiKhoanController {
             model.addAttribute("newAccount", newAccount);
         }
         model.addAttribute("ListQuyen", quyenRepository.findAll());
-        
+
         // Kiểm tra nếu có attribute showEditModal và thêm vào model
         boolean showEditModal = model.getAttribute("editModalOpen") != null && (boolean) model.getAttribute("editModalOpen")
                 || model.getAttribute("errorModalOpen") != null && (boolean) model.getAttribute("errorModalOpen");

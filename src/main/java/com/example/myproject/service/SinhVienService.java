@@ -32,13 +32,51 @@ public class SinhVienService{
         Pageable pageable = PageRequest.of(page - 1, size);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return sinhVienRepository.search(keyword.toLowerCase(), pageable);
+            return sinhVienRepository.search(keyword.trim(), pageable);
         }
 
         return sinhVienRepository.findAll(pageable);
     }
 
+    // Tìm kiếm với filter theo khoa và lớp
+    public Page<SinhVien> findSinhViensWithFilter(String keyword, String maKhoa, String maLop, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        
+        // Logic filter phức tạp - ưu tiên filter theo lớp trước
+        if (maLop != null && !maLop.trim().isEmpty()) {
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                // Có cả tìm kiếm và filter lớp
+                return sinhVienRepository.searchByLop(keyword.trim(), maLop, pageable);
+            } else {
+                // Chỉ filter theo lớp
+                return sinhVienRepository.findByLop_MaLop(maLop, pageable);
+            }
+        } else if (maKhoa != null && !maKhoa.trim().isEmpty()) {
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                // Có cả tìm kiếm và filter khoa
+                return sinhVienRepository.searchByKhoa(keyword.trim(), maKhoa, pageable);
+            } else {
+                // Chỉ filter theo khoa
+                return sinhVienRepository.findByLop_Khoa_MaKhoa(maKhoa, pageable);
+            }
+        } else {
+            // Không có filter khoa/lớp, chỉ tìm kiếm
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                return sinhVienRepository.search(keyword.trim(), pageable);
+            }
+            return sinhVienRepository.findAll(pageable);
+        }
+    }
+
     public SinhVien save(SinhVien sinhVien) {
+        // Kiểm tra số điện thoại
+        if (sinhVien.getSoDT() != null && !sinhVien.getSoDT().trim().isEmpty()) {
+            String soDT = sinhVien.getSoDT().trim();
+            if (!soDT.matches("^0\\d{9}$")) {
+                throw new IllegalArgumentException("Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số");
+            }
+        }
+        
         // Xử lý quan hệ lớp
         if (sinhVien.getLop() != null && sinhVien.getLop().getMaLop() != null) {
             Lop lop = lopRepository.findById(sinhVien.getLop().getMaLop())

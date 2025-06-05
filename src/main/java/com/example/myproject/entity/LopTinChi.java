@@ -13,7 +13,7 @@ public class LopTinChi {
     @Id
     @Column(name = "MaLopTC", length = 10)
     private String maLopTC;
-    
+
     @Transient
     private String tenLopTC;
 
@@ -24,7 +24,7 @@ public class LopTinChi {
     @ManyToOne
     @JoinColumn(name = "MaGV", nullable = false)
     private GiangVien giangVien;
-    
+
     /**
      * Phương thức tự động tạo tên lớp tín chỉ từ mã và tên môn học
      * @return Tên lớp tín chỉ được tạo động

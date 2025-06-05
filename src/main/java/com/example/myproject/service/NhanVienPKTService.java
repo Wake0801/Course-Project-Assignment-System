@@ -4,6 +4,7 @@ import com.example.myproject.entity.NhanVienPKT;
 import com.example.myproject.entity.TaiKhoan;
 import com.example.myproject.repository.NhanVienPKTRepository;
 import com.example.myproject.repository.LoginRepository;
+import com.example.myproject.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ public class NhanVienPKTService {
     public Page<NhanVienPKT> findNhanViens(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return nhanVienPKTRepository.search(keyword.toLowerCase(), pageable);
+            return nhanVienPKTRepository.search(keyword.trim(), pageable);
         }
         return nhanVienPKTRepository.findAll(pageable);
     }
@@ -35,6 +36,14 @@ public class NhanVienPKTService {
         // Kiểm tra ngày sinh
         if (nhanVien.getNgaySinh() == null) {
             throw new IllegalArgumentException("Ngày sinh không được để trống");
+        }
+        
+        // Kiểm tra số điện thoại
+        if (nhanVien.getSoDT() != null && !nhanVien.getSoDT().trim().isEmpty()) {
+            String soDT = nhanVien.getSoDT().trim();
+            if (!soDT.matches("^0\\d{9}$")) {
+                throw new IllegalArgumentException("Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số");
+            }
         }
         
         // Kiểm tra tài khoản

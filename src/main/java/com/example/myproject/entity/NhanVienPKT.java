@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import lombok.Getter;
 import lombok.Setter;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 
 @Getter
@@ -23,6 +25,8 @@ public class NhanVienPKT {
     private String ten;
 
     @Column(name = "SoDT", length = 10)
+    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số")
+    @Size(min = 10, max = 10, message = "Số điện thoại phải có đúng 10 chữ số")
     private String soDT;
 
     @Column(name = "NgaySinh", nullable = false)

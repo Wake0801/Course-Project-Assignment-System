@@ -59,36 +59,79 @@
                     </a>
                     
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                        <!-- Search input -->
-                        <div class="relative flex-grow">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
+                        <!-- Search and Filter form -->
+                        <form th:action="@{/students}" method="get" class="flex flex-col md:flex-row gap-3">
+                            <!-- Search input -->
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" name="search" placeholder="Tìm kiếm theo mã, tên, email..."
+                                    th:value="${keyword}" class="pl-10 pr-4 py-2 border rounded-md w-64" />
                             </div>
-                            <form th:action="@{/students}" method="get" class="flex gap-2">
-                                <input type="text" name="search" placeholder="Tìm kiếm..."
-                                    th:value="${keyword}" class="pl-10 pr-4 py-2 border rounded-md" />
-                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Tìm</button>
-                            </form>
-                        </div>
+
+                            
+                            <!-- Search button -->
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                <i class="fas fa-search mr-1"></i>Tìm kiếm
+                            </button>
+                            
+                            <!-- Clear filter button -->
+                            <a href="/students" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition flex items-center">
+                                <i class="fas fa-times mr-1"></i>Xóa bộ lọc
+                            </a>
+                            
+                            <!-- Hidden fields to preserve pagination -->
+                            <input type="hidden" name="size" th:value="${size}" />
+
+                        </form>
                         
                         <!-- Rows per page selector -->
                         <div class="flex items-center gap-2">
                             <label for="rowsPerPage" class="text-gray-600 whitespace-nowrap">Hiển thị:</label>
                             <form th:action="@{/students}" method="get" class="ml-4">
                                 <select name="size" onchange="this.form.submit()" class="border rounded-md px-2 py-1">
-                                <option th:selected="${size==10}" value="10">10</option>
-                                <option th:selected="${size==30}" value="30">30</option>
-                                <option th:selected="${size==50}" value="50">50</option>
-                                <option th:selected="${size==100}" value="100">100</option>
+                                    <option th:selected="${size==10}" value="10">10</option>
+                                    <option th:selected="${size==30}" value="30">30</option>
+                                    <option th:selected="${size==50}" value="50">50</option>
+                                    <option th:selected="${size==100}" value="100">100</option>
                                 </select>
+                                <!-- Preserve search and filter parameters -->
+                                <input type="hidden" name="search" th:value="${keyword}" />
                             </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter information -->
+                <div class="mb-4 text-sm text-gray-600">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <!-- Active filters -->
+                        <div th:if="${keyword != null and !keyword.isEmpty()}" class="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                            <i class="fas fa-search mr-1"></i>
+                            <span>Từ khóa: "<span th:text="${keyword}"></span>"</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Table container -->
                 <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <!-- Hiển thị thông báo khi không có kết quả -->
+                    <div th:if="${#lists.isEmpty(ListStudents)}" class="text-center py-12">
+                        <div class="text-gray-500 text-lg mb-4">
+                            <i class="fas fa-search text-4xl mb-4 text-gray-400"></i>
+                            <div>Không tìm thấy sinh viên nào</div>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            <span th:if="${keyword != null and !keyword.isEmpty()}">
+                                Thử thay đổi từ khóa tìm kiếm hoặc 
+                            </span>
+                            <a href="/students" class="text-blue-600 hover:text-blue-800">xóa tất cả bộ lọc</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Hiển thị bảng khi có kết quả -->
+                    <table th:if="${!#lists.isEmpty(ListStudents)}" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã SV</th>
@@ -101,7 +144,7 @@
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Lớp</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã TK</th>
-                                <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                                <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -109,7 +152,7 @@
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.maSV}"></td>
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.ho}"></td>
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.ten}"></td>
-                            <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.gioiTinh != null} ? (${sv.gioiTinh} ? 'Nam' : 'Nữ') : 'N/A'"></td></td>
+                            <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.gioiTinh != null} ? (${sv.gioiTinh} ? 'Nam' : 'Nữ') : 'N/A'"></td>
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.soDT}"></td>
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.diaChi}"></td>
                             <td class="px-3 py-4 text-sm text-gray-900" th:text="${sv.ngaySinh != null} ? ${#temporals.format(sv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
@@ -122,12 +165,11 @@
                             </td>
                             </tr>
                         </tbody>
-                        
                     </table>
                 </div>
                 
-                <!-- Pagination -->
-                <div class="mt-6 flex justify-center gap-2">
+                <!-- Pagination - Chỉ hiển thị khi có kết quả và totalPages > 1 -->
+                <div th:if="${totalPages > 1 and !#lists.isEmpty(ListStudents)}" class="mt-6 flex justify-center gap-2">
                     <a th:each="i : ${#numbers.sequence(1, totalPages)}"
                     th:href="@{|/students?page=${i}&size=${size}&search=${keyword}|}"
                     th:text="${i}"
@@ -175,7 +217,7 @@
                         <!-- Giới Tính -->
                         <div>
                             <label for="gioiTinh" class="block text-sm font-medium text-gray-700 mb-1">Giới Tính</label>
-                            <select id="gioiTinh" name="gioiTinh" class="w-full border...">
+                            <select id="gioiTinh" name="gioiTinh" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                                 <option value="true" th:selected="${editStudent?.gioiTinh == true}">Nam</option>
                                 <option value="false" th:selected="${editStudent?.gioiTinh == false}">Nữ</option>
                             </select>
@@ -183,9 +225,12 @@
                         
                         <!-- Số ĐT -->
                         <div>
-                            <label for="soDT" class="block text-sm font-medium text-gray-700 mb-1">Số ĐT</label>
+                            <label for="soDT" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
                             <input type="text" id="soDT" th:field="*{soDT}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                                   pattern="^0\d{9}$"
+                                   title="Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số"
+                                   maxlength="10"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                         
                         <!-- Địa Chỉ -->
@@ -292,6 +337,70 @@
             if (cancelBtn) {
                 cancelBtn.addEventListener("click", function () {
                     modal.classList.add("hidden");
+                });
+            }
+
+            // Auto-uppercase cho mã SV
+            const maSVInput = document.getElementById("maSV");
+            if (maSVInput) {
+                maSVInput.addEventListener("input", function (e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            }
+
+            // Auto-uppercase cho mã Lớp
+            const maLopInput = document.getElementById("maLop");
+            if (maLopInput) {
+                maLopInput.addEventListener("input", function (e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            }
+
+            // Auto-uppercase cho mã TK
+            const maTKInput = document.getElementById("maTK");
+            if (maTKInput) {
+                maTKInput.addEventListener("input", function (e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            }
+
+            // Validation cho số điện thoại
+            const soDTInput = document.getElementById("soDT");
+            if (soDTInput) {
+                soDTInput.addEventListener("input", function (e) {
+                    const value = e.target.value;
+                    const phonePattern = /^0\d{9}$/;
+                    
+                    // Chỉ cho phép nhập số
+                    e.target.value = value.replace(/[^0-9]/g, '');
+                    
+                    // Kiểm tra pattern và hiển thị thông báo
+                    if (e.target.value.length > 0) {
+                        if (!phonePattern.test(e.target.value)) {
+                            e.target.setCustomValidity("Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số");
+                            e.target.classList.add("border-red-500");
+                            e.target.classList.remove("border-gray-300");
+                        } else {
+                            e.target.setCustomValidity("");
+                            e.target.classList.remove("border-red-500");
+                            e.target.classList.add("border-gray-300");
+                        }
+                    } else {
+                        e.target.setCustomValidity("");
+                        e.target.classList.remove("border-red-500");
+                        e.target.classList.add("border-gray-300");
+                    }
+                });
+                
+                // Validation khi blur (rời khỏi trường)
+                soDTInput.addEventListener("blur", function (e) {
+                    const value = e.target.value;
+                    const phonePattern = /^0\d{9}$/;
+                    
+                    if (value.length > 0 && !phonePattern.test(value)) {
+                        e.target.setCustomValidity("Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số");
+                        e.target.reportValidity();
+                    }
                 });
             }
         });

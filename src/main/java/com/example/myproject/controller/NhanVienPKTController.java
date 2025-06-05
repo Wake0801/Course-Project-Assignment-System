@@ -27,16 +27,32 @@ public class NhanVienPKTController {
         @RequestParam(value = "size", defaultValue = "30") int size,
         Model model
     ) {
+        // Đảm bảo page >= 1
+        if (page < 1) {
+            page = 1;
+        }
+        
         Page<NhanVienPKT> employeePage = employeeService.findNhanViens(keyword, page, size);
+        
+        // Nếu page vượt quá totalPages và có kết quả, redirect về trang cuối
+        if (employeePage.getTotalPages() > 0 && page > employeePage.getTotalPages()) {
+            return "redirect:/employees?page=" + employeePage.getTotalPages() + 
+                   "&size=" + size + 
+                   (keyword != null ? "&search=" + keyword : "");
+        }
+        
         if (!model.containsAttribute("editEmployee")) {
             model.addAttribute("editEmployee", new NhanVienPKT());
             model.addAttribute("showEditModal", false);
         }
+        
         model.addAttribute("ListEmployees", employeePage.getContent());
-        model.addAttribute("currentPage", page);
+        // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
+        model.addAttribute("currentPage", employeePage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", employeePage.getTotalPages());
         model.addAttribute("keyword", keyword);
         model.addAttribute("size", size);
+        
         return "admin/manageEmployee";
     }
 
@@ -44,6 +60,12 @@ public class NhanVienPKTController {
     public String saveEmployee(@Valid @ModelAttribute("editEmployee") NhanVienPKT employee,
                             BindingResult result,
                             RedirectAttributes redirectAttributes) {
+        
+        // Chuyển mã NV thành uppercase
+        if (employee.getMaNV() != null) {
+            employee.setMaNV(employee.getMaNV().toUpperCase());
+        }
+        
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editEmployee", result);
             redirectAttributes.addFlashAttribute("editEmployee", employee);
@@ -51,13 +73,28 @@ public class NhanVienPKTController {
             redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/employees";
         }
+        
         try {
+            boolean isEdit = employee.getMaNV() != null && !employee.getMaNV().isEmpty() && employeeService.findById(employee.getMaNV()).isPresent();
             employeeService.save(employee);
-            redirectAttributes.addFlashAttribute("success", "Lưu nhân viên thành công!");
+            
+            if (isEdit) {
+                redirectAttributes.addFlashAttribute("success", "Cập nhật nhân viên thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Thêm nhân viên thành công!");
+            }
         } catch (DataIntegrityViolationException e) {
-             redirectAttributes.addFlashAttribute("error", "Lỗi: Mã NV hoặc Mã TK đã tồn tại.");
+            String errorMessage = "Lỗi: ";
+            if (e.getMessage().contains("MaNV")) {
+                errorMessage += "Mã NV đã tồn tại.";
+            } else if (e.getMessage().contains("MaTK")) {
+                errorMessage += "Mã TK đã tồn tại hoặc không hợp lệ.";
+            } else {
+                errorMessage += "Dữ liệu bị trùng lặp hoặc không hợp lệ.";
+            }
+            redirectAttributes.addFlashAttribute("error", errorMessage);
              redirectAttributes.addFlashAttribute("editEmployee", employee);
-             redirectAttributes.addFlashAttribute("showEditModal", true);
+            redirectAttributes.addFlashAttribute("showEditModal", true);
         } 
         catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -69,6 +106,7 @@ public class NhanVienPKTController {
             redirectAttributes.addFlashAttribute("editEmployee", employee);
             redirectAttributes.addFlashAttribute("showEditModal", true);
         }
+        
         return "redirect:/employees";
     }
 
@@ -76,13 +114,13 @@ public class NhanVienPKTController {
     public String deleteEmployee(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         try {
             employeeService.deleteById(id);
-            redirectAttributes.addFlashAttribute("success", "Đã xóa nhân viên thành công");
+            redirectAttributes.addFlashAttribute("success", "Xóa nhân viên thành công!");
         } catch (EmptyResultDataAccessException e) {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên với ID: " + id);
-        } catch (DataIntegrityViolationException e){
-             redirectAttributes.addFlashAttribute("error", "Không thể xóa nhân viên này do có dữ liệu liên quan.");
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên với mã: " + id);
+        } catch (DataIntegrityViolationException e) {
+            redirectAttributes.addFlashAttribute("error", "Không thể xóa nhân viên này vì đang được sử dụng trong hệ thống!");
         } catch (Exception e) {
-             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa nhân viên: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi xóa nhân viên: " + e.getMessage());
         }
         return "redirect:/employees";
     }
@@ -93,7 +131,7 @@ public class NhanVienPKTController {
                 .map(nv -> {
                     redirectAttributes.addFlashAttribute("editEmployee", nv);
                     redirectAttributes.addFlashAttribute("showEditModal", true);
-                    redirectAttributes.addFlashAttribute("success", "Đã tải thông tin nhân viên. Vui lòng thực hiện chỉnh sửa.");
+                    // Bỏ thông báo success không cần thiết khi mở form sửa
                     return "redirect:/employees";
                 })
                 .orElseGet(() -> {
