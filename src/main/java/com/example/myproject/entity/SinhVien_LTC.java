@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "SinhVien_LTC")
+@IdClass(SinhVien_LTCPK.class)
 public class SinhVien_LTC {
     @Id
     @ManyToOne
@@ -17,7 +18,7 @@ public class SinhVien_LTC {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "MaLTC", nullable = false)
+    @JoinColumn(name = "MaLopTC", nullable = false)
     private LopTinChi lopTinChi;
 
 }

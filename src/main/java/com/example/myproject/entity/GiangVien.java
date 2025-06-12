@@ -39,4 +39,8 @@ public class GiangVien {
     @JoinColumn(name = "MaTK", nullable = false)
     private TaiKhoan taiKhoan;
 
+
+    public String getTenGV() {
+        return (ho != null ? ho : "") + " " + (ten != null ? ten : "");
+    }
 }
