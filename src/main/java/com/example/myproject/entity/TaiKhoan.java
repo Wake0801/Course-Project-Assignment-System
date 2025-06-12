@@ -13,7 +13,8 @@ import lombok.Setter;
 @Table(name = "TaiKhoan")
 public class TaiKhoan {
     @Id
-    @Column(name = "MaTK", length = 10)
+    @Column(name = "MaTK")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotBlank(message = "Mã tài khoản không được để trống")
     private String maTK;
 

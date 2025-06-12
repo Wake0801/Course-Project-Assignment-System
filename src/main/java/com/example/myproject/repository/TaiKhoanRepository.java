@@ -1,6 +1,9 @@
 package com.example.myproject.repository;
 
 import com.example.myproject.entity.TaiKhoan;
+
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, String> {
     // Tìm kiếm theo username (không phân biệt hoa thường)
     Page<TaiKhoan> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
-
+    Optional<TaiKhoan> findByUsername(String username);
     // Hoặc tìm kiếm tổng quát hơn
     @Query("SELECT t FROM TaiKhoan t LEFT JOIN t.quyen q " +
            "WHERE LOWER(t.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

@@ -3,6 +3,9 @@ package com.example.myproject.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.example.myproject.compositeKey.SinhVienNhomId;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,14 +15,15 @@ import lombok.Setter;
 @Entity
 @Table(name = "SinhVienNhom")
 public class SinhVienNhom {
-    @Id
+    @EmbeddedId
+    private SinhVienNhomId sinhVienNhomId;
+
     @ManyToOne
-    @JoinColumn(name = "MaSV", nullable = false)
+    @JoinColumn(name = "MaSV", referencedColumnName = "MaSV", insertable = false, updatable = false)
     private SinhVien sinhVien;
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "MaNhom", nullable = false)
+    @JoinColumn(name = "MaNhom", referencedColumnName = "MaNhom", insertable = false, updatable = false)
     private Nhom nhom;
 
     @Column(name = "NgayGiaNhap", nullable = false)

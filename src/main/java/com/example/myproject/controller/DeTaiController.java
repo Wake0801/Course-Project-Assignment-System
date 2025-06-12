@@ -56,7 +56,7 @@ public class DeTaiController {
     }
 
     @GetMapping("/edit/{maDT}")
-    public String showEditTopicForm(@PathVariable String maDT, RedirectAttributes redirectAttributes) {
+    public String showEditTopicForm(@PathVariable int maDT, RedirectAttributes redirectAttributes) {
         try {
             Optional<DeTai> deTaiOpt = deTaiService.findById(maDT);
             if (deTaiOpt.isPresent()) {
@@ -108,7 +108,7 @@ public class DeTaiController {
     }
 
     @GetMapping("/delete/{maDT}")
-    public String deleteTopic(@PathVariable String maDT, RedirectAttributes redirectAttributes) {
+    public String deleteTopic(@PathVariable int maDT, RedirectAttributes redirectAttributes) {
         try {
             deTaiService.deleteById(maDT);
             redirectAttributes.addFlashAttribute("success", "Xóa đề tài thành công!");

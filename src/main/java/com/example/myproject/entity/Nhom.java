@@ -3,6 +3,8 @@ package com.example.myproject.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +19,8 @@ import lombok.Setter;
 public class Nhom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaNhom", length = 10)
-    private String maNhom;
+    @Column(name = "MaNhom")
+    private int maNhom;
 
     @Column(name = "TenNhom", nullable = false, length = 100)
     private String tenNhom;
@@ -28,5 +30,4 @@ public class Nhom {
 
     @Transient
     private long soThanhVienHienTai;
-
 }

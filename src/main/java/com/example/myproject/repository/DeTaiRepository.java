@@ -1,6 +1,8 @@
 package com.example.myproject.repository;
 
 import com.example.myproject.entity.DeTai;
+import com.example.myproject.entity.Nhom;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,10 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DeTaiRepository extends JpaRepository<DeTai, String> {
+public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
     
     @Query("SELECT dt FROM DeTai dt WHERE " +
-           "LOWER(dt.maDT) LIKE %:keyword% OR " +
+           "dt.maDT = :keyword OR " +
            "LOWER(dt.tenDT) LIKE %:keyword% OR " +
            "LOWER(dt.moTa) LIKE %:keyword% OR " +
            "LOWER(dt.lopTinChi.giangVien.ten) LIKE %:keyword% OR " +
@@ -23,7 +25,7 @@ public interface DeTaiRepository extends JpaRepository<DeTai, String> {
            "(:maKhoa IS NULL OR d.lopTinChi.giangVien.khoa.maKhoa = :maKhoa) AND " +
            "(:maGV IS NULL OR d.lopTinChi.giangVien.maGV = :maGV) AND " +
            "(COALESCE(:keyword, '') = '' OR " +
-           "LOWER(d.maDT) LIKE %:keyword% OR " +
+           "d.maDT = :keyword OR " +
            "LOWER(d.tenDT) LIKE %:keyword% OR " +
            "LOWER(d.moTa) LIKE %:keyword% OR " +
            "LOWER(d.lopTinChi.giangVien.ho) LIKE %:keyword% OR " +
@@ -33,6 +35,10 @@ public interface DeTaiRepository extends JpaRepository<DeTai, String> {
                              @Param("keyword") String keyword,
                              Pageable pageable);
 
-    // Page<DeTai> findByFilters(String filterKhoa, String filterGiangVien, Object object, Object object2,
-    //         Pageable pageable);
+    List<DeTai> findByLopTinChi_MaLopTCIn(List<String> maLopTCs);
+    
+    List<DeTai> findByLopTinChi_MaLopTC(String maLopTC);
+
+    @Query("SELECT d.nhom FROM DeTai d WHERE d.maDT = :maDT")
+       Nhom findNhomByDeTaiMaDT(@Param("maDT") int maDT);
 }

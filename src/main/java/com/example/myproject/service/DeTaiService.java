@@ -58,15 +58,12 @@ public class DeTaiService {
         return lopTinChiRepository.findAll();
     }
 
-    public Optional<DeTai> findById(String maDT) {
+    public Optional<DeTai> findById(int maDT) {
         return deTaiRepository.findById(maDT);
     }
 
     public DeTai save(DeTai deTai) {
-        // Kiểm tra mã đề tài
-        if (deTai.getMaDT() == null || deTai.getMaDT().trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã đề tài không được để trống");
-        }
+       
         
         // Kiểm tra tên đề tài
         if (deTai.getTenDT() == null || deTai.getTenDT().trim().isEmpty()) {
@@ -95,7 +92,7 @@ public class DeTaiService {
         return deTaiRepository.save(deTai);
     }
 
-    public void deleteById(String maDT) {
+    public void deleteById(int maDT) {
         deTaiRepository.deleteById(maDT);
     }
 }

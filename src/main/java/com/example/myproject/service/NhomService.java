@@ -32,7 +32,7 @@ public class NhomService {
         return result;
     }
 
-    public Optional<Nhom> findById(String maNhom) {
+    public Optional<Nhom> findById(int maNhom) {
         return nhomRepository.findById(maNhom)
             .map(nhom -> {
                 nhom.setSoThanhVienHienTai(getGroupMemberCount(maNhom));
@@ -40,23 +40,20 @@ public class NhomService {
             });
     }
 
-    public boolean existsById(String maNhom) {
-        return maNhom != null && nhomRepository.existsById(maNhom);
+    public boolean existsById(int maNhom) {
+        return maNhom > 0 && nhomRepository.existsById(maNhom);
     }
 
-    public Long getGroupMemberCount(String maNhom) {
-        return maNhom != null ? nhomRepository.countMembersByMaNhom(maNhom) : 0L;
+    public Long getGroupMemberCount(int maNhom) {
+        return maNhom > 0 ? nhomRepository.countMembersByMaNhom(maNhom) : 0L;
     }
 
     public Nhom save(Nhom nhom) {
         validateNhom(nhom);
         
-        // Nếu đang cập nhật và mã nhóm trống, đây là nhóm mới
-        // Lưu và để database tự tạo mã
         Nhom savedNhom = nhomRepository.save(nhom);
         
-        // Đảm bảo cập nhật số thành viên hiện tại
-        if (savedNhom.getMaNhom() != null) {
+        if (savedNhom.getMaNhom() > 0) {
             savedNhom.setSoThanhVienHienTai(getGroupMemberCount(savedNhom.getMaNhom()));
         }
         
@@ -77,9 +74,8 @@ public class NhomService {
             throw new IllegalArgumentException("Số lượng thành viên tối đa phải lớn hơn 0");
         }
         
-        // Kiểm tra số thành viên hiện tại chỉ khi cập nhật (mã nhóm đã tồn tại)
-        String maNhom = nhom.getMaNhom();
-        if (maNhom != null && !maNhom.trim().isEmpty()) {
+        int maNhom = nhom.getMaNhom();
+        if (maNhom > 0) {
             Long currentMembers = getGroupMemberCount(maNhom);
             if (nhom.getSoLuongTVToiDa() < currentMembers) {
                 throw new IllegalArgumentException("Số lượng thành viên tối đa không thể nhỏ hơn số thành viên hiện tại (" + currentMembers + ")");
@@ -88,10 +84,10 @@ public class NhomService {
     }
 
     private boolean isUpdateMode(Nhom nhom) {
-        return nhom != null && nhom.getMaNhom() != null && !nhom.getMaNhom().trim().isEmpty() && existsById(nhom.getMaNhom());
+        return nhom != null && nhom.getMaNhom() > 0 && existsById(nhom.getMaNhom());
     }
 
-    public void deleteById(String maNhom) {
+    public void deleteById(int maNhom) {
         if (!existsById(maNhom)) {
             throw new RuntimeException("Nhóm không tồn tại!");
         }

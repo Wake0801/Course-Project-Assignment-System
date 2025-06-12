@@ -23,4 +23,5 @@ public interface SinhVienRepository extends JpaRepository<SinhVien, String> {
     Optional<SinhVien> findByTaiKhoan_MaTK(String maTK);
     
     boolean existsByTaiKhoan_MaTK(String maTK);
+
 }

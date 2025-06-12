@@ -1,3 +1,4 @@
+<html lang="zxx" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <th:block th:fragment="headContent">
   <!-- Favicon -->
@@ -13,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- CUSTOM CSS SAU CÙNG -->
   <link rel="stylesheet" th:href="@{/client/css/style.css}"/>
-
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </th:block>
 
 <header th:fragment="header">
@@ -23,30 +24,54 @@
       <a class="navbar-brand" href="home.html">
       <img th:src="@{/client/images/z6425388337729_4b57f431a7c60d62672c90a6b28f44ee.jpg}" alt="" class="img-fluid">
       </a>
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" th:href="@{/client/home}">Trang chủ</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/client/topic}">Quản lý đề tài</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/client/studentgroup}">Quản lý nhóm</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/client/studentlist}">Danh sách sinh viên</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/client/notification}">Thông báo</a></li>
+      <ul class="navbar-nav" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
         
-      </ul>
+        <!-- Hiển thị với mọi người đã đăng nhập -->
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+            <a class="nav-link" th:href="@{/client/public/home}">Trang chủ</a>
+        </li>
+
+        <!-- Chỉ ADMIN và GIẢNG VIÊN thấy -->
+        <li class="nav-item" sec:authorize="hasRole('GIANG_VIEN')">
+            <a class="nav-link" th:href="@{/client/public/topic}">Quản lý đề tài</a>
+        </li>
+
+        <!-- Chỉ GIẢNG VIÊN thấy -->
+        <li class="nav-item" sec:authorize="hasRole('GIANG_VIEN')">
+            <a class="nav-link" th:href="@{/client/gv/studentgroup}">Quản lý nhóm</a>
+        </li>
+
+        <!-- Chỉ GIẢNG VIÊN thấy -->
+        <li class="nav-item" sec:authorize="hasRole('GIANG_VIEN')">
+            <a class="nav-link" th:href="@{/client/gv/studentlist}">Danh sách sinh viên</a>
+        </li>
+
+        <!-- Tất cả người dùng đã đăng nhập -->
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+            <a class="nav-link" th:href="@{/client/public/notification}">Thông báo</a>
+        </li>
+
+        <!-- Chỉ SINH VIÊN thấy -->
+        <li class="nav-item" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/client/sv/deTai}">Đề tài</a>
+        </li>
+
+    </ul>
+
     </div>
-      <!-- Signup-->
-      <!-- <div class="user-info">
-      <img src="images/Sample_User_Icon.png" alt="User">
-      <span>Login</span>
-      </div> -->
-      <!-- Already Signup-->
+
       
       <li class="user-info nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-right:30px">
           <img th:src="@{/client/images/61f75ea9a680def2ed1c6929fe75aeee.jpg}" alt="User">
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" th:href="@{/client/userinfo}">Thông tin cá nhân</a>
+          <a class="dropdown-item" th:href="@{/client/public/userinfo}">Thông tin cá nhân</a>
 
-          <a class="dropdown-item" th:href="@{/other/login}">Đăng xuất</a>
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="dropdown-item">Đăng xuất</button>
+        </form>
+
       </li>
     </div>
   </nav>

@@ -1,5 +1,7 @@
 package com.example.myproject.entity;
 
+import com.example.myproject.compositeKey.SinhVienLTCId;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,14 +12,14 @@ import lombok.Setter;
 @Entity
 @Table(name = "SinhVien_LTC")
 public class SinhVien_LTC {
-    @Id
+    
+    @EmbeddedId
+    private SinhVienLTCId sinhVienLTCId;
     @ManyToOne
-    @JoinColumn(name = "MaSV", nullable = false)
+    @JoinColumn(name = "MaSV", referencedColumnName = "MaSV", insertable = false, updatable = false)
     private SinhVien sinhVien;
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "MaLTC", nullable = false)
+    @JoinColumn(name = "MaLopTC", referencedColumnName = "MaLopTC", insertable = false, updatable = false)
     private LopTinChi lopTinChi;
-
 }

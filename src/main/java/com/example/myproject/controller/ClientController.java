@@ -8,48 +8,45 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/client")
 public class ClientController {
 
-    @GetMapping("/home")
+    @GetMapping("/public/home")
     public String home() {
-        return "client/home";
+        return "client/public/home";
     }
 
-    @GetMapping("/notification")
+    @GetMapping("/public/notification")
     public String notification() {
-        return "client/notification";
+        return "client/public/notification";
     }
 
-    @GetMapping("/password")
+    @GetMapping("/public/password")
     public String password() {
-        return "client/password";
+        return "client/public/password";
     }
 
-    @GetMapping("/service")
+    @GetMapping("/gv/service")
     public String service() {
         return "client/service";
     }
 
-    @GetMapping("/studentgroup")
+    @GetMapping("/gv/studentgroup")
     public String studentGroup() {
-        return "client/studentgroup";
+        return "client/gv/studentgroup";
     }
 
-    @GetMapping("/studentlist")
+    @GetMapping("/gv/studentlist")
     public String studentList() {
-        return "client/studentlist";
+        return "client/gv/studentlist";
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "client/test";
-    }
 
-    @GetMapping("/topic")
+
+    @GetMapping("/public/topic")
     public String topic() {
-        return "client/topic";
+        return "client/public/topic";
     }
 
-    @GetMapping("/userinfo")
+    @GetMapping("/public/userinfo")
     public String userInfo() {
-        return "client/userinfo";
+        return "client/public/userinfo";
     }
 }

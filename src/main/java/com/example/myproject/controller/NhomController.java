@@ -72,7 +72,7 @@ public class NhomController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteGroup(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    public String deleteGroup(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         try {
             nhomService.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Đã xóa nhóm thành công");
@@ -85,7 +85,7 @@ public class NhomController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editGroup(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
+    public String editGroup(@PathVariable("id") int id, RedirectAttributes redirectAttributes) {
         return nhomService.findById(id)
                 .map(nhom -> {
                     redirectAttributes.addFlashAttribute("editNhom", nhom);

@@ -1,6 +1,10 @@
 package com.example.myproject.repository;
 
+import com.example.myproject.entity.DeTai;
 import com.example.myproject.entity.Nhom;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,11 +13,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NhomRepository extends JpaRepository<Nhom, String> {
+public interface NhomRepository extends JpaRepository<Nhom, Integer> {
     
-    @Query("SELECT n FROM Nhom n WHERE " +
-           "LOWER(n.maNhom) LIKE %:keyword% OR " +
-           "LOWER(n.tenNhom) LIKE %:keyword%")
+    @Query("SELECT n FROM Nhom n WHERE LOWER(n.tenNhom) LIKE %:keyword%")
     Page<Nhom> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query(value = "SELECT n.*, " +
@@ -23,5 +25,5 @@ public interface NhomRepository extends JpaRepository<Nhom, String> {
     Page<Nhom> findAllWithMemberCount(Pageable pageable);
 
     @Query("SELECT COUNT(svn) FROM SinhVienNhom svn WHERE svn.nhom.maNhom = :maNhom AND svn.ngayRoiNhom IS NULL")
-    long countMembersByMaNhom(@Param("maNhom") String maNhom);
+    long countMembersByMaNhom(@Param("maNhom") int maNhom);
 }

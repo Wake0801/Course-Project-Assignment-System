@@ -13,8 +13,9 @@ import lombok.Setter;
 @Table(name = "DeTai")
 public class DeTai {
     @Id
-    @Column(name = "MaDT", length = 10)
-    private String maDT;
+    @Column(name = "MaDT")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int maDT;
 
     @Column(name = "TenDT", nullable = false, length = 255)
     private String tenDT;
@@ -30,4 +31,7 @@ public class DeTai {
     @ManyToOne
     @JoinColumn(name = "MaLopTC", nullable = false)
     private LopTinChi lopTinChi;
+    @ManyToOne
+    @JoinColumn(name = "MaNhom")
+    private Nhom nhom;
 }
