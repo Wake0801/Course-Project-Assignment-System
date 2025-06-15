@@ -25,10 +25,8 @@ public class ClientSVController {
                           HttpSession session) {
         
         String maSV = (String) session.getAttribute("maSV");
-        System.out.println(maSV);
         // Lấy danh sách lớp tín chỉ của sinh viên cho combobox
         model.addAttribute("lopTinChis", sinhVienDeTaiService.getLopTinChiBySinhVien(maSV));
-        System.out.println(sinhVienDeTaiService.getLopTinChiBySinhVien(maSV));
         // Lọc đề tài
         model.addAttribute("deTais", sinhVienDeTaiService.filterDeTai(maSV, maLopTC, trangThai));
         
@@ -41,6 +39,6 @@ public class ClientSVController {
                                 Model model) {
         
         model.addAttribute("detail", sinhVienDeTaiService.getDeTaiDetail(maDT, maNhom));
-        return "client/sv/deTaiDetail";
+        return "client/sv/deTai";
     }
 }

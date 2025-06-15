@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import com.example.myproject.entity.GiangVien;
 import com.example.myproject.entity.NhanVienPKT;
 import com.example.myproject.entity.SinhVien;
+import com.example.myproject.entity.TaiKhoan;
 @Component
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -27,20 +28,47 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, 
                                       HttpServletResponse response,
                                       Authentication authentication) throws IOException {
-        try{
+       try {
             HttpSession session = request.getSession();
+            
+            // 1. Kiểm tra principal an toàn
+            if (!(authentication.getPrincipal() instanceof CustomUserDetails)) {
+                throw new IllegalStateException("Principal không phải CustomUserDetails");
+            }
+            
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             
+            // 2. Kiểm tra null cho các đối tượng lồng nhau
+            if (userDetails.getTaiKhoan() == null) {
+                throw new IllegalStateException("Đối tượng TaiKhoan là null");
+            }
+            
+            TaiKhoan taiKhoan = userDetails.getTaiKhoan();
+            
             // Lưu thông tin cơ bản
-            session.setAttribute("maTK", userDetails.getTaiKhoan().getMaTK());
+            session.setAttribute("maTK", taiKhoan.getMaTK());
             session.setAttribute("username", userDetails.getUsername());
-            session.setAttribute("role", userDetails.getTaiKhoan().getLoaiTK());
-            session.setAttribute("maQuyen", userDetails.getTaiKhoan().getQuyen());
-
-            // Lưu thông tin chi tiết theo từng loại tài khoản
-            switch (userDetails.getTaiKhoan().getLoaiTK()) {
+            session.setAttribute("role", taiKhoan.getQuyen().getTenQuyen());
+            
+            // 3. Kiểm tra Quyen
+            if (taiKhoan.getQuyen() == null) {
+                throw new IllegalStateException("Đối tượng Quyen là null");
+            }
+            
+            
+            
+            // 4. Xử lý từng loại tài khoản với kiểm tra nghiêm ngặt
+            Object userDetailObj = userDetails.getUserDetails();
+            if (userDetailObj == null) {
+                throw new IllegalStateException("UserDetails là null");
+            }
+            
+            switch (taiKhoan.getQuyen().getTenQuyen()) {
                 case "SINH_VIEN":
-                    SinhVien sinhVien = (SinhVien) userDetails.getUserDetails();
+                    if (!(userDetailObj instanceof SinhVien)) {
+                        throw new ClassCastException("Kiểu userDetails không phải SinhVien");
+                    }
+                    SinhVien sinhVien = (SinhVien) userDetailObj;
                     session.setAttribute("maSV", sinhVien.getMaSV());
                     session.setAttribute("hoTen", sinhVien.getHo() + " " + sinhVien.getTen());
                     session.setAttribute("email", sinhVien.getEmail());
@@ -49,7 +77,10 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                     break;
                     
                 case "GIANG_VIEN":
-                    GiangVien giangVien = (GiangVien) userDetails.getUserDetails();
+                    if (!(userDetailObj instanceof GiangVien)) {
+                        throw new ClassCastException("Kiểu userDetails không phải GiangVien");
+                    }
+                    GiangVien giangVien = (GiangVien) userDetailObj;
                     session.setAttribute("maGV", giangVien.getMaGV());
                     session.setAttribute("hoTen", giangVien.getHo() + " " + giangVien.getTen());
                     session.setAttribute("email", giangVien.getEmail());
@@ -57,7 +88,10 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                     break;
                     
                 case "NHAN_VIEN":
-                    NhanVienPKT nhanVien = (NhanVienPKT) userDetails.getUserDetails();
+                if (!(userDetailObj instanceof NhanVienPKT)) {
+                        throw new ClassCastException("Kiểu userDetails không phải NhanVien");
+                    }
+                    NhanVienPKT nhanVien = (NhanVienPKT) userDetailObj;
                     session.setAttribute("maNV", nhanVien.getMaNV());
                     session.setAttribute("hoTen", nhanVien.getHo() + " " + nhanVien.getTen());
                     // Thêm các thông tin khác nếu cần
@@ -65,17 +99,22 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             }
 
             // Redirect đến trang phù hợp
+           if (!response.isCommitted()) {
             String targetUrl = determineTargetUrl(authentication);
             redirectStrategy.sendRedirect(request, response, targetUrl);
+        } else {
+            System.out.println("Không thể redirect vì response đã committed");
+        }
         } catch (Exception e) {
-            // Xử lý lỗi và chuyển hướng đến trang mặc định
-            System.err.println("Lỗi xử lý đăng nhập: " + e.getMessage());
-            redirectStrategy.sendRedirect(request, response, "/login") ;
+            System.out.println("Lỗi xử lí đăng nhập "+ e.getMessage());
+            if (!response.isCommitted()) {
+                response.sendRedirect("/login?error=system_error");
+            }
         }}
 
     protected String determineTargetUrl(final Authentication authentication) {
         Map<String, String> roleTargetUrlMap = new HashMap<>();
-        roleTargetUrlMap.put("SINH_VIEN", "/client/public/home"); // Bỏ tiền tố ROLE_
+        roleTargetUrlMap.put("SINH_VIEN", "/client/public/home"); 
         roleTargetUrlMap.put("GIANG_VIEN", "/client/public/home");
         roleTargetUrlMap.put("NHAN_VIEN", "/admin/index");
         roleTargetUrlMap.put("ADMIN", "/admin/index");

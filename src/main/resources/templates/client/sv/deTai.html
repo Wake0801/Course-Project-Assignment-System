@@ -65,7 +65,7 @@
                         <option value="">Tất cả lớp tín chỉ</option>
                         <option th:each="lop : ${lopTinChis}" 
                                 th:value="${lop.maLopTC}" 
-                                th:text="${lop.tenMon + ' - ' + lop.maLopTC}"></option>
+                                th:text="${lop.monHoc.tenMon + ' - ' + lop.maLopTC}"></option>
                     </select>
                 </div>
                 <div>
@@ -91,48 +91,104 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800" th:text="${deTai.tenDT}"></h3>
-                            <p class="text-sm text-gray-500 mt-1" th:text="${deTai.lopTinChi.tenMon + ' - ' + deTai.lopTinChi.maLopTC}"></p>
+                            <p class="text-sm text-gray-500 mt-1" th:text="${deTai.lopTinChi.monHoc.tenMon + ' - ' + deTai.lopTinChi.maLopTC}"></p>
                         </div>
                         <span th:class="${deTai.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}" 
                             class="status-badge">
-                            <span th:text="${deTai.completed ? 'Đã hoàn thành' : 'Đang làm'}"></span>
+                            <span th:text="${deTai.completed ? 'Đã hoàn thành' : 'Đang thực hiện'}"></span>
                         </span>
                     </div>
                     
                     <div class="mt-4 pt-4 border-t border-gray-100">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm text-gray-500">Nhóm:</p>
-                                <p class="text-sm font-medium" th:text="${deTai.nhom.tenNhom}"></p>
+                                <p class="text-sm text-gray-500">Nhóm: <span class="text-sm font-medium" th:text="${deTai.nhom.tenNhom}"></span></p>
+                                
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500">Điểm hiện tại:</p>
-                                <p class="grade" th:text="${deTai.diemTrungBinh} + '/10'"></p>
+                                <p class="text-sm text-gray-500">Điểm trung bình hiện tại:</p>
+                                <p class="grade" th:text="${deTai.diemTrungBinh != null ? deTai.diemTrungBinh + '/10' : 'Chưa có điểm'}"></p>
+
                             </div>
                         </div>
                     </div>
                     
                     <div class="mt-5">
-                        <a th:href="@{/client/sv/deTai/detail?maDT={maDT}&maNhom={maNhom}(maDT=${deTai.maDT},maNhom=${deTai.nhom.maNhom})}" 
+                        <a th:href="@{/client/sv/deTai/detail(maDT=${deTai.maDT}, maNhom=${deTai.nhom.maNhom})}"
                         class="view-detail-btn w-full py-2 px-4 border border-blue-500 rounded-md text-blue-600 hover:bg-blue-50 transition flex items-center justify-center">
                             <i class="fas fa-info-circle mr-2"></i> Xem chi tiết
                         </a>
+                    </div>
+                    
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!-- Modal chi tiết từ model 'detail' -->
+    <div th:if="${detail != null}" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="window.location.href='/client/sv/deTai'"></div>
+
+        <div class="modal-container bg-white w-full max-w-4xl mx-4 rounded-lg shadow-xl z-50 overflow-y-auto max-h-screen p-6">
+            <!-- Tiêu đề -->
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-sm text-gray-500" th:text="'Mã đề tài: ' + ${detail.deTai.maDT}"></p>
+                    <h3 class="text-xl font-bold text-gray-800" th:text="${detail.deTai.tenDT}"></h3>
+                </div>
+                <button onclick="window.location.href='/client/sv/deTai'" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Mô tả -->
+            <div class="mb-4">
+                <h4 class="font-semibold text-gray-700 mb-1">Mô tả đề tài</h4>
+                <p class="text-gray-600" th:text="${detail.deTai.moTa}"></p>
+            </div>
+
+            <!-- Nội dung chia 2 cột -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <!-- Cột trái: Nhóm và thành viên -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-2">Nhóm: <span th:text="${detail.nhom.tenNhom}"></span></h4>
+                    <div th:each="member : ${detail.members}" class="bg-gray-50 p-3 rounded mb-2">
+                        <p class="font-medium" th:text="${member.ho + ' ' + member.ten}"></p>
+                        <p class="text-sm text-gray-500" th:text="'MSSV: ' + ${member.maSV}"></p>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Điểm biểu đồ -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-2">Điểm báo cáo</h4>
+                    <div th:each="d : ${detail.diemSo}" class="mb-4">
+                        <p th:if="${d.ngayBaoCao != null}"class="text-sm text-gray-600 font-medium mb-1" th:text="${d.loaiBaoCao.tenLoaiBaoCao} +' - Ngày báo cáo:' + ${#temporals.format(d.ngayBaoCao, 'dd/MM/yyyy')}"></p>
+                        <p th:if="${d.ngayBaoCao == null}"class="text-sm text-gray-600 font-medium mb-1"  th:text="${d.loaiBaoCao.tenLoaiBaoCao}"></p>
+                        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div th:if="${d.diem != null}" 
+                                th:style="'width:' + (${d.diem} * 10) + '%'" 
+                                class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full">
+                            </div>
+                            <div th:if="${d.diem == null}" class="text-sm text-gray-500 mt-1">Chưa có điểm</div>
+                        </div>
+                        <p th:if="${d.diem != null}" class="text-sm text-right text-blue-600 font-semibold mt-1" th:text="${d.diem + '/10'}"></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Project detail modal -->
-    <div id="project-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal()"></div>
-        
-        <div class="modal-container bg-white w-full max-w-4xl mx-4 rounded-lg shadow-xl z-50 overflow-y-auto max-h-screen fade-in" id="modal-content">
-            <!-- Content will be loaded here via JavaScript -->
-        </div>
-    </div>
-    <script>
-        document.getElementById('apply-filters').addEventListener('click', function () {
+
+    
+<script>
+    document.querySelectorAll('.view-detail-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const modalId = this.getAttribute('data-modal-id');
+            document.getElementById(modalId).classList.remove('hidden');
+        });
+    });
+    document.getElementById('apply-filters').addEventListener('click', function () {
         const creditClass = document.getElementById('credit-class').value;
         const status = document.getElementById('status').value;
 
@@ -142,8 +198,9 @@
 
         window.location.href = `/client/sv/deTai?${queryParams.toString()}`;
     });
+</script>
 
-    </script>
+    
 
 <!-- footer Start -->
 <div th:replace="~{client/layout/footer :: footer}"></div>

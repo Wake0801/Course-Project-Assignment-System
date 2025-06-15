@@ -30,22 +30,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         TaiKhoan taiKhoan = taiKhoanRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user"));
         
         Object userDetails = null;
         
-        switch (taiKhoan.getLoaiTK()) {
+        switch (taiKhoan.getQuyen().getTenQuyen()) {
             case "SINH_VIEN":
                 userDetails = sinhVienRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
-                    .orElseThrow(() -> new UsernameNotFoundException("Sinh vien not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy sinh viên"));
                 break;
             case "GIANG_VIEN":
                 userDetails = giangVienRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
-                    .orElseThrow(() -> new UsernameNotFoundException("Giang vien not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy giảng viên"));
                 break;
             case "NHAN_VIEN":
                 userDetails = nhanVienPKTRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
-                    .orElseThrow(() -> new UsernameNotFoundException("Nhan vien not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy nhân viên"));
                 break;
         }
         

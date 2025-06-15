@@ -1,6 +1,7 @@
 package com.example.myproject.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,10 @@ public interface SinhVienNhomRepository extends JpaRepository<SinhVienNhom, Sinh
 
     @Query("SELECT COUNT(sn) > 0 FROM SinhVienNhom sn WHERE sn.sinhVienNhomId.maSV = :maSV AND sn.sinhVienNhomId.maNhom = :maNhom AND sn.ngayRoiNhom IS NULL")
     boolean existsByMaSVAndMaNhom(@Param("maSV") String maSV, @Param("maNhom") int maNhom);
+        boolean existsBySinhVien_MaSVAndNhom_LopTinChi_MaLopTCAndNgayRoiNhomIsNull(String maSV, String maLopTC);
+    
+    @Query("SELECT sn FROM SinhVienNhom sn WHERE sn.sinhVien.maSV = :maSV AND sn.nhom.lopTinChi.maLopTC = :maLopTC AND sn.ngayRoiNhom IS NULL")
+    Optional<SinhVienNhom> findCurrentNhomOfSinhVienInLopTC(@Param("maSV") String maSV, @Param("maLopTC") String maLopTC);
+    @Query("SELECT sn FROM SinhVienNhom sn WHERE sn.nhom.maNhom = :maNhom")
+    List<SinhVienNhom> findByNhom_MaNhom(@Param("maNhom") int maNhom);
 }

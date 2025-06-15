@@ -15,5 +15,5 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class SinhVienNhomId implements Serializable {
     private String maSV;
-    private String maNhom;
+    private int maNhom;
 }

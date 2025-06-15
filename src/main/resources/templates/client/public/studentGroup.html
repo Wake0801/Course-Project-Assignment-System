@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zxx" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Orbitor,business,company,agency,modern,bootstrap4,tech,software">
+  <meta name="author" content="themefisher.com">
+
+  <title>Quản lý nhóm</title>
+  <th:block th:replace="~{client/layout/header :: headContent}"></th:block>
+</head>
+
+<body id="top">
+    <div th:replace="~{client/layout/header :: header}"></div>
+
+<section class="studentlist">
+    <div class="container">
+        <!-- Hiển thị thông báo -->
+        <div th:if="${success != null}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Quản lý nhóm</div>
+            </div>
+            <div class="filter-bar">
+                <form th:action="@{/client/public/studentGroup}" method="get">
+                    <div class="form-group">
+                        <label for="course-select" class="form-label">Lớp tín chỉ</label>
+                        <select id="course-select" name="maLopTC" class="form-control">
+                            <option value="">Chọn lớp tín chỉ</option>
+                            <option th:each="lopTC : ${dsLopTC}" 
+                                    th:value="${lopTC.maLopTC}" 
+                                    th:text="${lopTC.maLopTC + ' - ' + lopTC.monHoc.tenMon}"
+                                    th:selected="${selectedLopTC != null and selectedLopTC == lopTC.maLopTC}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Lọc</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Phần dành cho giảng viên -->
+        <div th:if="${#authorization.expression('hasRole(''GIANG_VIEN'')')}" >
+            <div th:if="${selectedLopTC != null and !daCoNhom}" class="card mt-3" >
+                <div class="card-header">
+                    <div class="card-title">Tùy chọn quản lý nhóm</div>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <h5>Lớp tín chỉ chưa có nhóm</h5>
+
+                        <!-- 2 nút điều khiển -->
+                        <div class="d-flex gap-3 mb-3">
+                            <button class="btn btn-primary" onclick="showForm('randomGroupForm')">Chia nhóm ngẫu nhiên</button>
+                            <button class="btn btn-success" onclick="showForm('registrationForm')">Tạo form đăng ký nhóm</button>
+                        </div>
+
+                        <!-- Form chia nhóm ngẫu nhiên -->
+                        <div id="randomGroupForm" class="card p-3 mb-3" style="display: none;">
+                            <form th:action="@{/client/public/studentGroup/taoNhomNgauNhien}" method="post">
+                                <input type="hidden" name="maLopTC" th:value="${selectedLopTC}">
+                                <div class="form-group">
+                                    <label>Số nhóm</label>
+                                    <input type="number" name="soNhom" class="form-control" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số lượng thành viên tối đa</label>
+                                    <input type="number" name="soLuongTVToiDa" class="form-control" min="2" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2">Chia nhóm ngẫu nhiên</button>
+                            </form>
+                        </div>
+
+                        <!-- Form tạo form đăng ký -->
+                        <div id="registrationForm" class="card p-3 mb-3" style="display: none;">
+                            <form th:action="@{/client/public/studentGroup/taoFormDangKy}" method="post">
+                                <input type="hidden" name="maLopTC" th:value="${selectedLopTC}">
+                                <div class="form-group">
+                                    <label>Số nhóm</label>
+                                    <input type="number" name="soNhom" class="form-control" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số lượng thành viên tối đa</label>
+                                    <input type="number" name="soLuongTVToiDa" class="form-control" min="2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày hết hạn đăng ký</label>
+                                    <input type="date" name="ngayHetHan" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-success mt-2">Tạo form đăng ký nhóm</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách nhóm -->
+        <div th:if="${selectedLopTC != null and daCoNhom}" class="card mt-3">
+            <div class="card-header">
+                <div class="card-title">Danh sách nhóm</div>
+            </div>
+            <div class="card-body">
+                <div th:each="nhom : ${dsNhom}" class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 th:text="${nhom.tenNhom}"></h5>
+                        <div>
+                            <span class="badge bg-secondary" 
+                                th:text="'Số lượng: ' + ${nhom.soThanhVienHienTai} + '/' + ${nhom.soLuongTVToiDa}"></span>
+                            <span th:if="${nhom.ngayDongDangKyNhom != null}" 
+                                class="badge ms-2" 
+                                th:classappend="${nhom.ngayDongDangKyNhom.isBefore(T(java.time.LocalDate).now()) ? 'bg-danger' : 'bg-success'}"
+                                th:text="'Hạn đăng ký: ' + ${#temporals.format(nhom.ngayDongDangKyNhom, 'dd/MM/yyyy')}">
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Danh sách thành viên -->
+                    <ul class="list-group mt-2">
+                        <li th:each="sv : ${nhom.thanhVien}" 
+                            th:if="${sv.ngayRoiNhom == null}"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span th:text="${sv.sinhVien.maSV + ' - ' + sv.sinhVien.ho + ' ' + sv.sinhVien.ten}"></span>
+                            <small th:text="'Ngày vào: ' + ${#temporals.format(sv.ngayGiaNhap, 'dd/MM/yyyy')}"></small>
+                        </li>
+                    </ul>
+                    
+                    <!-- Nút đăng ký cho sinh viên -->
+                    <div th:if="${#authorization.expression('hasRole(''SINH_VIEN'')') and !daThamGiaNhom and (nhom.ngayDongDangKyNhom == null or nhom.ngayDongDangKyNhom.isAfter(T(java.time.LocalDate).now())) and nhom.soThanhVienHienTai < nhom.soLuongTVToiDa}"
+                         class="mt-2">
+                        <form th:action="@{/client/public/studentGroup/dangKyNhom}" method="post">
+                            <input type="hidden" name="maNhom" th:value="${nhom.maNhom}">
+                            <input type="hidden" name="maLopTC" th:value="${selectedLopTC}">
+                            <button type="submit" class="btn btn-sm btn-success">Đăng ký vào nhóm này</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Nút rời nhóm cho sinh viên -->
+                    <div th:if="${#authorization.expression('hasRole(''SINH_VIEN'')') and currentNhom != null and currentNhom.maNhom == nhom.maNhom and (nhom.ngayDongDangKyNhom == null or nhom.ngayDongDangKyNhom.isAfter(T(java.time.LocalDate).now()))}"
+                         class="mt-2">
+                        <form th:action="@{/client/public/studentGroup/roiNhom}" method="post">
+                            <input type="hidden" name="maNhom" th:value="${nhom.maNhom}">
+                            <input type="hidden" name="maLopTC" th:value="${selectedLopTC}">
+                            <button type="submit" class="btn btn-sm btn-danger">Rời nhóm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thông báo khi chưa chọn lớp tín chỉ -->
+        <div th:if="${selectedLopTC == null}" class="card mt-3">
+            <div class="card-body text-center">
+                <p>Vui lòng chọn lớp tín chỉ để xem danh sách nhóm</p>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function showForm(formId) {
+        // Ẩn cả 2 form trước
+        document.getElementById("randomGroupForm").style.display = "none";
+        document.getElementById("registrationForm").style.display = "none";
+
+        // Hiện form được chọn
+        document.getElementById(formId).style.display = "block";
+    }
+</script>
+<!-- footer Start -->
+<div th:replace="~{client/layout/footer :: footer}"></div>
+<th:block th:replace="~{client/layout/footer :: scriptContent}"></th:block>
+</body>
+</html>

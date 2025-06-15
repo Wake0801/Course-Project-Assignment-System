@@ -1,5 +1,7 @@
 package com.example.myproject.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -30,4 +32,12 @@ public class Nhom {
 
     @Transient
     private long soThanhVienHienTai;
+    @ManyToOne
+    @JoinColumn(name = "MaLopTC", nullable = false)
+    private LopTinChi lopTinChi;
+    @Column(name = "NgayDongDangKyNhom")
+    private LocalDate ngayDongDangKyNhom;
+
+    @Column(name = "NgayLapNhom", nullable = false)
+    private LocalDate ngayLapNhom;
 }

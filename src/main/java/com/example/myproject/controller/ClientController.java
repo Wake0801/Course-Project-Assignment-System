@@ -28,10 +28,6 @@ public class ClientController {
         return "client/service";
     }
 
-    @GetMapping("/gv/studentgroup")
-    public String studentGroup() {
-        return "client/gv/studentgroup";
-    }
 
     @GetMapping("/gv/studentlist")
     public String studentList() {

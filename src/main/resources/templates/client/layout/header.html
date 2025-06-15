@@ -38,9 +38,11 @@
 
         <!-- Chỉ GIẢNG VIÊN thấy -->
         <li class="nav-item" sec:authorize="hasRole('GIANG_VIEN')">
-            <a class="nav-link" th:href="@{/client/gv/studentgroup}">Quản lý nhóm</a>
+            <a class="nav-link" th:href="@{/client/public/studentGroup}">Quản lý nhóm</a>
         </li>
-
+        <li class="nav-item" sec:authorize="hasRole('SINH_VIEN')">
+            <a class="nav-link" th:href="@{/client/public/studentGroup}">Nhóm</a>
+        </li>
         <!-- Chỉ GIẢNG VIÊN thấy -->
         <li class="nav-item" sec:authorize="hasRole('GIANG_VIEN')">
             <a class="nav-link" th:href="@{/client/gv/studentlist}">Danh sách sinh viên</a>

@@ -1,7 +1,9 @@
 package com.example.myproject.repository;
 
+import com.example.myproject.compositeKey.SinhVienNhomId;
 import com.example.myproject.entity.DeTai;
 import com.example.myproject.entity.Nhom;
+import com.example.myproject.entity.SinhVienNhom;
 
 import java.util.List;
 
@@ -26,4 +28,9 @@ public interface NhomRepository extends JpaRepository<Nhom, Integer> {
 
     @Query("SELECT COUNT(svn) FROM SinhVienNhom svn WHERE svn.nhom.maNhom = :maNhom AND svn.ngayRoiNhom IS NULL")
     long countMembersByMaNhom(@Param("maNhom") int maNhom);
+     List<Nhom> findByLopTinChi_MaLopTC(String maLopTC);
+
+    
+    @Query("SELECT COUNT(sv) FROM SinhVienNhom sv WHERE sv.nhom.maNhom = :maNhom AND sv.ngayRoiNhom IS NULL")
+    int countCurrentMembersInNhom(@Param("maNhom") int maNhom);
 }

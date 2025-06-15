@@ -14,7 +14,12 @@ public class LoaiBaoCaoLopTC {
 
     @EmbeddedId
     private LoaiBaoCaoLopTCId id;
-
+    @ManyToOne
+    @JoinColumn(name = "MaLoaiBaoCao", referencedColumnName = "MaLoaiBaoCao", insertable = false, updatable = false)
+    private LoaiBaoCao loaiBaoCao;
+    @ManyToOne
+    @JoinColumn(name = "MaLopTC", referencedColumnName = "MaLopTC", insertable = false, updatable = false)
+    private LopTinChi maLopTC;
     private Double heSoDiem;
 }
 

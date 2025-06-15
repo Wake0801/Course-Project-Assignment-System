@@ -1,5 +1,7 @@
 package com.example.myproject.entity;
 
+import java.util.Date;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +27,8 @@ public class LopTinChi {
     @JoinColumn(name = "MaGV", nullable = false)
     private GiangVien giangVien;
     
+    @Column(name="NgayMoLop")
+    private Date ngayMoLop ;
     /**
      * Phương thức tự động tạo tên lớp tín chỉ từ mã và tên môn học
      * @return Tên lớp tín chỉ được tạo động
