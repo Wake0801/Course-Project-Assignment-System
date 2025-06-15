@@ -1,6 +1,7 @@
 package com.example.myproject.entity;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "SinhVienNhom")
+@IdClass(SinhVienNhom.PK.class)
 public class SinhVienNhom {
     @Id
     @ManyToOne
@@ -29,4 +31,22 @@ public class SinhVienNhom {
     @Temporal(TemporalType.DATE)
     private Date ngayRoiNhom;
 
+    @Getter
+    @Setter
+    public static class PK implements Serializable {
+        private String sinhVien;
+        private Integer nhom;
+        // equals & hashCode
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof PK)) return false;
+            PK pk = (PK) o;
+            return sinhVien.equals(pk.sinhVien) && nhom.equals(pk.nhom);
+        }
+        @Override
+        public int hashCode() {
+            return sinhVien.hashCode() + nhom.hashCode();
+        }
+    }
 }

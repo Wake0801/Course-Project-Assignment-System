@@ -52,14 +52,14 @@
                                 <option value="">Giảng viên</option>
                                 <option th:each="gv : ${listGiangVien}" th:value="${gv.maGV}" th:text="${gv.maGV + ' - ' + gv.ho + ' ' + gv.ten}" th:selected="${gv.maGV == filterMaGV}"></option>
                             </select>
+                            <select name="sortNgayLap" class="border rounded-md px-2 py-2" th:value="${sortNgayLap}">
+                                <option value="desc" th:selected="${sortNgayLap == 'desc'}">Ngày lập mới nhất</option>
+                                <option value="asc" th:selected="${sortNgayLap == 'asc'}">Ngày lập cũ nhất</option>
+                            </select>
                             <select name="trangThai" class="border rounded-md px-2 py-2" th:value="${filterTrangThai}">
                                 <option value="">Trạng thái</option>
                                 <option value="true" th:selected="${filterTrangThai == true}">Mở</option>
                                 <option value="false" th:selected="${filterTrangThai == false}">Đóng</option>
-                            </select>
-                            <select name="sortNgayLap" class="border rounded-md px-2 py-2" th:value="${sortNgayLap}">
-                                <option value="desc" th:selected="${sortNgayLap == 'desc'}">Ngày lập mới nhất</option>
-                                <option value="asc" th:selected="${sortNgayLap == 'asc'}">Ngày lập cũ nhất</option>
                             </select>
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Lọc</button>
                             <button type="button" onclick="resetLTCFilter()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-300 transition">Làm mới</button>
@@ -73,7 +73,6 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã lớp TC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã môn</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                             </tr>
                         </thead>
@@ -81,7 +80,6 @@
                             <tr th:each="ltc,iterStat : ${ListLTC}" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${ltc.maLopTC}"></td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${ltc.maMon}"></td>
-                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${ltc.trangThai ? 'Mở' : 'Đóng'}"></td>
                                 <td class="px-6 py-4 text-right text-sm font-medium flex gap-2 justify-end">
                                     <button type="button"
                                         class="inline-flex items-center gap-1 px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 transition"
@@ -203,11 +201,36 @@
                         </div>
                         <div>
                             <label for="trangThai" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                            <select id="trangThai" name="trangThai" th:value="${editLTC?.trangThai}" required
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
-                                <option th:value="true" th:selected="${editLTC?.trangThai == true}">Mở</option>
-                                <option th:value="false" th:selected="${editLTC?.trangThai == false}">Đóng</option>
+                            <select id="trangThai" name="trangThai"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                                    style="display:none;">
+                                <option value="true" th:selected="${editLTC?.trangThai == true}">Mở</option>
+                                <option value="false" th:selected="${editLTC?.trangThai == false}">Đóng</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hệ số điểm các loại báo cáo</label>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 border">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Loại báo cáo</th>
+                                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Hệ số điểm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="lbc : ${listLoaiBaoCao}">
+                                            <td class="px-2 py-1" th:text="${lbc.tenLoaiBaoCao}"></td>
+                                            <td class="px-2 py-1">
+                                                <input type="number" step="0.01" min="0" max="1"
+                                                       th:name="'heSoDiem_' + ${lbc.maLoaiBaoCao}"
+                                                       th:value="${#lists.contains(#ids, lbc.maLoaiBaoCao) ? #maps.get(editHeSoDiemMap, lbc.maLoaiBaoCao) : ''}"
+                                                       class="border rounded px-2 py-1 w-24" required />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </form>
                     <div class="flex justify-end border-t px-4 md:px-6 py-3 md:py-4 gap-2 md:gap-3">
@@ -313,10 +336,27 @@
                             <dd id="detailTrangThai" class="text-gray-900"></dd>
                         </div>
                         <div class="py-2 flex justify-between">
-                            <dt class="font-medium text-gray-700">Ngày lập</dt>
+                            <dt class="font-medium text-gray-700" id="detailNgayLapLabel">Ngày lập</dt>
                             <dd id="detailNgayLap" class="text-gray-900"></dd>
                         </div>
                     </dl>
+                    <!-- Bảng hệ số điểm các loại báo cáo -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hệ số điểm các loại báo cáo</label>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 border">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Loại báo cáo</th>
+                                        <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Hệ số điểm</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailHeSoDiemBody">
+                                    <!-- JS sẽ render -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -348,14 +388,12 @@
                     ltcForm.hocKi.value = "";
                     ltcForm.nienKhoa.value = "";
                     // Trạng thái luôn là mở khi thêm mới
-                    if (ltcForm.trangThai) ltcForm.trangThai.value = "true";
+                    ltcForm.trangThai.value = "true";
+                    // Ẩn trường trạng thái khi thêm mới
+                    ltcForm.trangThai.style.display = "none";
                     modalTitle.textContent = "Thêm lớp tín chỉ";
                     submitBtnText.textContent = "Thêm mới";
                     ltcForm.setAttribute("action", "/ltc/save");
-                    // Ẩn trường trạng thái khi thêm mới
-                    document.querySelectorAll('#ltcForm [name="trangThai"]').forEach(el => {
-                        if (el.type === "hidden") el.value = "true";
-                    });
                     modal.classList.remove("hidden");
                 });
             }
@@ -378,14 +416,12 @@
                             ltcForm.soLuongToiThieu.value = data.soLuongToiThieu;
                             ltcForm.hocKi.value = data.hocKi;
                             ltcForm.nienKhoa.value = data.nienKhoa;
-                            ltcForm.trangThai.value = data.trangThai;
+                            ltcForm.trangThai.value = data.trangThai ? "true" : "false";
+                            // Hiện trường trạng thái khi sửa
+                            ltcForm.trangThai.style.display = "";
                             modalTitle.textContent = "Sửa thông tin lớp tín chỉ";
                             submitBtnText.textContent = "Cập nhật";
                             ltcForm.setAttribute("action", "/ltc/save");
-                            // Hiện trường trạng thái khi sửa
-                            document.querySelectorAll('#ltcForm [name="trangThai"]').forEach(el => {
-                                if (el.type === "hidden") el.type = "select-one";
-                            });
                             modal.classList.remove("hidden");
                         })
                         .catch(() => alert("Không thể lấy thông tin lớp tín chỉ!"));
@@ -582,6 +618,29 @@
                     document.getElementById('detailNienKhoa').textContent = data.nienKhoa ?? '';
                     document.getElementById('detailTrangThai').textContent = data.trangThai ? 'Mở' : 'Đóng';
                     document.getElementById('detailNgayLap').textContent = data.ngayLap ? data.ngayLap : '';
+                    // Đổi nhãn ngày lập thành ngày mở/ngày đóng dựa vào trạng thái
+                    const label = document.getElementById('detailNgayLapLabel');
+                    if (data.trangThai) {
+                        label.textContent = 'Ngày mở';
+                    } else {
+                        label.textContent = 'Ngày đóng';
+                    }
+                    // Lấy hệ số điểm các loại báo cáo
+                    fetch(`/ltc/${maLTC}/hesodiem`)
+                        .then(res => res.json())
+                        .then(list => {
+                            const tbody = document.getElementById('detailHeSoDiemBody');
+                            if (Array.isArray(list) && list.length > 0) {
+                                tbody.innerHTML = list.map(item =>
+                                    `<tr>
+                                        <td class="px-2 py-1">${item.tenLoaiBaoCao || item.maLoaiBaoCao}</td>
+                                        <td class="px-2 py-1">${item.heSoDiem}</td>
+                                </tr>`
+                                ).join('');
+                            } else {
+                                tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-500">Không có dữ liệu</td></tr>';
+                            }
+                        });
                     document.getElementById('ltcDetailModal').classList.remove('hidden');
                 })
                 .catch(() => alert('Không thể lấy thông tin chi tiết lớp tín chỉ!'));

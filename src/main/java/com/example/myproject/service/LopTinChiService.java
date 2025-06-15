@@ -71,4 +71,8 @@ public class LopTinChiService {
                 .sorted()
                 .collect(Collectors.toList());
     }
+
+    public List<LopTinChi> getAll() {
+        return lopTinChiRepository.findAll();
+    }
 }

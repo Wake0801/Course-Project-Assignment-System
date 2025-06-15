@@ -1,12 +1,10 @@
 package com.example.myproject.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -14,13 +12,26 @@ import lombok.Setter;
 @Table(name = "Nhom")
 public class Nhom {
     @Id
-    @Column(name = "MaNhom", length = 10)
-    private String maNhom;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "MaNhom")
+    private Integer maNhom;
 
-    @Column(name = "TenNhom", nullable = false, length = 100)
+    @Column(name = "TenNhom", nullable = false, length = 50)
     private String tenNhom;
 
     @Column(name = "SoLuongTVToiDa", nullable = false)
-    private int soLuongTVToiDa;
+    private Integer soLuongTVToiDa;
 
+    @Column(name = "MaLopTC", length = 10, nullable = false)
+    private String maLopTC;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "NgayDongDangKyNhom")
+    @Temporal(TemporalType.DATE)
+    private Date ngayDongDangKyNhom;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "NgayLapNhom")
+    @Temporal(TemporalType.DATE)
+    private Date ngayLapNhom;
 }

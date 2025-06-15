@@ -37,7 +37,7 @@ public class LopTinChi {
     @Column(name = "TrangThai", nullable = false)
     private boolean trangThai;
 
-    @Column(name = "NgayLap", nullable = false)
+    @Column(name = "NgayMoLop", nullable = false)
     private LocalDateTime ngayLap;
 
     // Lombok @Getter/@Setter sẽ tự sinh getTrangThai/setTrangThai

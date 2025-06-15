@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý nhóm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        .layout { display: flex; min-height: calc(100vh - 5rem); margin-top: 5rem; position: relative; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-2 md:p-4">
+            <div class="container mx-auto px-2 md:px-4 py-4 md:py-8 bg-white rounded-lg shadow-sm max-w-full">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-8 text-center">Quản lý nhóm</h1>
+                <!-- Thông báo -->
+                <div th:if="${message != null}" class="mb-4 p-3 rounded bg-green-100 text-green-800 border border-green-200" th:text="${message}"></div>
+                <div th:if="${error != null}" class="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-200" th:text="${error}"></div>
+                <!-- Controls section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-2 md:gap-4">
+                    <button id="addGroupBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2 text-sm md:text-base">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm nhóm</span>
+                    </button>
+                    <div class="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
+                        <form th:action="@{/group}" method="get" class="flex flex-wrap gap-2 items-center">
+                            <select name="keyword" class="border rounded-md px-2 py-2" required>
+                                <option value="">-- Chọn mã lớp TC --</option>
+                                <option th:each="ltc : ${listLopTC}"
+                                        th:value="${ltc.maLopTC}"
+                                        th:text="${ltc.maLopTC + ' - ' + ltc.maMon}"
+                                        th:selected="${keyword == ltc.maLopTC}">
+                                </option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Lọc</button>
+                            <button type="button" onclick="resetGroupFilter()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-300 transition">Làm mới</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Table container -->
+                <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200 max-w-full">
+                    <table class="min-w-[600px] w-full text-xs md:text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã nhóm</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên nhóm</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số lượng tối đa</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã lớp TC</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày đóng ĐK</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày lập nhóm</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="nhom,iterStat : ${listNhom}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${nhom.maNhom}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${nhom.tenNhom}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${nhom.soLuongTVToiDa}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${nhom.maLopTC}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${#dates.format(nhom.ngayDongDangKyNhom, 'yyyy-MM-dd')}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${#dates.format(nhom.ngayLapNhom, 'yyyy-MM-dd')}"></td>
+                                <td class="px-6 py-4 text-right text-sm font-medium flex gap-2 justify-end">
+                                    <button type="button"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 transition"
+                                        th:attr="data-manhom=${nhom.maNhom}"
+                                        title="Xem danh sách sinh viên"
+                                        onclick="showGroupStudentList(this)">
+                                        <i class="fas fa-users"></i>
+                                        <span class="hidden md:inline">DS SV</span>
+                                    </button>
+                                    <a th:href="@{'/group/edit/' + ${nhom.maNhom}}"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300 transition"
+                                        title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="hidden md:inline">Sửa</span>
+                                    </a>
+                                    <a th:href="@{'/group/delete/' + ${nhom.maNhom}}"
+                                        onclick="return confirm('Bạn chắc chắn muốn xóa?')"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                                        title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                        <span class="hidden md:inline">Xóa</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="mt-4 md:mt-6 flex justify-center gap-2">
+                    <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                       th:href="@{|/group?page=${i}&size=${size}&keyword=${keyword}|}"
+                       th:text="${i}"
+                       th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Modal for Add/Edit Group -->
+        <div id="groupModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-[95vw] max-w-lg mx-auto max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-4 md:px-6 py-3 md:py-4">
+                    <h3 id="groupModalTitle" class="text-lg md:text-xl font-semibold text-gray-800">Thêm nhóm</h3>
+                    <button id="closeGroupModal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-6 overflow-y-auto">
+                    <form id="groupForm" th:action="@{/group/save}" th:object="${editNhom}" method="post" class="grid grid-cols-1 gap-3">
+                        <input type="hidden" id="maNhom" name="maNhom" th:if="${editNhom != null}" th:value="${editNhom?.maNhom}" />
+                        <div>
+                            <label for="tenNhom" class="block text-sm font-medium text-gray-700 mb-1">Tên nhóm</label>
+                            <input type="text" id="tenNhom" name="tenNhom" th:value="${editNhom?.tenNhom}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="soLuongTVToiDa" class="block text-sm font-medium text-gray-700 mb-1">Số lượng thành viên tối đa</label>
+                            <input type="number" id="soLuongTVToiDa" name="soLuongTVToiDa" th:value="${editNhom?.soLuongTVToiDa}" min="1" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div th:if="${editNhom == null}">
+                            <label for="maLopTC" class="block text-sm font-medium text-gray-700 mb-1">Mã lớp TC</label>
+                            <select id="maLopTC" name="maLopTC" required
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                                <option value="">-- Chọn lớp TC --</option>
+                                <option th:each="ltc : ${listLopTC}"
+                                        th:value="${ltc.maLopTC}"
+                                        th:text="${ltc.maLopTC + ' - ' + ltc.maMon}"
+                                        th:selected="${editNhom?.maLopTC == ltc.maLopTC}">
+                                </option>
+                            </select>
+                        </div>
+                        <div th:if="${editNhom != null}">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mã lớp TC</label>
+                            <input type="text" id="maLopTC" name="maLopTC" th:value="${editNhom?.maLopTC}" readonly
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900">
+                            <input type="hidden" name="maLopTC" th:value="${editNhom?.maLopTC}" />
+                        </div>
+                        <div>
+                            <label for="ngayDongDangKyNhom" class="block text-sm font-medium text-gray-700 mb-1">Ngày đóng ĐK nhóm</label>
+                            <input type="date" id="ngayDongDangKyNhom" name="ngayDongDangKyNhom" th:value="${#dates.format(editNhom?.ngayDongDangKyNhom, 'yyyy-MM-dd')}"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <!-- Không nhập ngày lập nhóm -->
+                    </form>
+                    <div class="flex justify-end border-t px-4 md:px-6 py-3 md:py-4 gap-2 md:gap-3">
+                        <button type="button" id="cancelGroupBtn" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Hủy
+                        </button>
+                        <button type="submit" form="groupForm" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <span id="submitGroupBtnText">Thêm mới</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal danh sách sinh viên nhóm -->
+        <div id="groupStudentListModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-4 md:px-6 py-3 md:py-4">
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-800 flex flex-wrap items-center gap-2">
+                        Danh sách sinh viên nhóm <span id="modalMaNhom"></span>
+                        <span id="groupStudentCountInfo" class="ml-2 text-blue-600 text-base"></span>
+                    </h3>
+                    <button type="button" onclick="closeGroupStudentListModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-6 flex-1 flex flex-col min-h-0 overflow-y-auto">
+                    <div id="addGroupStudentRow" class="mb-4 flex gap-2 items-center">
+                        <!-- Thay input text bằng select -->
+                        <select id="addGroupMaSVSelect" class="border rounded px-2 py-1 flex-1"></select>
+                        <button type="button" onclick="addStudentToGroup()" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">Thêm SV</button>
+                    </div>
+                    <div id="groupStudentListFullAlert" class="mb-4 text-red-600 font-semibold hidden">Nhóm đã đủ số lượng thành viên tối đa, không thể thêm nữa.</div>
+                    <div id="groupStudentListLoading" class="text-center text-gray-500 hidden">Đang tải...</div>
+                    <div id="groupStudentListError" class="text-center text-red-500 hidden"></div>
+                    <div id="groupStudentListTableContainer" class="overflow-x-auto flex-1 min-h-0">
+                        <table class="min-w-full divide-y divide-gray-200" id="groupStudentListTable">
+                            <thead class="bg-gray-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mã SV</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ tên</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Giới tính</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ngày gia nhập</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ngày rời nhóm</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="groupStudentListBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Nội dung sẽ được render bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("groupModal");
+            const groupForm = document.getElementById("groupForm");
+            const modalTitle = document.getElementById("groupModalTitle");
+            const addBtn = document.getElementById("addGroupBtn");
+            const submitBtnText = document.getElementById("submitGroupBtnText");
+            // Hiển thị modal thêm mới
+            if (addBtn) {
+                addBtn.addEventListener("click", function () {
+                    groupForm.reset();
+                    // Không set maNhom, không set ngayLapNhom
+                    groupForm.tenNhom.value = "";
+                    groupForm.soLuongTVToiDa.value = "";
+                    groupForm.maLopTC.value = "";
+                    groupForm.ngayDongDangKyNhom.value = "";
+                    // Hiện select mã lớp TC, ẩn input readonly
+                    groupForm.querySelector('select[name="maLopTC"]').parentElement.style.display = '';
+                    let maLopTCInput = groupForm.querySelector('input[name="maLopTC"]');
+                    if (maLopTCInput) maLopTCInput.parentElement.style.display = 'none';
+                    modalTitle.textContent = "Thêm nhóm";
+                    submitBtnText.textContent = "Thêm mới";
+                    groupForm.setAttribute("action", "/group/save");
+                    modal.classList.remove("hidden");
+                });
+            }
+            // Hiển thị modal sửa khi nhấn nút Sửa
+            document.querySelectorAll('a[href^="/group/edit/"]').forEach(function(editLink) {
+                editLink.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    const href = editLink.getAttribute("href");
+                    const maNhom = href.split("/").pop();
+                    fetch(`/group/${maNhom}/info`)
+                        .then(res => {
+                            if (!res.ok) throw new Error("Không tìm thấy nhóm hoặc lỗi server!");
+                            return res.json();
+                        })
+                        .then(data => {
+                            if (!data || !data.maNhom) {
+                                alert("Không thể lấy thông tin nhóm!");
+                                return;
+                            }
+                            // Đảm bảo luôn có input hidden maNhom
+                            let maNhomInput = groupForm.querySelector('input[name="maNhom"]');
+                            if (!maNhomInput) {
+                                maNhomInput = document.createElement('input');
+                                maNhomInput.type = 'hidden';
+                                maNhomInput.name = 'maNhom';
+                                maNhomInput.id = 'maNhom';
+                                groupForm.prepend(maNhomInput);
+                            }
+                            maNhomInput.value = data.maNhom;
+                            groupForm.tenNhom.value = data.tenNhom;
+                            groupForm.soLuongTVToiDa.value = data.soLuongTVToiDa;
+                            groupForm.maLopTC.value = data.maLopTC || "";
+                            groupForm.ngayDongDangKyNhom.value = data.ngayDongDangKyNhom ? data.ngayDongDangKyNhom.substring(0,10) : "";
+                            // Ẩn select mã lớp TC, hiện input readonly
+                            let selectMaLopTC = groupForm.querySelector('select[name="maLopTC"]');
+                            if (selectMaLopTC) selectMaLopTC.parentElement.style.display = 'none';
+                            let maLopTCInput = groupForm.querySelector('input[name="maLopTC"]');
+                            if (maLopTCInput) maLopTCInput.parentElement.style.display = '';
+                            modalTitle.textContent = "Sửa thông tin nhóm";
+                            submitBtnText.textContent = "Cập nhật";
+                            groupForm.setAttribute("action", "/group/save");
+                            modal.classList.remove("hidden");
+                        })
+                        .catch(err => alert(err.message || "Không thể lấy thông tin nhóm!"));
+                });
+            });
+            // Đóng modal khi click nền tối hoặc các nút đóng/hủy
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    modal.classList.add("hidden");
+                }
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    modal.classList.add("hidden");
+                }
+            });
+            const closeModal = document.getElementById("closeGroupModal");
+            if (closeModal) {
+                closeModal.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            const cancelBtn = document.getElementById("cancelGroupBtn");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            // Xác nhận xóa
+            document.querySelectorAll('a[href*="/group/delete/"]').forEach(function(link) {
+                link.addEventListener("click", function(e) {
+                    if (!confirm("Bạn chắc chắn muốn xóa nhóm này?")) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            // Hiển thị lại modal nếu có lỗi/thông báo từ backend
+            /*[[${showModal}]]*/ 
+            var showModal = /*[[${showModal}]]*/ false;
+            if (showModal) {
+                setTimeout(function() {
+                    document.getElementById("groupModal").classList.remove("hidden");
+                }, 200);
+            }
+        });
+
+        function renderGroupStudentList(data, maNhom) {
+            const tbody = document.getElementById('groupStudentListBody');
+            const countInfo = document.getElementById('groupStudentCountInfo');
+            if (typeof window.groupStudentListMaxCount === "number" && window.groupStudentListMaxCount > 0) {
+                countInfo.textContent = `${data.length}/${window.groupStudentListMaxCount}`;
+            } else {
+                countInfo.textContent = `${data.length}`;
+            }
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-4">Không có sinh viên</td></tr>';
+            } else {
+                tbody.innerHTML = data.map((sv, idx) =>
+                    `<tr>
+                        <td class="px-2 py-2 text-center">${idx + 1}</td>
+                        <td class="px-4 py-2">${sv.maSV}</td>
+                        <td class="px-4 py-2">${sv.ho} ${sv.ten}</td>
+                        <td class="px-4 py-2">${sv.gioiTinh ? 'Nam' : 'Nữ'}</td>
+                        <td class="px-4 py-2">${sv.ngayGiaNhap || ''}</td>
+                        <td class="px-4 py-2">${sv.ngayRoiNhom || ''}</td>
+                        <td class="px-4 py-2 text-center">
+                            <button type="button" class="text-red-600 hover:text-red-800" onclick="removeStudentFromGroup('${maNhom}','${sv.maSV}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`
+                ).join('');
+            }
+        }
+
+        function refreshGroupStudentList(maNhom) {
+            document.getElementById('groupStudentListLoading').classList.remove('hidden');
+            document.getElementById('groupStudentListError').classList.add('hidden');
+            fetch('/group/' + maNhom + '/students')
+                .then(res => {
+                    if (!res.ok) throw new Error('Không thể tải danh sách sinh viên');
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('groupStudentListLoading').classList.add('hidden');
+                    renderGroupStudentList(data, maNhom);
+                    if (window.groupStudentListMaxCount !== undefined) {
+                        if (data.length >= window.groupStudentListMaxCount) {
+                            document.getElementById('addGroupStudentRow').classList.add('hidden');
+                            document.getElementById('groupStudentListFullAlert').classList.remove('hidden');
+                        } else {
+                            document.getElementById('addGroupStudentRow').classList.remove('hidden');
+                            document.getElementById('groupStudentListFullAlert').classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('groupStudentListLoading').classList.add('hidden');
+                    document.getElementById('groupStudentListError').classList.remove('hidden');
+                    document.getElementById('groupStudentListError').textContent = err.message;
+                });
+        }
+
+        function showGroupStudentList(btn) {
+            const maNhom = btn.getAttribute('data-manhom');
+            document.getElementById('modalMaNhom').textContent = maNhom;
+            document.getElementById('groupStudentListModal').classList.remove('hidden');
+            // Lấy thông tin nhóm để lấy maLopTC
+            fetch(`/group/${maNhom}/info`)
+                .then(res => res.json())
+                .then(data => {
+                    window.groupStudentListMaxCount = data.soLuongTVToiDa || 0;
+                    const maLopTC = data.maLopTC;
+                    // Lấy danh sách sinh viên thuộc LTC này
+                    fetch(`/ltc/${maLopTC}/students`)
+                        .then(res => res.json())
+                        .then(listSV => {
+                            const select = document.getElementById('addGroupMaSVSelect');
+                            select.innerHTML = '';
+                            if (Array.isArray(listSV) && listSV.length > 0) {
+                                listSV.forEach(sv => {
+                                    const opt = document.createElement('option');
+                                    opt.value = sv.maSV;
+                                    opt.textContent = sv.maSV + ' - ' + sv.ho + ' ' + sv.ten;
+                                    select.appendChild(opt);
+                                });
+                                select.disabled = false;
+                            } else {
+                                const opt = document.createElement('option');
+                                opt.value = '';
+                                opt.textContent = 'Không có sinh viên trong lớp tín chỉ này';
+                                select.appendChild(opt);
+                                select.disabled = true;
+                            }
+                            refreshGroupStudentList(maNhom);
+                        })
+                        .catch(() => {
+                            const select = document.getElementById('addGroupMaSVSelect');
+                            select.innerHTML = '<option value="">Không thể tải danh sách SV</option>';
+                            select.disabled = true;
+                            refreshGroupStudentList(maNhom);
+                        });
+                })
+                .catch(() => {
+                    window.groupStudentListMaxCount = 0;
+                    refreshGroupStudentList(maNhom);
+                });
+        }
+
+        function addStudentToGroup() {
+            const maNhom = document.getElementById('modalMaNhom').textContent;
+            const select = document.getElementById('addGroupMaSVSelect');
+            const maSV = select.value;
+            if (!maSV) {
+                alert('Vui lòng chọn sinh viên!');
+                return;
+            }
+            fetch(`/group/${maNhom}/students`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({maSV})
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if (resp.success) {
+                    refreshGroupStudentList(maNhom);
+                } else {
+                    alert(resp.message || 'Thêm sinh viên thất bại');
+                }
+            })
+            .catch(() => alert('Lỗi khi thêm sinh viên'));
+        }
+
+        function removeStudentFromGroup(maNhom, maSV) {
+            if (!confirm('Bạn chắc chắn muốn xóa sinh viên này khỏi nhóm?')) return;
+            fetch(`/group/${maNhom}/students/${maSV}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(resp => {
+                    if (resp.success) {
+                        refreshGroupStudentList(maNhom);
+                    } else {
+                        alert(resp.message || 'Xóa sinh viên thất bại');
+                    }
+                })
+                .catch(() => alert('Lỗi khi xóa sinh viên'));
+        }
+
+        function closeGroupStudentListModal() {
+            document.getElementById('groupStudentListModal').classList.add('hidden');
+        }
+
+        function resetGroupFilter() {
+            const form = document.querySelector('form[th\\:action="@{/group}"], form[action="/group"]');
+            if (!form) return;
+            form.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
+                el.value = '';
+            });
+            form.submit();
+        }
+        /*]]>*/
+    </script>
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+</body>
+</html>

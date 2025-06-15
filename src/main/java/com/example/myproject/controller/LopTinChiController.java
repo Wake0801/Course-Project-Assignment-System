@@ -11,6 +11,10 @@ import com.example.myproject.repository.SinhVien_LTCRepository;
 import com.example.myproject.repository.SinhVienRepository;
 import com.example.myproject.entity.SinhVien_LTC;
 import com.example.myproject.entity.SinhVien_LTCPK;
+import com.example.myproject.entity.LoaiBaoCao;
+import com.example.myproject.entity.LoaiBaoCao_LopTC;
+import com.example.myproject.repository.LoaiBaoCaoRepository;
+import com.example.myproject.repository.LoaiBaoCao_LopTCRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -46,6 +50,11 @@ public class LopTinChiController {
 
     @Autowired
     private SinhVienRepository sinhVienRepository;
+
+    @Autowired
+    private LoaiBaoCaoRepository loaiBaoCaoRepository;
+    @Autowired
+    private LoaiBaoCao_LopTCRepository loaiBaoCaoLopTCRepository;
 
     @GetMapping
     public String listLTC(
@@ -83,14 +92,33 @@ public class LopTinChiController {
         model.addAttribute("filterMaGV", maGV);
         model.addAttribute("filterTrangThai", trangThai);
         model.addAttribute("sortNgayLap", sortNgayLap);
+
+        List<LoaiBaoCao> listLoaiBaoCao = loaiBaoCaoRepository.findAll();
+        model.addAttribute("listLoaiBaoCao", listLoaiBaoCao);
+
+        // Nếu đang sửa, truyền map hệ số điểm ra view
+        Map<String, java.math.BigDecimal> editHeSoDiemMap = new java.util.HashMap<>();
+        LopTinChi editLTC = (LopTinChi) model.getAttribute("editLTC");
+        if (editLTC != null && editLTC.getMaLopTC() != null) {
+            var heSoList = loaiBaoCaoLopTCRepository.findAllByMaLopTC(editLTC.getMaLopTC());
+            for (var h : heSoList) {
+                editHeSoDiemMap.put(String.valueOf(h.getMaLoaiBaoCao()), h.getHeSoDiem());
+            }
+        }
+        model.addAttribute("editHeSoDiemMap", editHeSoDiemMap);
+
         return "admin/manageLTC";
     }
 
     @PostMapping("/save")
-    public String saveLTC(@ModelAttribute("editLTC") LopTinChi ltc,
-                      BindingResult result,
-                      RedirectAttributes redirectAttributes,
-                      Model model) {
+    public String saveLTC(
+            @ModelAttribute("editLTC") LopTinChi ltc,
+            BindingResult result,
+            RedirectAttributes redirectAttributes,
+            Model model,
+            @RequestParam(value = "trangThai", required = false) String trangThaiStr,
+            @RequestParam Map<String, String> allParams // lấy toàn bộ param để lấy hệ số điểm động
+    ) {
         // Đảm bảo luôn set số lượng tối thiểu là 10 trước khi validate binding
         ltc.setSoLuongToiThieu(10);
 
@@ -162,7 +190,34 @@ public class LopTinChiController {
             if (!isUpdate) {
                 ltc.setTrangThai(true);
             }
+            // Xử lý trạng thái (nếu có)
+            if (trangThaiStr != null) {
+                ltc.setTrangThai("true".equals(trangThaiStr));
+            }
+            // Lưu lớp tín chỉ như cũ
             lopTinChiService.save(ltc);
+
+            // Xử lý hệ số điểm các loại báo cáo
+            List<LoaiBaoCao> listLoaiBaoCao = loaiBaoCaoRepository.findAll();
+            for (LoaiBaoCao lbc : listLoaiBaoCao) {
+                String key = "heSoDiem_" + lbc.getMaLoaiBaoCao();
+                if (allParams.containsKey(key)) {
+                    try {
+                        java.math.BigDecimal heSo = new java.math.BigDecimal(allParams.get(key));
+                        // Sửa dòng này: ép kiểu String -> int
+                        loaiBaoCaoLopTCRepository.deleteByMaLopTCAndMaLoaiBaoCao(
+                            ltc.getMaLopTC(),
+                            Integer.parseInt(lbc.getMaLoaiBaoCao())
+                        );
+                        // Lưu mới
+                        var entity = new LoaiBaoCao_LopTC();
+                        entity.setMaLopTC(ltc.getMaLopTC());
+                        entity.setMaLoaiBaoCao(Integer.parseInt(lbc.getMaLoaiBaoCao()));
+                        entity.setHeSoDiem(heSo);
+                        loaiBaoCaoLopTCRepository.save(entity);
+                    } catch (Exception ignore) {}
+                }
+            }
             if (isUpdate) {
                 redirectAttributes.addFlashAttribute("message", "Cập nhật thành công!");
             } else {
@@ -328,5 +383,25 @@ public class LopTinChiController {
         sinhVienLTCRepository.deleteById(pk);
         resp.put("success", true);
         return resp;
+    }
+
+    // API trả về danh sách hệ số điểm các loại báo cáo cho một lớp tín chỉ (dùng cho chi tiết)
+    @GetMapping("/{maLTC}/hesodiem")
+    @ResponseBody
+    public List<Map<String, Object>> getHeSoDiemLopTC(@PathVariable("maLTC") String maLTC) {
+        List<LoaiBaoCao_LopTC> list = loaiBaoCaoLopTCRepository.findAllByMaLopTC(maLTC);
+        List<LoaiBaoCao> loaiBaoCaoList = loaiBaoCaoRepository.findAll();
+        Map<Integer, String> tenLoaiBaoCaoMap = loaiBaoCaoList.stream()
+            .collect(Collectors.toMap(
+                lbc -> Integer.parseInt(lbc.getMaLoaiBaoCao()),
+                LoaiBaoCao::getTenLoaiBaoCao
+            ));
+        return list.stream().map(item -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("maLoaiBaoCao", item.getMaLoaiBaoCao());
+            map.put("tenLoaiBaoCao", tenLoaiBaoCaoMap.get(item.getMaLoaiBaoCao()));
+            map.put("heSoDiem", item.getHeSoDiem());
+            return map;
+        }).collect(Collectors.toList());
     }
 }
