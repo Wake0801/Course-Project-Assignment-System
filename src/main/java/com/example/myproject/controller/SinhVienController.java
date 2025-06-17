@@ -65,6 +65,7 @@ public class SinhVienController {
         // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
         model.addAttribute("currentPage", studentPage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", studentPage.getTotalPages());
+        model.addAttribute("totalElements", studentPage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("size", size);
         
@@ -100,17 +101,23 @@ public class SinhVienController {
             }
         } catch (DataIntegrityViolationException e) {
             String errorMessage = "Lỗi: ";
-            if (e.getMessage().contains("Email")) {
+            String exceptionMsg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+            
+            if (exceptionMsg.contains("email")) {
                 errorMessage += "Email đã tồn tại hoặc không được để trống.";
-            } else if (e.getMessage().contains("MaSV")) {
-                errorMessage += "Mã SV đã tồn tại.";
-            } else if (e.getMessage().contains("MaTK")) {
-                errorMessage += "Mã TK đã tồn tại hoặc không hợp lệ.";
-            } else if (e.getMessage().contains("MaLop")) {
-                errorMessage += "Mã Lớp không hợp lệ.";
+            } else if (exceptionMsg.contains("masv") || exceptionMsg.contains("primary key")) {
+                errorMessage += "Mã sinh viên đã tồn tại.";
+            } else if (exceptionMsg.contains("matk") || exceptionMsg.contains("uq__sinhvien__272500719b579527")) {
+                errorMessage += "Tài khoản đã được gán cho sinh viên khác hoặc không hợp lệ.";
+            } else if (exceptionMsg.contains("malop") || exceptionMsg.contains("foreign key")) {
+                errorMessage += "Mã lớp không tồn tại trong hệ thống.";
+            } else if (exceptionMsg.contains("unique") || exceptionMsg.contains("duplicate")) {
+                errorMessage += "Dữ liệu bị trùng lặp. Vui lòng kiểm tra lại thông tin.";
             } else {
-                errorMessage += "Dữ liệu bị trùng lặp hoặc không hợp lệ.";
+                errorMessage += "Dữ liệu không hợp lệ hoặc vi phạm ràng buộc database.";
+                System.err.println("DataIntegrityViolationException details: " + e.getMessage());
             }
+            
             redirectAttributes.addFlashAttribute("error", errorMessage);
             redirectAttributes.addFlashAttribute("editStudent", student);
             redirectAttributes.addFlashAttribute("showEditModal", true);

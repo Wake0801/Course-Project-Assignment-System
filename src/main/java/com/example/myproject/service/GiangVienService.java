@@ -74,6 +74,11 @@ public class GiangVienService {
             }
         }
         
+        // Xử lý email - cho phép null hoặc rỗng
+        if (giangVien.getEmail() != null && giangVien.getEmail().trim().isEmpty()) {
+            giangVien.setEmail(null);
+        }
+        
         // Xử lý quan hệ Khoa
         if (giangVien.getKhoa() != null && giangVien.getKhoa().getMaKhoa() != null && !giangVien.getKhoa().getMaKhoa().trim().isEmpty()) {
             Khoa khoa = khoaRepository.findById(giangVien.getKhoa().getMaKhoa())
@@ -83,16 +88,37 @@ public class GiangVienService {
              throw new IllegalArgumentException("Mã khoa không được để trống");
         }
 
-        // Xử lý quan hệ Tài khoản
-        if (giangVien.getTaiKhoan() != null && giangVien.getTaiKhoan().getMaTK() != null && !giangVien.getTaiKhoan().getMaTK().trim().isEmpty()) {
-            TaiKhoan tk = taiKhoanRepository.findById(giangVien.getTaiKhoan().getMaTK())
-                                        .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại"));
-            giangVien.setTaiKhoan(tk);
+        // Xử lý quan hệ tài khoản - Cải thiện logic để tránh UNIQUE constraint với NULL
+        if (giangVien.getTaiKhoan() != null) {
+            Integer maTK = giangVien.getTaiKhoan().getMaTK();
+            
+            // Nếu MaTK là null, empty, hoặc 0 thì set toàn bộ taiKhoan thành null
+            if (maTK == null || maTK == 0) {
+                giangVien.setTaiKhoan(null);
+            } else {
+                // Validate MaTK tồn tại
+                TaiKhoan tk = taiKhoanRepository.findById(maTK)
+                                            .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại: " + maTK));
+                
+                // Kiểm tra MaTK đã được sử dụng bởi giảng viên khác chưa
+                if (!giangVien.getMaGV().equals(getCurrentGiangVienByMaTK(maTK))) {
+                    throw new IllegalArgumentException("Tài khoản này đã được gán cho giảng viên khác");
+                }
+                
+                giangVien.setTaiKhoan(tk);
+            }
         } else {
-            throw new IllegalArgumentException("Mã tài khoản không được để trống");
+            // TaiKhoan object null -> set thành null 
+            giangVien.setTaiKhoan(null);
         }
 
         return giangVienRepository.save(giangVien);
+    }
+    
+    // Helper method để kiểm tra MaTK đã được sử dụng chưa
+    private String getCurrentGiangVienByMaTK(Integer maTK) {
+        Optional<GiangVien> existingGiangVien = giangVienRepository.findByTaiKhoan_MaTK(maTK);
+        return existingGiangVien.map(GiangVien::getMaGV).orElse(null);
     }
 
     // Xóa giảng viên theo ID

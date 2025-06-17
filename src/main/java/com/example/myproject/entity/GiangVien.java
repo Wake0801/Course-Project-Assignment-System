@@ -34,7 +34,7 @@ public class GiangVien {
     @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
-    @Column(name = "Email", length = 100, unique = true)
+    @Column(name = "Email", length = 100)
     private String email;
     
     @Column(name = "HocVi", length = 50)
@@ -45,7 +45,7 @@ public class GiangVien {
     private Khoa khoa;
 
     @ManyToOne
-    @JoinColumn(name = "MaTK", nullable = false)
+    @JoinColumn(name = "MaTK", nullable = true)
     private TaiKhoan taiKhoan;
 
 }

@@ -7,6 +7,6 @@ import com.example.myproject.entity.Quyen;
 
 
 @Repository
-public interface QuyenRepository extends JpaRepository<Quyen, String> {
+public interface QuyenRepository extends JpaRepository<Quyen, Integer> {
 
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface LoginRepository extends JpaRepository<TaiKhoan, String> {
+public interface LoginRepository extends JpaRepository<TaiKhoan, Integer> {
     // Tìm TaiKhoan theo username
     Optional<TaiKhoan> findByUsername(String username);
 }

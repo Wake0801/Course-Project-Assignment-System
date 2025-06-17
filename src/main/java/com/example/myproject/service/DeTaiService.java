@@ -35,38 +35,16 @@ public class DeTaiService {
     @Autowired
     private LopTinChiRepository lopTinChiRepository;
 
-    public Page<DeTai> findDeTaisWithFilter(String keyword, String maKhoa, String maGV, String maLopTC, String maMon, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        
-        // Debug logging
-        System.out.println("=== SERVICE DEBUG ===");
-        System.out.println("Original keyword: " + keyword);
-        System.out.println("maKhoa: " + maKhoa);
-        System.out.println("maGV: " + maGV);
-        System.out.println("maLopTC: " + maLopTC);
-        System.out.println("maMon: " + maMon);
-        
-        // Clean parameters - chuyển empty string thành null
-        String cleanKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
-        String cleanMaKhoa = (maKhoa != null && !maKhoa.trim().isEmpty()) ? maKhoa : null;
-        String cleanMaGV = (maGV != null && !maGV.trim().isEmpty()) ? maGV : null;
-        String cleanMaLopTC = (maLopTC != null && !maLopTC.trim().isEmpty()) ? maLopTC : null;
-        String cleanMaMon = (maMon != null && !maMon.trim().isEmpty()) ? maMon : null;
-        
-        System.out.println("Clean keyword: " + cleanKeyword);
-        System.out.println("Clean maKhoa: " + cleanMaKhoa);
-        System.out.println("Clean maGV: " + cleanMaGV);
-        System.out.println("Clean maLopTC: " + cleanMaLopTC);
-        System.out.println("Clean maMon: " + cleanMaMon);
-        System.out.println("===================");
-        
-        return deTaiRepository.findByAdvancedFilters(cleanMaKhoa, cleanMaGV, cleanMaLopTC, cleanMaMon,
-            cleanKeyword, pageable);
-    }
-
     public Page<DeTai> findAllDeTai(int page, int size, String keyword, String filterKhoa, String filterGiangVien) {
         Pageable pageable = PageRequest.of(page - 1, size);
         return deTaiRepository.findByFilters(filterKhoa, filterGiangVien, 
+            keyword != null ? keyword.toLowerCase() : "", 
+            pageable);
+    }
+
+    public Page<DeTai> findByAdvancedFilters(int page, int size, String keyword, String maKhoa, String maGV, String maLopTC, String maMon) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return deTaiRepository.findByAdvancedFilters(maKhoa, maGV, maLopTC, maMon, 
             keyword != null ? keyword.toLowerCase() : "", 
             pageable);
     }
@@ -92,11 +70,14 @@ public class DeTaiService {
     }
 
     public DeTai save(DeTai deTai) {
-       
-        
         // Kiểm tra tên đề tài
         if (deTai.getTenDT() == null || deTai.getTenDT().trim().isEmpty()) {
             throw new IllegalArgumentException("Tên đề tài không được để trống");
+        }
+        
+        // Kiểm tra độ dài tên đề tài
+        if (deTai.getTenDT().length() > 50) {
+            throw new IllegalArgumentException("Tên đề tài không được vượt quá 50 ký tự");
         }
         
         // Kiểm tra mô tả
@@ -110,12 +91,17 @@ public class DeTaiService {
         }
         
         // Kiểm tra Lớp tín chỉ
-        if (deTai.getLopTinChi() != null && deTai.getLopTinChi().getMaLopTC() != null && !deTai.getLopTinChi().getMaLopTC().trim().isEmpty()) {
+        if (deTai.getLopTinChi() == null || deTai.getLopTinChi().getMaLopTC() == null || deTai.getLopTinChi().getMaLopTC().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã lớp tín chỉ không được để trống");
+        } else {
             LopTinChi lopTinChi = lopTinChiRepository.findById(deTai.getLopTinChi().getMaLopTC())
                 .orElseThrow(() -> new IllegalArgumentException("Lớp tín chỉ không tồn tại"));
             deTai.setLopTinChi(lopTinChi);
-        } else {
-            throw new IllegalArgumentException("Mã lớp tín chỉ không được để trống");
+        }
+        
+        // Kiểm tra Nhóm (REQUIRED theo database schema)
+        if (deTai.getNhom() == null || deTai.getNhom().getMaNhom() <= 0) {
+            throw new IllegalArgumentException("Nhóm không được để trống");
         }
         
         return deTaiRepository.save(deTai);

@@ -50,6 +50,7 @@ public class NhanVienPKTController {
         // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
         model.addAttribute("currentPage", employeePage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", employeePage.getTotalPages());
+        model.addAttribute("totalElements", employeePage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("size", size);
         

@@ -3,6 +3,7 @@ package com.example.myproject.repository;
 import com.example.myproject.entity.SinhVien;
 import com.example.myproject.entity.TaiKhoan;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,9 +55,12 @@ public interface SinhVienRepository extends JpaRepository<SinhVien, String> {
     Page<SinhVien> findByLop_Khoa_MaKhoa(String maKhoa, Pageable pageable);
     
     // Tìm kiếm tài khoản sinh viên
-    Optional<SinhVien> findByTaiKhoan_MaTK(String maTK);
+    Optional<SinhVien> findByTaiKhoan_MaTK(Integer maTK);
     
     // Kiểm tra tồn tại tài khoản sinh viên
-    boolean existsByTaiKhoan_MaTK(String maTK);
+    boolean existsByTaiKhoan_MaTK(Integer maTK);
+    
+    // Tìm sinh viên chưa có tài khoản
+    List<SinhVien> findByTaiKhoanIsNull();
 
 }

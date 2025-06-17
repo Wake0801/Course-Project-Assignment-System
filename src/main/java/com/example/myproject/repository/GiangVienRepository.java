@@ -3,6 +3,7 @@ package com.example.myproject.repository;
 import com.example.myproject.entity.GiangVien; // Đảm bảo import đúng entity GiangVien
 import com.example.myproject.entity.TaiKhoan;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,9 +45,12 @@ public interface GiangVienRepository extends JpaRepository<GiangVien, String> {
     Page<GiangVien> findByKhoa_MaKhoa(String maKhoa, Pageable pageable);
     
     // Lấy danh sách giảng viên theo khoa (không phân trang - cho dropdown)
-    java.util.List<GiangVien> findByKhoa_MaKhoa(String maKhoa);
+    List<GiangVien> findByKhoa_MaKhoa(String maKhoa);
     
-    Optional<GiangVien> findByTaiKhoan_MaTK(String maTK);
+    Optional<GiangVien> findByTaiKhoan_MaTK(Integer maTK);
     
-    boolean existsByTaiKhoan_MaTK(String maTK);
+    boolean existsByTaiKhoan_MaTK(Integer maTK);
+    
+    // Tìm giảng viên chưa có tài khoản
+    List<GiangVien> findByTaiKhoanIsNull();
 }

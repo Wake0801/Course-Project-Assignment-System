@@ -3,6 +3,7 @@ package com.example.myproject.repository;
 import com.example.myproject.entity.NhanVienPKT;
 import com.example.myproject.entity.TaiKhoan;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,10 @@ public interface NhanVienPKTRepository extends JpaRepository<NhanVienPKT, String
            "UPPER(TRIM(CONCAT(nv.ten, ' ', nv.ho))) LIKE UPPER(CONCAT('%', TRIM(:keyword), '%'))")
     Page<NhanVienPKT> search(@Param("keyword") String keyword, Pageable pageable);
     
-    Optional<NhanVienPKT> findByTaiKhoan_MaTK(String maTK);
+    Optional<NhanVienPKT> findByTaiKhoan_MaTK(Integer maTK);
     
-    boolean existsByTaiKhoan_MaTK(String maTK);
+    boolean existsByTaiKhoan_MaTK(Integer maTK);
+    
+    // Tìm nhân viên chưa có tài khoản
+    List<NhanVienPKT> findByTaiKhoanIsNull();
 }

@@ -34,8 +34,11 @@ public class NhanVienPKT {
     @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
+    @Column(name = "Email", length = 100)
+    private String email;
+
     @ManyToOne
-    @JoinColumn(name = "MaTK", nullable = false)
+    @JoinColumn(name = "MaTK", nullable = true)
     private TaiKhoan taiKhoan;
 
 }

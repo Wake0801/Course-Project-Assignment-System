@@ -1,14 +1,13 @@
 package com.example.myproject.controller;
 
 import com.example.myproject.entity.DeTai;
+import com.example.myproject.service.DeTaiService;
 import com.example.myproject.entity.GiangVien;
 import com.example.myproject.entity.MonHoc;
 import com.example.myproject.entity.LopTinChi;
-import com.example.myproject.service.DeTaiService;
-import com.example.myproject.service.KhoaService;
 import com.example.myproject.service.GiangVienService;
-import com.example.myproject.service.LopTinChiService;
 import com.example.myproject.service.MonHocService;
+import com.example.myproject.service.LopTinChiService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,8 +18,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.util.Optional;
 import java.util.List;
+import com.example.myproject.entity.Khoa;
+import com.example.myproject.repository.KhoaRepository;
 
 @Controller
 @RequestMapping("/topics")
@@ -28,112 +29,80 @@ public class DeTaiController {
 
     @Autowired
     private DeTaiService deTaiService;
-    
-    @Autowired
-    private KhoaService khoaService;
-    
+
     @Autowired
     private GiangVienService giangVienService;
-    
-    @Autowired
-    private LopTinChiService lopTinChiService;
-    
+
     @Autowired
     private MonHocService monHocService;
 
-    @GetMapping
-    public String listTopics(
+    @Autowired
+    private LopTinChiService lopTinChiService;
+
+    @Autowired
+    private KhoaRepository khoaRepository;
+
+    @GetMapping("")
+    public String manageTopics(
+        @RequestParam(value = "page", defaultValue = "1") int page,
+        @RequestParam(value = "size", defaultValue = "10") int size,
         @RequestParam(value = "search", required = false) String keyword,
         @RequestParam(value = "maKhoa", required = false) String maKhoa,
         @RequestParam(value = "maGV", required = false) String maGV,
-        @RequestParam(value = "maLopTC", required = false) String maLopTC,
         @RequestParam(value = "maMon", required = false) String maMon,
-        @RequestParam(value = "page", defaultValue = "1") int page,
-        @RequestParam(value = "size", defaultValue = "30") int size,
+        @RequestParam(value = "maLopTC", required = false) String maLopTC,
         Model model
     ) {
-        // Debug logging
-        System.out.println("=== DEBUG SEARCH/FILTER ===");
-        System.out.println("keyword: " + keyword);
-        System.out.println("maKhoa: " + maKhoa);
-        System.out.println("maGV: " + maGV);
-        System.out.println("maLopTC: " + maLopTC);
-        System.out.println("maMon: " + maMon);
-        System.out.println("page: " + page);
-        System.out.println("size: " + size);
-        
-        // Đảm bảo page >= 1
-        if (page < 1) {
-            page = 1;
-        }
-        
-        Page<DeTai> topicPage = deTaiService.findDeTaisWithFilter(keyword, maKhoa, maGV, maLopTC, maMon, page, size);
-        
-        System.out.println("Found " + topicPage.getTotalElements() + " topics");
-        System.out.println("=========================");
-        
-        // Nếu page vượt quá totalPages và có kết quả, redirect về trang cuối
-        if (topicPage.getTotalPages() > 0 && page > topicPage.getTotalPages()) {
-            return "redirect:/topics?page=" + topicPage.getTotalPages() + 
-                   "&size=" + size + 
-                   (keyword != null ? "&search=" + keyword : "") +
-                   (maKhoa != null ? "&maKhoa=" + maKhoa : "") +
-                   (maGV != null ? "&maGV=" + maGV : "") +
-                   (maLopTC != null ? "&maLopTC=" + maLopTC : "") +
-                   (maMon != null ? "&maMon=" + maMon : "");
-        }
+        Page<DeTai> deTaiPage = deTaiService.findByAdvancedFilters(page, size, keyword, maKhoa, maGV, maLopTC, maMon);
         
         if (!model.containsAttribute("editTopic")) {
             model.addAttribute("editTopic", new DeTai());
             model.addAttribute("showEditModal", false);
         }
         
-        model.addAttribute("ListTopics", topicPage.getContent());
-        // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
-        model.addAttribute("currentPage", topicPage.getTotalPages() > 0 ? page : 1);
-        model.addAttribute("totalPages", topicPage.getTotalPages());
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("ListTopics", deTaiPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", deTaiPage.getTotalPages());
+        model.addAttribute("totalItems", deTaiPage.getTotalElements());
         model.addAttribute("size", size);
+        model.addAttribute("keyword", keyword);
         
-        // Add filter data for dropdowns
-        model.addAttribute("listKhoa", khoaService.getAllKhoa());
-        model.addAttribute("listGiangVien", giangVienService.getAllGiangVien());
-        model.addAttribute("listLopTC", lopTinChiService.getAllLopTinChi());
+        // Add filter data
+        model.addAttribute("listKhoa", deTaiService.getAllKhoa());
+        model.addAttribute("listGiangVien", deTaiService.getAllGiangVien());
+        model.addAttribute("listLopTC", deTaiService.getAllLopTinChi());
         model.addAttribute("listMonHoc", monHocService.getAllMonHoc());
         
-        // Add selected filter values
+        // Add selected filter values for template
         model.addAttribute("selectedKhoa", maKhoa);
         model.addAttribute("selectedGiangVien", maGV);
-        model.addAttribute("selectedLopTC", maLopTC);
         model.addAttribute("selectedMonHoc", maMon);
+        model.addAttribute("selectedLopTC", maLopTC);
         
-        // Add selected filter names for display
-        if (maKhoa != null && !maKhoa.trim().isEmpty()) {
-            khoaService.getAllKhoa().stream()
-                .filter(k -> k.getMaKhoa().equals(maKhoa))
-                .findFirst()
-                .ifPresent(k -> model.addAttribute("selectedKhoaName", k.getTenKhoa()));
-        }
-        
-        if (maGV != null && !maGV.trim().isEmpty()) {
-            giangVienService.getAllGiangVien().stream()
-                .filter(gv -> gv.getMaGV().equals(maGV))
-                .findFirst()
-                .ifPresent(gv -> model.addAttribute("selectedGiangVienName", gv.getHo() + " " + gv.getTen()));
-        }
-        
-        if (maMon != null && !maMon.trim().isEmpty()) {
-            monHocService.getAllMonHoc().stream()
-                .filter(mh -> mh.getMaMon().equals(maMon))
-                .findFirst()
-                .ifPresent(mh -> model.addAttribute("selectedMonHocName", mh.getTenMon()));
-        }
-        
-        if (maLopTC != null && !maLopTC.trim().isEmpty()) {
-            lopTinChiService.getAllLopTinChi().stream()
-                .filter(ltc -> ltc.getMaLopTC().equals(maLopTC))
-                .findFirst()
-                .ifPresent(ltc -> model.addAttribute("selectedLopTCName", ltc.getMaLopTC() + " - " + ltc.getMonHoc().getTenMon()));
+        // Add selected names for display
+        try {
+            if (maKhoa != null && !maKhoa.isEmpty()) {
+                Optional<Khoa> khoa = khoaRepository.findById(maKhoa);
+                if (khoa.isPresent()) {
+                    model.addAttribute("selectedKhoaName", khoa.get().getTenKhoa());
+                }
+            }
+            if (maGV != null && !maGV.isEmpty()) {
+                Optional<GiangVien> gvOpt = giangVienService.findById(maGV);
+                if (gvOpt.isPresent()) {
+                    GiangVien gv = gvOpt.get();
+                    model.addAttribute("selectedGiangVienName", gv.getHo() + " " + gv.getTen());
+                }
+            }
+            if (maLopTC != null && !maLopTC.isEmpty()) {
+                LopTinChi ltc = lopTinChiService.findById(maLopTC);
+                if (ltc != null) {
+                    model.addAttribute("selectedLopTCName", ltc.getMaLopTC() + " - " + ltc.getMonHoc().getTenMon());
+                }
+            }
+        } catch (Exception e) {
+            // Log error but continue
+            System.err.println("Error getting filter names: " + e.getMessage());
         }
         
         return "admin/manageTopics";
@@ -158,83 +127,52 @@ public class DeTaiController {
     }
 
     @PostMapping("/save")
-    public String saveTopic(@Valid @ModelAttribute("editTopic") DeTai topic,
-                           BindingResult result,
+    public String saveTopic(@ModelAttribute @Valid DeTai editTopic, 
+                           BindingResult result, 
                            RedirectAttributes redirectAttributes) {
-        
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editTopic", result);
-            redirectAttributes.addFlashAttribute("editTopic", topic);
+            redirectAttributes.addFlashAttribute("editTopic", editTopic);
             redirectAttributes.addFlashAttribute("showEditModal", true);
             redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
             return "redirect:/topics";
         }
         
         try {
-            // Kiểm tra xem có phải là edit mode không (có mã đề tài và đề tài đã tồn tại)
-            boolean isEdit = topic.getMaDT() != null && deTaiService.findById(topic.getMaDT()).isPresent();
-            
-            deTaiService.save(topic);
-            
-            if (isEdit) {
-                redirectAttributes.addFlashAttribute("success", "Cập nhật đề tài thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("success", "Thêm đề tài thành công! Mã đề tài: " + topic.getMaDT());
-            }
+            deTaiService.save(editTopic);
+            redirectAttributes.addFlashAttribute("success", "Lưu đề tài thành công!");
         } catch (DataIntegrityViolationException e) {
-            String errorMessage = "Lỗi: ";
-            if (e.getMessage().contains("MaDT")) {
-                errorMessage += "Mã đề tài đã tồn tại.";
-            } else if (e.getMessage().contains("MaLopTC")) {
-                errorMessage += "Mã lớp tín chỉ không hợp lệ.";
-            } else {
-                errorMessage += "Dữ liệu bị trùng lặp hoặc không hợp lệ.";
-            }
-            redirectAttributes.addFlashAttribute("error", errorMessage);
-            redirectAttributes.addFlashAttribute("editTopic", topic);
+            redirectAttributes.addFlashAttribute("error", "Lỗi: Dữ liệu đề tài vi phạm ràng buộc toàn vẹn");
+            redirectAttributes.addFlashAttribute("editTopic", editTopic);
             redirectAttributes.addFlashAttribute("showEditModal", true);
-        } 
-        catch (IllegalArgumentException e) {
+            return "redirect:/topics";
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("editTopic", topic);
+            redirectAttributes.addFlashAttribute("editTopic", editTopic);
             redirectAttributes.addFlashAttribute("showEditModal", true);
-        }
-        catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("editTopic", topic);
+            return "redirect:/topics";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi lưu đề tài: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("editTopic", editTopic);
             redirectAttributes.addFlashAttribute("showEditModal", true);
+            return "redirect:/topics";
         }
-        
         return "redirect:/topics";
     }
 
     @GetMapping("/delete/{maDT}")
     public String deleteTopic(@PathVariable int maDT, RedirectAttributes redirectAttributes) {
         try {
-            deTaiService.deleteById(id);
+            deTaiService.deleteById(maDT);
             redirectAttributes.addFlashAttribute("success", "Xóa đề tài thành công!");
         } catch (EmptyResultDataAccessException e) {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy đề tài với mã: " + id);
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy đề tài để xóa!");
         } catch (DataIntegrityViolationException e) {
-            redirectAttributes.addFlashAttribute("error", "Không thể xóa đề tài này vì đang được sử dụng trong hệ thống!");
+            redirectAttributes.addFlashAttribute("error", "Không thể xóa đề tài vì có dữ liệu liên quan!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi xóa đề tài: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa đề tài: " + e.getMessage());
         }
         return "redirect:/topics";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editTopic(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
-        return deTaiService.findById(id)
-                .map(dt -> {
-                    redirectAttributes.addFlashAttribute("editTopic", dt);
-                    redirectAttributes.addFlashAttribute("showEditModal", true);
-                    return "redirect:/topics";
-                })
-                .orElseGet(() -> {
-                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đề tài");
-                    return "redirect:/topics";
-                });
     }
     
     @GetMapping("/new")
@@ -243,14 +181,7 @@ public class DeTaiController {
         redirectAttributes.addFlashAttribute("showEditModal", true);
         return "redirect:/topics";
     }
-    
-    // API endpoint để lấy giảng viên theo khoa (cho dynamic filtering)
-    @GetMapping("/api/giangvien/by-khoa/{maKhoa}")
-    @ResponseBody
-    public List<GiangVien> getGiangVienByKhoa(@PathVariable("maKhoa") String maKhoa) {
-        return giangVienService.getGiangVienByKhoa(maKhoa);
-    }
-    
+
     // API endpoint để lấy tất cả giảng viên (khi không chọn khoa)
     @GetMapping("/api/giangvien/by-khoa/")
     @ResponseBody

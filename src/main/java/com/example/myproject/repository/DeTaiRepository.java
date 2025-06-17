@@ -15,7 +15,6 @@ public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
     
     //Tìm kiếm đơn giản
     @Query("SELECT dt FROM DeTai dt WHERE " +
-           "dt.maDT = :keyword OR " +
            "LOWER(dt.tenDT) LIKE %:keyword% OR " +
            "LOWER(dt.moTa) LIKE %:keyword% OR " +
            "LOWER(dt.lopTinChi.giangVien.ten) LIKE %:keyword% OR " +
@@ -27,7 +26,6 @@ public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
            "(:maKhoa IS NULL OR d.lopTinChi.giangVien.khoa.maKhoa = :maKhoa) AND " +
            "(:maGV IS NULL OR d.lopTinChi.giangVien.maGV = :maGV) AND " +
            "(COALESCE(:keyword, '') = '' OR " +
-           "d.maDT = :keyword OR " +
            "LOWER(d.tenDT) LIKE %:keyword% OR " +
            "LOWER(d.moTa) LIKE %:keyword% OR " +
            "LOWER(d.lopTinChi.giangVien.ho) LIKE %:keyword% OR " +
@@ -36,6 +34,25 @@ public interface DeTaiRepository extends JpaRepository<DeTai, Integer> {
                              @Param("maGV") String maGV,
                              @Param("keyword") String keyword,
                              Pageable pageable);
+
+    // Tìm kiếm nâng cao với LopTinChi và MonHoc
+    @Query("SELECT d FROM DeTai d WHERE " +
+           "(:maKhoa IS NULL OR :maKhoa = '' OR d.lopTinChi.giangVien.khoa.maKhoa = :maKhoa) AND " +
+           "(:maGV IS NULL OR :maGV = '' OR d.lopTinChi.giangVien.maGV = :maGV) AND " +
+           "(:maLopTC IS NULL OR :maLopTC = '' OR d.lopTinChi.maLopTC = :maLopTC) AND " +
+           "(:maMon IS NULL OR :maMon = '' OR d.lopTinChi.monHoc.maMon = :maMon) AND " +
+           "(:keyword IS NULL OR :keyword = '' OR " +
+           "LOWER(d.tenDT) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.moTa) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.lopTinChi.giangVien.ho) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.lopTinChi.giangVien.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.lopTinChi.monHoc.tenMon) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<DeTai> findByAdvancedFilters(@Param("maKhoa") String maKhoa,
+                                     @Param("maGV") String maGV,
+                                     @Param("maLopTC") String maLopTC,
+                                     @Param("maMon") String maMon,
+                                     @Param("keyword") String keyword,
+                                     Pageable pageable);
 
     List<DeTai> findByLopTinChi_MaLopTCIn(List<String> maLopTCs);
     

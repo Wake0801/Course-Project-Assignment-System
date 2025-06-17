@@ -46,15 +46,41 @@ public class NhanVienPKTService {
             }
         }
         
-        // Kiểm tra tài khoản
-        if (nhanVien.getTaiKhoan() != null && nhanVien.getTaiKhoan().getMaTK() != null && !nhanVien.getTaiKhoan().getMaTK().trim().isEmpty()) {
-            TaiKhoan tk = taiKhoanRepository.findById(nhanVien.getTaiKhoan().getMaTK())
-                                        .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại"));
-            nhanVien.setTaiKhoan(tk);
+        // Xử lý email - cho phép null hoặc rỗng
+        if (nhanVien.getEmail() != null && nhanVien.getEmail().trim().isEmpty()) {
+            nhanVien.setEmail(null);
+        }
+        
+        // Xử lý quan hệ tài khoản - Cải thiện logic để tránh UNIQUE constraint với NULL
+        if (nhanVien.getTaiKhoan() != null) {
+            Integer maTK = nhanVien.getTaiKhoan().getMaTK();
+            
+            // Nếu MaTK là null, empty, hoặc 0 thì set toàn bộ taiKhoan thành null
+            if (maTK == null || maTK == 0) {
+                nhanVien.setTaiKhoan(null);
+            } else {
+                // Validate MaTK tồn tại
+                TaiKhoan tk = taiKhoanRepository.findById(maTK)
+                                            .orElseThrow(() -> new IllegalArgumentException("Mã tài khoản không tồn tại: " + maTK));
+                
+                // Kiểm tra MaTK đã được sử dụng bởi nhân viên khác chưa
+                if (!nhanVien.getMaNV().equals(getCurrentNhanVienByMaTK(maTK))) {
+                    throw new IllegalArgumentException("Tài khoản này đã được gán cho nhân viên khác");
+                }
+                
+                nhanVien.setTaiKhoan(tk);
+            }
         } else {
-             throw new IllegalArgumentException("Mã tài khoản không được để trống");
+            // TaiKhoan object null -> set thành null 
+            nhanVien.setTaiKhoan(null);
         }
         return nhanVienPKTRepository.save(nhanVien);
+    }
+    
+    // Helper method để kiểm tra MaTK đã được sử dụng chưa
+    private String getCurrentNhanVienByMaTK(Integer maTK) {
+        Optional<NhanVienPKT> existingNhanVien = nhanVienPKTRepository.findByTaiKhoan_MaTK(maTK);
+        return existingNhanVien.map(NhanVienPKT::getMaNV).orElse(null);
     }
 
     public void deleteById(String maNV) {

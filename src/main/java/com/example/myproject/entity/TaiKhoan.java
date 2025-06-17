@@ -15,8 +15,7 @@ public class TaiKhoan {
     @Id
     @Column(name = "MaTK")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotBlank(message = "Mã tài khoản không được để trống")
-    private String maTK;
+    private Integer maTK;
 
     @Column(name = "Username", nullable = false, length = 50, unique = true)
     @NotBlank(message = "Tên đăng nhập không được để trống")

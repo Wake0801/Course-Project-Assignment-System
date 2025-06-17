@@ -12,5 +12,4 @@ public class TaiKhoanDTO {
 
     @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
-
 }

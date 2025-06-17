@@ -17,13 +17,13 @@ public class DeTai {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int maDT;
 
-    @Column(name = "TenDT", nullable = false, length = 255)
+    @Column(name = "TenDT", nullable = false, length = 50)
     private String tenDT;
 
-    @Column(name = "MoTa", nullable = false, length = 500)
+    @Column(name = "MoTa", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
-    @Column(name = "NgayBatDau", nullable = false)
+    @Column(name = "NgayBatDau")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private LocalDate ngayBatDau;
@@ -31,7 +31,8 @@ public class DeTai {
     @ManyToOne
     @JoinColumn(name = "MaLopTC", nullable = false)
     private LopTinChi lopTinChi;
+    
     @ManyToOne
-    @JoinColumn(name = "MaNhom")
+    @JoinColumn(name = "MaNhom", nullable = false)
     private Nhom nhom;
 }

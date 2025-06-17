@@ -57,6 +57,7 @@ public class GiangVienController {
         // Hiển thị currentPage = 1 nếu không có kết quả, ngược lại hiển thị page thực tế
         model.addAttribute("currentPage", lecturerPage.getTotalPages() > 0 ? page : 1);
         model.addAttribute("totalPages", lecturerPage.getTotalPages());
+        model.addAttribute("totalElements", lecturerPage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedKhoa", maKhoa);
         model.addAttribute("size", size);
