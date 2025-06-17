@@ -57,10 +57,10 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <a href="/accounts/new" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm mới tài khoản</span>
-                    </a>
+                    <button type="button" onclick="openCapTaiKhoanModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Cấp tài khoản</span>
+                    </button>
                     
                     <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                         <div class="relative flex-grow">
@@ -106,9 +106,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.loaiTK}"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${tk.quyen?.tenQuyen ?: 'N/A'}"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                                    <a th:href="@{'/accounts/edit/' + ${tk.maTK}}" class="text-blue-600 hover:text-blue-800 mr-3">
+                                    <button th:onclick="'editAccount(' + ${tk.maTK} + ')'" class="text-blue-600 hover:text-blue-800 mr-3">
                                         <i class="fas fa-edit"></i> Sửa
-                                    </a>
+                                    </button>
                                     <a th:href="@{'/accounts/delete/' + ${tk.maTK}}" 
                                        onclick="return confirm('Bạn chắc chắn muốn xóa tài khoản này? Việc này có thể ảnh hưởng đến người dùng liên quan.')" 
                                        class="text-red-600 hover:text-red-800">
@@ -144,64 +144,247 @@
     </div>
     <div th:replace="~{admin/layout/footer :: footer}"></div>
 
-    <div id="accountModal" th:class="${showEditModal ? '' : 'hidden'} + ' fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center'">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto modal-content-custom"> <div class="flex justify-between items-center border-b px-6 py-4">
-                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800" th:text="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Sửa thông tin tài khoản' : 'Thêm mới tài khoản'">Thêm mới tài khoản</h3>
-                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times fa-lg"></i></button> </div>
+    <!-- Modal Chỉnh Sửa Tài Khoản -->
+    <div id="editAccountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto modal-content-custom overflow-hidden">
+            <div class="flex justify-between items-center border-b px-6 py-4">
+                <h3 class="text-xl font-semibold text-gray-800">
+                    <i class="fas fa-edit"></i> Chỉnh Sửa Tài Khoản
+                </h3>
+                <button id="closeEditModalBtn" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Alert Message Area -->
+            <div id="editModalAlert" class="mx-6 mt-4 hidden"></div>
+            
             <div class="p-6">
-                <form id="accountForm" th:action="@{/accounts/save}" th:object="${newAccount}" method="post" class="space-y-4">
-                    <input type="hidden" id="maTKHidden" name="maTKHidden" th:field="*{maTK}"/>
-
-                    <div>
-                        <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã Tài Khoản:</label>
-                        <input type="text" id="maTK" th:field="*{maTK}" required
-                               th:disabled="${newAccount.maTK != null && !newAccount.maTK.isEmpty()}"
-                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
-                        <small th:if="${#fields.hasErrors('maTK')}" th:errors="*{maTK}" class="text-red-500 text-xs"></small>
+                <form id="editAccountForm" th:action="@{/accounts/save}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" id="editMaTK" name="maTK">
+                    
+                    <div class="mb-4">
+                        <label for="editUsername" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tên đăng nhập: <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="editUsername" name="username" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" 
+                               required>
                     </div>
                     
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên Đăng Nhập:</label>
-                        <input type="text" id="username" th:field="*{username}" required
-                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
-                        <small th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-500 text-xs"></small>
+                    <div class="mb-4">
+                        <label for="editNewPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                            Mật khẩu mới: <span class="text-sm text-gray-500">(Để trống nếu không đổi)</span>
+                        </label>
+                        <input type="password" id="editNewPassword" name="newPassword" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" 
+                               placeholder="Nhập mật khẩu mới...">
                     </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật Khẩu:</label>
-                        <input type="password" id="password" name="password" 
-                               th:required="${newAccount.maTK == null || newAccount.maTK.isEmpty()}" 
-                               th:placeholder="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Để trống nếu không đổi' : 'Nhập mật khẩu'"
-                               class="form-input w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" />
-                        <small id="passwordHelp" class="text-xs text-gray-500" th:text="${newAccount.maTK != null && !newAccount.maTK.isEmpty()} ? 'Để trống nếu không muốn thay đổi mật khẩu khi sửa.' : ''"></small>
-                    </div>
-
-                    <div>
-                        <label for="loaiTK" class="block text-sm font-medium text-gray-700 mb-1">Loại Tài Khoản:</label>
-                        <select id="loaiTK" th:field="*{loaiTK}" required
-                                class="form-select w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                    
+                    <div class="mb-4">
+                        <label for="editLoaiTK" class="block text-sm font-medium text-gray-700 mb-1">
+                            Loại tài khoản: <span class="text-red-500">*</span>
+                        </label>
+                        <select id="editLoaiTK" name="loaiTK" 
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" 
+                                required>
                             <option value="">-- Chọn loại tài khoản --</option>
-                            <option value="SINHVIEN">Sinh Viên</option>
-                            <option value="GIANGVIEN">Giảng Viên</option>
-                            <option value="NHANVIENPKT">Nhân Viên PKT</option>
-                            <option value="ADMIN">Quản trị viên</option> 
+                            <option value="SINHVIEN">Sinh viên</option>
+                            <option value="GIANGVIEN">Giảng viên</option>
+                            <option value="NHANVIENPKT">Nhân viên</option>
+                            <option value="ADMIN">Quản trị viên</option>
                         </select>
-                        <small th:if="${#fields.hasErrors('loaiTK')}" th:errors="*{loaiTK}" class="text-red-500 text-xs"></small>
                     </div>
-
-                    <div>
-                        <label for="quyen" class="block text-sm font-medium text-gray-700 mb-1">Quyền:</label>
-                        <select id="quyen" name="quyen.maQuyen" required
-                                class="form-select w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                    
+                    <div class="mb-6">
+                        <label for="editQuyen" class="block text-sm font-medium text-gray-700 mb-1">
+                            Quyền: <span class="text-red-500">*</span>
+                        </label>
+                        <select id="editQuyen" name="quyen.maQuyen" 
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" 
+                                required>
                             <option value="">-- Chọn quyền --</option>
-                            <option th:each="q : ${ListQuyen}" th:value="${q.maQuyen}" th:text="${q.tenQuyen}" th:selected="${newAccount.quyen != null && newAccount.quyen.maQuyen == q.maQuyen}"></option>
+                            <option th:each="quyen : ${listQuyen}" 
+                                    th:value="${quyen.maQuyen}" 
+                                    th:text="${quyen.tenQuyen}"></option>
                         </select>
-                         <small th:if="${#fields.hasErrors('quyen')}" th:errors="*{quyen}" class="text-red-500 text-xs"></small>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="cancelEditBtn" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
+                            Hủy
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                            <i class="fas fa-save mr-1"></i>Lưu thay đổi
+                        </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cấp Tài Khoản -->
+    <div id="capTaiKhoanModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto modal-content-custom overflow-hidden">
+            <div class="flex justify-between items-center border-b px-6 py-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">
+                    <i class="fas fa-user-plus"></i> Cấp Tài Khoản
+                </h3>
+                <button id="closeCapModalBtn" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Alert Message Area -->
+            <div id="modalAlert" class="mx-6 mt-4 hidden"></div>
+            
+            <div class="p-6">
+                
+                <!-- Tabs Navigation -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button id="sinhvientab" class="py-2 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600 whitespace-nowrap tab-btn active-tab">
+                            <i class="fas fa-user-graduate"></i> Sinh viên
+                        </button>
+                        <button id="giangvientab" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap tab-btn">
+                            <i class="fas fa-chalkboard-teacher"></i> Giảng viên
+                        </button>
+                        <button id="nhanvientab" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap tab-btn">
+                            <i class="fas fa-user-tie"></i> Nhân viên
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Tab Content -->
+                <div class="mt-6">
+                    <!-- Sinh viên Panel -->
+                    <div id="sinhvienpanel" class="tab-panel">
+                        <form id="sinhVienForm" action="/accounts/captaikhoan" method="POST">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="userRole" value="SINHVIEN">
+                            <input type="hidden" name="quyenId" value="3">
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chọn sinh viên: <span class="text-red-500">*</span></label>
+                                <select name="selectedUserId" id="sinhVienSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" required>
+                                    <option value="">-- Chọn sinh viên --</option>
+                                    <option th:each="sv : ${sinhViens}" th:value="${sv.maSV}" th:text="${sv.ho + ' ' + sv.ten + ' (' + sv.maSV + ')'}" th:data-ngaysinh="${sv.ngaySinh}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên:</label>
+                                    <input type="text" name="selectedUserName" id="sinhVienHoTen" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+                                    <input type="email" name="selectedUserEmail" id="sinhVienEmail" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập:</label>
+                                    <input type="text" name="username" id="sinhVienUsername" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu:</label>
+                                    <input type="text" name="password" id="sinhVienPassword" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Giảng viên Panel -->
+                    <div id="giangvienpanel" class="tab-panel hidden">
+                        <form id="giangVienForm" action="/accounts/captaikhoan" method="POST">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="userRole" value="GIANGVIEN">
+                            <input type="hidden" name="quyenId" value="2">
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chọn giảng viên: <span class="text-red-500">*</span></label>
+                                <select name="selectedUserId" id="giangVienSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" required>
+                                    <option value="">-- Chọn giảng viên --</option>
+                                    <option th:each="gv : ${giangViens}" th:value="${gv.maGV}" th:text="${gv.ho + ' ' + gv.ten + ' (' + gv.maGV + ')'}" th:data-ngaysinh="${gv.ngaySinh}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên:</label>
+                                    <input type="text" name="selectedUserName" id="giangVienHoTen" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+                                    <input type="email" name="selectedUserEmail" id="giangVienEmail" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập:</label>
+                                    <input type="text" name="username" id="giangVienUsername" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu:</label>
+                                    <input type="text" name="password" id="giangVienPassword" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Nhân viên Panel -->
+                    <div id="nhanvienpanel" class="tab-panel hidden">
+                        <form id="nhanVienForm" action="/accounts/captaikhoan" method="POST">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="userRole" value="NHANVIENPKT">
+                            <input type="hidden" name="quyenId" value="4">
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chọn nhân viên: <span class="text-red-500">*</span></label>
+                                <select name="selectedUserId" id="nhanVienSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" required>
+                                    <option value="">-- Chọn nhân viên --</option>
+                                    <option th:each="nv : ${nhanViens}" th:value="${nv.maNV}" th:text="${nv.ho + ' ' + nv.ten + ' (' + nv.maNV + ')'}" th:data-ngaysinh="${nv.ngaySinh}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên:</label>
+                                    <input type="text" name="selectedUserName" id="nhanVienHoTen" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+                                    <input type="email" name="selectedUserEmail" id="nhanVienEmail" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập:</label>
+                                    <input type="text" name="username" id="nhanVienUsername" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu:</label>
+                                    <input type="text" name="password" id="nhanVienPassword" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-900" readonly>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Footer Buttons -->
                 <div class="flex justify-end border-t px-6 py-4 gap-3 mt-6">
-                    <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Hủy</button> <button type="submit" form="accountForm" id="saveAccountBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                       <span th:text="${newAccount.maTK == null || newAccount.maTK.isEmpty()} ? 'Thêm mới' : 'Cập nhật'"></span>
+                    <button type="button" id="cancelCapModalBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Hủy
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" id="submitBtn">
+                        <i class="fas fa-save"></i> Cấp tài khoản
                     </button>
                 </div>
             </div>
@@ -212,31 +395,469 @@
     <script th:src="@{/admin/js/quixnav-init.js}"></script>
     <script th:src="@{/admin/js/custom.min.js}"></script>
 
+    <script src="https://cdn.tailwindcss.com/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.getElementById("accountModal");
-        const closeModalBtn = document.getElementById("closeModalBtn");
-        const cancelModalBtn = document.getElementById("cancelModalBtn");
-
-        // Đóng modal
-        function closeModal() {
-            window.location.href = '/accounts'; // Redirect về trang danh sách
-        }
-
-        if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
-        if (cancelModalBtn) cancelModalBtn.addEventListener("click", closeModal);
+    let currentActiveTab = 'sinhvien';
+    
+    // Hiển thị thông báo trong modal
+    function showModalAlert(message, type = 'error') {
+        const alertDiv = document.getElementById('modalAlert');
+        const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+        const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
         
-        // Đóng modal khi click ra ngoài (vùng backdrop)
-        modal.addEventListener("click", function (e) {
-            if (e.target === modal) { // Chỉ đóng khi click trực tiếp vào backdrop
-                closeModal();
+        alertDiv.innerHTML = `
+            <div class="border px-4 py-3 rounded ${bgColor}">
+                <div class="flex items-center">
+                    <i class="${icon} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            </div>
+        `;
+        alertDiv.classList.remove('hidden');
+        
+        // Tự động ẩn sau 5 giây
+        setTimeout(() => {
+            alertDiv.classList.add('hidden');
+        }, 5000);
+    }
+    
+    // Ẩn thông báo modal
+    function hideModalAlert() {
+        document.getElementById('modalAlert').classList.add('hidden');
+    }
+    
+    // Mở modal cấp tài khoản
+    function openCapTaiKhoanModal() {
+        document.getElementById('capTaiKhoanModal').classList.remove('hidden');
+        hideModalAlert();
+        resetAllForms();
+        switchTab('sinhvien');
+    }
+    
+    // Đóng modal cấp tài khoản
+    function closeCapTaiKhoanModal() {
+        document.getElementById('capTaiKhoanModal').classList.add('hidden');
+        resetAllForms();
+    }
+    
+    // Event listeners
+    document.addEventListener("DOMContentLoaded", function () {
+        // Đóng modal buttons
+        document.getElementById('closeCapModalBtn').addEventListener('click', closeCapTaiKhoanModal);
+        document.getElementById('cancelCapModalBtn').addEventListener('click', closeCapTaiKhoanModal);
+        
+        // Tab switching
+        document.getElementById('sinhvientab').addEventListener('click', () => switchTab('sinhvien'));
+        document.getElementById('giangvientab').addEventListener('click', () => switchTab('giangvien'));
+        document.getElementById('nhanvientab').addEventListener('click', () => switchTab('nhanvien'));
+        
+        // Change event cho select để tự động điền thông tin
+        document.getElementById('sinhVienSelect').addEventListener('change', function() {
+            updateSinhVienInfo();
+        });
+        
+        document.getElementById('giangVienSelect').addEventListener('change', function() {
+            updateGiangVienInfo();
+        });
+        
+        document.getElementById('nhanVienSelect').addEventListener('change', function() {
+            updateNhanVienInfo();
+        });
+        
+        // Đóng modal khi click ra ngoài
+        document.getElementById('capTaiKhoanModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCapTaiKhoanModal();
             }
         });
-
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-                closeModal();
+        
+        // Đóng modal với ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCapTaiKhoanModal();
             }
+        });
+        
+        // Handle form submit
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            e.preventDefault(); // Ngăn submit mặc định
+            console.log('Submit button clicked');
+            console.log('Current active tab:', currentActiveTab);
+            
+            hideModalAlert(); // Ẩn thông báo cũ
+            
+            // Xác định form dựa trên tab hiện tại
+            let formId;
+            switch(currentActiveTab) {
+                case 'sinhvien':
+                    formId = 'sinhVienForm';
+                    break;
+                case 'giangvien':
+                    formId = 'giangVienForm';
+                    break;
+                case 'nhanvien':
+                    formId = 'nhanVienForm';
+                    break;
+                default:
+                    formId = 'sinhVienForm';
+            }
+            
+            const form = document.getElementById(formId);
+            if (!form) {
+                console.log('Form not found:', formId);
+                showModalAlert('Không tìm thấy form. Vui lòng thử lại.', 'error');
+                return;
+            }
+            
+            console.log('Form found:', formId);
+            
+            // Kiểm tra validation cơ bản
+            const selectedUserId = form.querySelector('select[name="selectedUserId"]').value;
+            const selectedUserName = form.querySelector('input[name="selectedUserName"]').value;
+            const username = form.querySelector('input[name="username"]').value;
+            const password = form.querySelector('input[name="password"]').value;
+            
+            if (!selectedUserId) {
+                showModalAlert('Vui lòng chọn người dùng cần cấp tài khoản.', 'error');
+                return;
+            }
+            
+            if (!selectedUserName.trim()) {
+                showModalAlert('Thông tin họ tên không hợp lệ.', 'error');
+                return;
+            }
+            
+            if (!username.trim()) {
+                showModalAlert('Tên đăng nhập không được để trống.', 'error');
+                return;
+            }
+            
+            if (!password.trim()) {
+                showModalAlert('Mật khẩu không được để trống.', 'error');
+                return;
+            }
+            
+            // Kiểm tra validation HTML5
+            if (!form.checkValidity()) {
+                console.log('Form validation failed');
+                form.reportValidity();
+                return;
+            }
+            
+            // Hiển thị loading
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(form);
+            console.log('=== FORM DATA TO SUBMIT ===');
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+            console.log('========================');
+            
+            // Submit form
+            try {
+                console.log('Submitting form...');
+                form.submit();
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showModalAlert('Có lỗi xảy ra khi gửi form: ' + error.message, 'error');
+                // Restore button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    });
+    
+    // Switch tabs
+    function switchTab(tabName) {
+        currentActiveTab = tabName;
+        
+        // Hide all panels
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.add('hidden');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active-tab', 'border-blue-500', 'text-blue-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show active panel
+        document.getElementById(tabName + 'panel').classList.remove('hidden');
+        
+        // Add active class to current tab
+        const activeBtn = document.getElementById(tabName + 'tab');
+        activeBtn.classList.add('active-tab', 'border-blue-500', 'text-blue-600');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        
+        console.log('Switched to tab:', tabName);
+        
+        // Reset form cho tab hiện tại
+        resetForm(tabName);
+    }
+    
+    // Hàm chuyển đổi tiếng Việt không dấu
+    function removeVietnameseAccents(str) {
+        const accentsMap = {
+            'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a', 'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+            'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+            'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e', 'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+            'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+            'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o', 'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+            'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+            'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u', 'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+            'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            'đ': 'd',
+            'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A', 'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+            'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+            'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E', 'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+            'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+            'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O', 'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+            'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+            'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U', 'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+            'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+            'Đ': 'D'
+        };
+        
+        return str.split('').map(char => accentsMap[char] || char).join('');
+    }
+    
+    // Tạo username từ họ tên
+    function generateUsername(fullName, userCode) {
+        if (!fullName) return '';
+        
+        const nameParts = fullName.trim().split(' ');
+        if (nameParts.length === 1) {
+            return removeVietnameseAccents(nameParts[0].toLowerCase()) + userCode.toLowerCase();
+        }
+        
+        const lastName = nameParts[nameParts.length - 1];
+        const firstNameInitials = nameParts.slice(0, -1).map(name => name.charAt(0)).join('');
+        
+        return removeVietnameseAccents(lastName.toLowerCase() + firstNameInitials.toLowerCase()) + userCode.toLowerCase();
+    }
+    
+    // Tạo password từ ngày sinh
+    function generatePassword(birthDate) {
+        if (!birthDate) return '';
+        
+        // Format: ddmmyyyy
+        const date = new Date(birthDate);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}${month}${year}`;
+    }
+    
+    // Cập nhật thông tin sinh viên khi chọn
+    function updateSinhVienInfo() {
+        const select = document.getElementById('sinhVienSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            const text = selectedOption.text;
+            const match = text.match(/^(.+) \(([^)]+)\)$/);
+            const birthDate = selectedOption.getAttribute('data-ngaysinh');
+            
+            if (match) {
+                const fullName = match[1];
+                const userCode = match[2];
+                
+                document.getElementById('sinhVienHoTen').value = fullName;
+                document.getElementById('sinhVienEmail').value = userCode + '@student.ptithcm.edu.vn';
+                document.getElementById('sinhVienUsername').value = generateUsername(fullName, userCode);
+                document.getElementById('sinhVienPassword').value = generatePassword(birthDate);
+            }
+        } else {
+            clearSinhVienForm();
+        }
+    }
+    
+    // Cập nhật thông tin giảng viên khi chọn
+    function updateGiangVienInfo() {
+        const select = document.getElementById('giangVienSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            const text = selectedOption.text;
+            const match = text.match(/^(.+) \(([^)]+)\)$/);
+            const birthDate = selectedOption.getAttribute('data-ngaysinh');
+            
+            if (match) {
+                const fullName = match[1];
+                const userCode = match[2];
+                
+                document.getElementById('giangVienHoTen').value = fullName;
+                document.getElementById('giangVienEmail').value = userCode + '@ptithcm.edu.vn';
+                document.getElementById('giangVienUsername').value = generateUsername(fullName, userCode);
+                document.getElementById('giangVienPassword').value = generatePassword(birthDate);
+            }
+        } else {
+            clearGiangVienForm();
+        }
+    }
+    
+    // Cập nhật thông tin nhân viên khi chọn
+    function updateNhanVienInfo() {
+        const select = document.getElementById('nhanVienSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            const text = selectedOption.text;
+            const match = text.match(/^(.+) \(([^)]+)\)$/);
+            const birthDate = selectedOption.getAttribute('data-ngaysinh');
+            
+            if (match) {
+                const fullName = match[1];
+                const userCode = match[2];
+                
+                document.getElementById('nhanVienHoTen').value = fullName;
+                document.getElementById('nhanVienEmail').value = userCode + '@ptithcm.vn';
+                document.getElementById('nhanVienUsername').value = generateUsername(fullName, userCode);
+                document.getElementById('nhanVienPassword').value = generatePassword(birthDate);
+            }
+        } else {
+            clearNhanVienForm();
+        }
+    }
+    
+    // Clear forms
+    function clearSinhVienForm() {
+        document.getElementById('sinhVienHoTen').value = '';
+        document.getElementById('sinhVienEmail').value = '';
+        document.getElementById('sinhVienUsername').value = '';
+        document.getElementById('sinhVienPassword').value = '';
+    }
+    
+    function clearGiangVienForm() {
+        document.getElementById('giangVienHoTen').value = '';
+        document.getElementById('giangVienEmail').value = '';
+        document.getElementById('giangVienUsername').value = '';
+        document.getElementById('giangVienPassword').value = '';
+    }
+    
+    function clearNhanVienForm() {
+        document.getElementById('nhanVienHoTen').value = '';
+        document.getElementById('nhanVienEmail').value = '';
+        document.getElementById('nhanVienUsername').value = '';
+        document.getElementById('nhanVienPassword').value = '';
+    }
+    
+    // Reset specific form
+    function resetForm(tabName) {
+        switch(tabName) {
+            case 'sinhvien':
+                clearSinhVienForm();
+                document.getElementById('sinhVienSelect').value = '';
+                break;
+            case 'giangvien':
+                clearGiangVienForm();
+                document.getElementById('giangVienSelect').value = '';
+                break;
+            case 'nhanvien':
+                clearNhanVienForm();
+                document.getElementById('nhanVienSelect').value = '';
+                break;
+        }
+    }
+    
+    // Reset all forms
+    function resetAllForms() {
+        resetForm('sinhvien');
+        resetForm('giangvien');
+        resetForm('nhanvien');
+    }
+    
+    // === CHỈNH SỬA TÀI KHOẢN ===
+    
+    // Mở modal chỉnh sửa tài khoản
+    async function editAccount(maTK) {
+        try {
+            const response = await fetch(`/accounts/edit/${maTK}`);
+            if (!response.ok) {
+                throw new Error('Không thể tải thông tin tài khoản');
+            }
+            
+            const account = await response.json();
+            
+            // Điền thông tin vào form
+            document.getElementById('editMaTK').value = account.maTK;
+            document.getElementById('editUsername').value = account.username;
+            document.getElementById('editLoaiTK').value = account.loaiTK;
+            document.getElementById('editQuyen').value = account.quyen.maQuyen;
+            
+            // Clear password field
+            document.getElementById('editNewPassword').value = '';
+            
+            // Hiển thị modal
+            document.getElementById('editAccountModal').classList.remove('hidden');
+            
+        } catch (error) {
+            console.error('Lỗi khi tải thông tin tài khoản:', error);
+            alert('Không thể tải thông tin tài khoản: ' + error.message);
+        }
+    }
+    
+    // Đóng modal chỉnh sửa
+    function closeEditAccountModal() {
+        document.getElementById('editAccountModal').classList.add('hidden');
+        document.getElementById('editAccountForm').reset();
+        hideEditAlert();
+    }
+    
+    // Hiển thị thông báo trong modal chỉnh sửa
+    function showEditAlert(message, type = 'error') {
+        const alertDiv = document.getElementById('editModalAlert');
+        alertDiv.className = `mx-6 mt-4 p-3 rounded-md ${type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'}`;
+        alertDiv.textContent = message;
+        alertDiv.classList.remove('hidden');
+    }
+    
+    // Ẩn thông báo trong modal chỉnh sửa
+    function hideEditAlert() {
+        document.getElementById('editModalAlert').classList.add('hidden');
+    }
+    
+    // Event listeners cho modal chỉnh sửa
+    document.addEventListener('DOMContentLoaded', function() {
+        // Đóng modal khi click nút X
+        document.getElementById('closeEditModalBtn').addEventListener('click', closeEditAccountModal);
+        
+        // Đóng modal khi click nút Hủy
+        document.getElementById('cancelEditBtn').addEventListener('click', closeEditAccountModal);
+        
+        // Đóng modal khi click bên ngoài
+        document.getElementById('editAccountModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditAccountModal();
+            }
+        });
+        
+        // Xử lý submit form chỉnh sửa
+        document.getElementById('editAccountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Validate dữ liệu
+            const username = formData.get('username');
+            const loaiTK = formData.get('loaiTK');
+            const quyenId = formData.get('quyen.maQuyen');
+            
+            if (!username || !loaiTK || !quyenId) {
+                showEditAlert('Vui lòng điền đầy đủ thông tin bắt buộc');
+                return;
+            }
+            
+            // Submit form
+            this.submit();
         });
     });
     </script>

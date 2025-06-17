@@ -37,7 +37,7 @@
          width: 100% !important;
         }
         }
-        </style>
+    </style>
 </head>
 <body class="bg-gray-50 font-sans">
     <div th:replace="~{admin/layout/header :: header}"></div>
@@ -77,21 +77,21 @@
 
                             <!-- Khoa filter -->
                             <select name="maKhoa" class="border rounded-md px-3 py-2 w-full md:w-[180px]">
-                                <option value="">Tất cả khoa</option>
+                                    <option value="">Tất cả khoa</option>
                                 <option th:each="khoa : ${listKhoa}" 
-                                        th:value="${khoa.maKhoa}" 
-                                        th:text="${khoa.tenKhoa}" 
+                                            th:value="${khoa.maKhoa}" 
+                                            th:text="${khoa.tenKhoa}"
                                         th:selected="${selectedKhoa == khoa.maKhoa}">
                                 </option>
-                            </select>
+                                </select>
 
                             <!-- Giảng viên filter -->
                             <select name="maGV" class="border rounded-md px-3 py-2 w-full md:w-[180px]" 
                                     th:attr="data-selected=${selectedGiangVien}">
-                                <option value="">Tất cả giảng viên</option>
+                                    <option value="">Tất cả giảng viên</option>
                                 <option th:each="gv : ${listGiangVien}" 
-                                        th:value="${gv.maGV}" 
-                                        th:text="${gv.ho + ' ' + gv.ten}"
+                                            th:value="${gv.maGV}" 
+                                            th:text="${gv.ho + ' ' + gv.ten}"
                                         th:selected="${selectedGiangVien == gv.maGV}">
                                 </option>
                             </select>
@@ -107,9 +107,9 @@
                                 <i class="fas fa-search mr-1"></i>Tìm kiếm
                             </button>
 
-                            <!-- Xóa bộ lọc -->
+                            <!-- Làm mới -->
                             <a href="/topics" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition flex items-center">
-                                <i class="fas fa-times mr-1"></i>Xóa bộ lọc
+                                <i class="fas fa-sync-alt mr-1"></i>Làm mới
                             </a>
 
                             <!-- Advanced Filters -->
@@ -158,9 +158,9 @@
                                 <input type="hidden" name="maMon" th:value="${selectedMonHoc}" />
                             </form>
                         </div>
-                    </div>
-                </div>
-                
+                                </div>
+                            </div>
+
                 <!-- Filter information -->
                 <div class="mb-4 text-sm text-gray-600">
                     <div class="flex flex-wrap items-center gap-4">
@@ -247,9 +247,9 @@
                 <div th:if="${totalPages > 1 and !#lists.isEmpty(ListTopics)}" class="mt-6 flex justify-center gap-2">
                     <a th:each="i : ${#numbers.sequence(1, totalPages)}"
                        th:href="@{|/topics?page=${i}&size=${size}&search=${keyword}&maKhoa=${selectedKhoa}&maGV=${selectedGiangVien}&maLopTC=${selectedLopTC}&maMon=${selectedMonHoc}|}"
-                       th:text="${i}"
-                       th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
-                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    th:text="${i}"
+                    th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
+                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
                     </a>
                 </div>
             </div>
@@ -346,12 +346,12 @@
         
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("topicModal");
-
+    
             // Nếu cần hiển thị modal chỉnh sửa
             if (showEditModal === true) {
                 modal.classList.remove("hidden");
                 if (isEditMode) {
-                    document.getElementById("modalTitle").textContent = "Sửa thông tin đề tài";
+                document.getElementById("modalTitle").textContent = "Sửa thông tin đề tài";
                 } else {
                     document.getElementById("modalTitle").textContent = "Thêm đề tài";
                 }
@@ -364,21 +364,21 @@
                     advancedFilter.classList.remove("hidden");
                 }
             }
-
+    
             // Đóng modal khi bấm ra ngoài
             modal.addEventListener("click", function (e) {
                 if (e.target === modal) {
                     modal.classList.add("hidden");
                 }
             });
-
+    
             // Đóng modal khi bấm ESC
             document.addEventListener("keydown", function (e) {
                 if (e.key === "Escape") {
                     modal.classList.add("hidden");
                 }
             });
-
+    
             // Đóng modal khi bấm nút "X"
             const closeModal = document.getElementById("closeModal");
             if (closeModal) {
@@ -386,7 +386,7 @@
                     modal.classList.add("hidden");
                 });
             }
-
+    
             // Đóng modal khi bấm nút "Hủy"
             const cancelBtn = document.getElementById("cancelBtn");
             if (cancelBtn) {

@@ -77,7 +77,7 @@
                             
                             <!-- Clear filter button -->
                             <a href="/employees" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition flex items-center">
-                                <i class="fas fa-times mr-1"></i>Xóa bộ lọc
+                                <i class="fas fa-sync-alt mr-1"></i>Làm mới
                             </a>
                             
                             <!-- Hidden fields to preserve pagination -->
@@ -137,6 +137,7 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số ĐT</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Sinh</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã TK</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                             </tr>
@@ -148,6 +149,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${nv.ten}"></td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${nv.soDT}"></td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${nv.ngaySinh != null} ? ${#temporals.format(nv.ngaySinh, 'dd/MM/yyyy')} : 'N/A'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${nv.email}"></td>
                                 <td class="px-6 py-4 text-sm text-gray-900" th:text="${nv.taiKhoan != null} ? ${nv.taiKhoan.maTK} : 'Chưa có TK'"></td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
                                     <a th:href="@{'/employees/edit/' + ${nv.maNV}}" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</a>
@@ -166,6 +168,10 @@
                        th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
                     </a>
+                                <span th:if="${currentPage == totalPages}" class="page-link">&raquo;&raquo;</span>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -218,10 +224,20 @@
                                    th:value="${editEmployee?.ngaySinh != null} ? ${#temporals.format(editEmployee.ngaySinh, 'yyyy-MM-dd')} : ''" required
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email (tùy chọn)</label>
+                            <input type="email" id="email" th:field="*{email}"
+                                   placeholder="Nhập email cá nhân (VD: example@email.com)"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        
                         <!-- Mã TK -->
                         <div>
-                            <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã TK</label>
-                            <input type="text" id="maTK" th:field="*{taiKhoan.maTK}" required
+                            <label for="maTK" class="block text-sm font-medium text-gray-700 mb-1">Mã TK (tùy chọn)</label>
+                            <input type="text" id="maTK" th:field="*{taiKhoan.maTK}"
+                                   placeholder="Để trống nếu chưa có tài khoản"
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
                         </div>
                     </form>
