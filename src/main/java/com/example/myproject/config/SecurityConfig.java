@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
@@ -55,15 +56,16 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/client/gv/**").hasRole("GIANG_VIEN")
                 .requestMatchers("/client/sv/**").hasRole("SINH_VIEN")
-                
                 .requestMatchers("/client/public/**").hasAnyRole("SINH_VIEN", "GIANG_VIEN")
                 .requestMatchers("/admin/**").hasAnyRole("NHAN_VIEN", "ADMIN")
+                .requestMatchers("/nvpkt/**").hasAnyRole("NHAN_VIEN", "ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
                 .successHandler(successHandler)
+                .failureHandler(authenticationFailureHandler()) 
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -86,6 +88,9 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
+}
     
 }

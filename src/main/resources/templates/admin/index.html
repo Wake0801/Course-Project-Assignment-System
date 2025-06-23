@@ -62,70 +62,7 @@
 
         <div th:replace="~{admin/layout/header :: header}"></div>
         <div th:replace="~{admin/layout/sidebar :: sidebar}"></div>
-        <div class="content-body">
-            <div class="container-fluid">
-                <div class="flex space-x-4">
-                    <!-- Nút Trang chủ -->
-                    <form th:action="@{/other/logi}" method="get">
-                        <button 
-                            type="submit" 
-                            name="login" 
-                            value="login"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow"
-                        >
-                            Trang chủ
-                        </button>
-                    </form>
-                
-                    <!-- Nút Show sinh viên -->
-                    <form th:action="@{/SinhVien}" method="get">
-                        <button 
-                            type="submit" 
-                            name="SinhVien" 
-                            value="SinhVien"
-                            class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow"
-                        >
-                            Show sinh viên
-                        </button>
-                    </form>
-                </div>
-                
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Mã SV</th>
-                                <th>Họ</th>
-                                <th>Tên</th>
-                                <th>Giới Tính</th>
-                                <th>Số ĐT</th>
-                                <th>Địa Chỉ</th>
-                                <th>Ngày Sinh</th>
-                                <th>Email</th>
-                                <th>Mã Lớp</th>
-                                <th>Mã TK</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                                <tr th:each="sinhVien : ${sinhVienList}">
-                                    <td th:text="${sinhVien.maSV}"></td>
-                                    <td th:text="${sinhVien.ho}"></td>
-                                    <td th:text="${sinhVien.ten}"></td>
-                                    <td th:text="${sinhVien.gioiTinh} ? 'Nữ' : 'Nam'"></td>
-                                    <td th:text="${sinhVien.soDT}"></td>
-                                    <td th:text="${sinhVien.diaChi}"></td>
-                                    <td th:text="${sinhVien.ngaySinh}"></td>
-                                    <td th:text="${sinhVien.email}"></td>
-                                    <td th:text="${sinhVien.lop.maLop}"></td>
-                                    <td th:text="${sinhVien.taiKhoan.maTK}"></td>
-                                </tr>
-                                
-                            
-                        </tbody>
-                    </table>
-                
-            </div>
-        </div>
+        
         <div th:replace="~{admin/layout/footer :: footer}"></div>
 
     </div>

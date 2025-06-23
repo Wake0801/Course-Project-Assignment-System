@@ -1,26 +1,27 @@
+<html lang="zxx" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <div class="quixnav" th:fragment="sidebar">
     <div class="quixnav-scroll">
         <ul class="metismenu" id="menu">
-            <li class="nav-label">Quản lí</li>
-            <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
+            <li class="nav-label" sec:authorize="hasRole('ADMIN')">Quản lí</li>
+            <li><a class="has-arrow" href="javascript:void()" aria-expanded="false" sec:authorize="hasRole('ADMIN')"><i
                         class="icon icon-form"></i><span class="nav-text">Quản lí</span></a>
                         <ul aria-expanded="false">
                             <li><a th:href="@{/students}" >Quản lí sinh viên</a></li>
                             <li><a th:href="@{/lecturers}" >Quản lí giảng viên</a></li>
                             <li><a th:href="@{/employees}" >Quản lí nhân viên</a></li>
                             <li><a th:href="@{/topics}" >Quản lí đề tài</a></li>
-                            <li><a th:href="@{/groups}" >Quản lí nhóm</a></li>
+                            <li><a th:href="@{/group}" >Quản lí nhóm</a></li>
                             <li><a th:href="@{/accounts}" >Quản lí tài khoản</a></li>
-                            <li><a th:href="@{/admin/index}" >Quản lí môn học</a></li>
-                            <li><a th:href="@{/admin/index}" >Quản lí lớp tín chỉ</a></li>
+                            <li><a th:href="@{/subjects}" >Quản lí môn học</a></li>
+                            <li><a th:href="@{/ltc}" >Quản lí lớp tín chỉ</a></li>
                         </ul>
             </li>
             <li class="nav-label">Thống kê</li>
             <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                         class="icon icon-layout-25"></i><span class="nav-text">Thống kê</span></a>
                 <ul aria-expanded="false">
-                    <li><a href="table-bootstrap-basic.html">Thống kê điểm</a></li>
-                    <li><a href="table-datatable-basic.html">Tỷ lệ</a></li>
+                    <li><a th:href="@{/nvpkt/thong-ke/diem}">Thống kê điểm</a></li>
+                    <li><a th:href="@{/nvpkt/thong-ke/ty-le-diem}">Tỷ lệ</a></li>
                 </ul>
             </li>                  
         </ul>

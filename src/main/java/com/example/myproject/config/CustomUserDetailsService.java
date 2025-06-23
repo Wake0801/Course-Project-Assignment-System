@@ -29,6 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (!isValidEmail(username)) {
+            throw new UsernameNotFoundException("Username phải là email hợp lệ");
+        }
         TaiKhoan taiKhoan = taiKhoanRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user"));
         
@@ -47,9 +50,19 @@ public class CustomUserDetailsService implements UserDetailsService {
                 userDetails = nhanVienPKTRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
                     .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy nhân viên"));
                 break;
+            case "ADMIN":
+                // Không cần lấy thông tin chi tiết cho ADMIN
+                userDetails = null;
+                break;
+            default:
+                throw new UsernameNotFoundException("Loại quyền không hợp lệ");
         }
         
         return new CustomUserDetails(taiKhoan, userDetails);
     }
+    private boolean isValidEmail(String email) {
+    String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+    return email != null && email.matches(emailRegex);
+}
 }
 

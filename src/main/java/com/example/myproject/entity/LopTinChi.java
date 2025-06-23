@@ -1,6 +1,7 @@
 package com.example.myproject.entity;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,15 +29,17 @@ public class LopTinChi {
     private GiangVien giangVien;
     
     @Column(name="NgayMoLop")
-    private Date ngayMoLop ;
-    /**
-     * Phương thức tự động tạo tên lớp tín chỉ từ mã và tên môn học
-     * @return Tên lớp tín chỉ được tạo động
-     */
-    public String getTenLopTC() {
-        if (this.monHoc != null) {
-            return this.maLopTC + " - " + this.monHoc.getTenMon();
-        }
-        return this.maLopTC;
-    }
+    private LocalDate ngayMoLop;
+
+    @Column(name = "SoLuongToiThieu", nullable = false)
+    private int soLuongToiThieu;
+
+    @Column(name = "HocKi", nullable = false)
+    private int hocKi;
+
+    @Column(name = "TrangThai", nullable = false)
+    private boolean trangThai;
+
+    @Column(name = "SoLuongToiDa")
+    private Integer soLuongToiDa;
 }

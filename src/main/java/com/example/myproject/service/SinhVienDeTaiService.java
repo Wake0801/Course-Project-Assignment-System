@@ -1,5 +1,7 @@
 package com.example.myproject.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -121,20 +123,24 @@ public class SinhVienDeTaiService {
         
         if (nhom != null) {
             List<LoaiBaoCaoDeTai> diems = lbcDTRepository.findById_MaDT(deTai.getMaDT());
-            double tongDiem = 0;
-            double tongHeSo = 0;
-            
+            BigDecimal tongDiem = BigDecimal.ZERO;
+            BigDecimal tongHeSo = BigDecimal.ZERO;
+
             for (LoaiBaoCaoDeTai diem : diems) {
                 LoaiBaoCaoLopTC lbc_ltc = lbcLTCRepository.findById(new LoaiBaoCaoLopTCId(
                         diem.getId().getMaLoaiBaoCao(), deTai.getLopTinChi().getMaLopTC())).orElse(null);
                 if (diem.getDiem() != null && lbc_ltc != null && lbc_ltc.getHeSoDiem() != null) {
-                    tongDiem += diem.getDiem() * lbc_ltc.getHeSoDiem();
-                    tongHeSo += lbc_ltc.getHeSoDiem();
+                    BigDecimal diemBD = new BigDecimal(diem.getDiem());
+                    BigDecimal heSoDiem = lbc_ltc.getHeSoDiem();
+
+                    tongDiem = tongDiem.add(diemBD.multiply(heSoDiem));
+                    tongHeSo = tongHeSo.add(heSoDiem);
                 }
             }
-            
-            if (tongHeSo > 0) {
-                dto.setDiemTrungBinh(Math.round((tongDiem / tongHeSo) * 10.0) / 10.0);
+
+            if (tongHeSo.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal diemTB = tongDiem.divide(tongHeSo, 2, RoundingMode.HALF_UP);
+                dto.setDiemTrungBinh(diemTB.doubleValue());
             }
         }
         

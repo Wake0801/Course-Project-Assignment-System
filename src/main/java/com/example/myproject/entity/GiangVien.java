@@ -27,7 +27,6 @@ public class GiangVien {
 
     @Column(name = "NgaySinh", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
     @Column(name = "Email", length = 100, unique = true)
@@ -43,5 +42,7 @@ public class GiangVien {
     @ManyToOne
     @JoinColumn(name = "MaTK", nullable = false)
     private TaiKhoan taiKhoan;
-
+    public String getTenGV() {
+        return (ho != null ? ho : "") + " " + (ten != null ? ten : "");
+    }
 }

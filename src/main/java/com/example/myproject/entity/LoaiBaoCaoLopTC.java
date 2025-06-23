@@ -1,5 +1,7 @@
 package com.example.myproject.entity;
 
+import java.math.BigDecimal;
+
 import com.example.myproject.compositeKey.LoaiBaoCaoLopTCId;
 
 import jakarta.persistence.*;
@@ -20,6 +22,6 @@ public class LoaiBaoCaoLopTC {
     @ManyToOne
     @JoinColumn(name = "MaLopTC", referencedColumnName = "MaLopTC", insertable = false, updatable = false)
     private LopTinChi maLopTC;
-    private Double heSoDiem;
+    private BigDecimal heSoDiem;
 }
 

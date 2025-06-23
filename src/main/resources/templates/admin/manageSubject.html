@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý môn học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        .layout { display: flex; min-height: calc(100vh - 5rem); margin-top: 5rem; position: relative; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-4">
+            <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Quản lý môn học</h1>
+                <!-- Thông báo -->
+                <div th:if="${message != null}" class="mb-4 p-3 rounded bg-green-100 text-green-800 border border-green-200" th:text="${message}"></div>
+                <div th:if="${error != null}" class="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-200" th:text="${error}"></div>
+                <!-- Controls section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm môn học</span>
+                    </button>
+                    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                        <!-- Search input -->
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <form th:action="@{/subjects}" method="get" class="flex gap-2">
+                                <input type="text" name="search" placeholder="Tìm kiếm..."
+                                    th:value="${keyword}" class="pl-3 pr-4 py-2 border rounded-md" />
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Tìm</button>
+                            </form>
+                        </div>
+                        <!-- Rows per page selector -->
+                        <div class="flex items-center gap-2">
+                            <label for="rowsPerPage" class="text-gray-600 whitespace-nowrap">Hiển thị:</label>
+                            <form th:action="@{/subjects}" method="get" class="ml-4">
+                                <select name="size" onchange="this.form.submit()" class="border rounded-md px-2 py-1">
+                                    <option th:selected="${size==10}" value="10">10</option>
+                                    <option th:selected="${size==30}" value="30">30</option>
+                                    <option th:selected="${size==50}" value="50">50</option>
+                                    <option th:selected="${size==100}" value="100">100</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Table container -->
+                <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Môn</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Môn</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiết LT</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiết TH</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="mh : ${ListSubjects}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${mh.maMon}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${mh.tenMon}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${mh.soTietLT}"></td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${mh.soTietTH}"></td>
+                                <td class="px-6 py-4 text-right text-sm font-medium flex gap-2 justify-end">
+                                    <a th:href="@{'/subjects/edit/' + ${mh.maMon}}"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300 transition"
+                                        title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="hidden md:inline">Sửa</span>
+                                    </a>
+                                    <a th:href="@{'/subjects/delete/' + ${mh.maMon}}"
+                                        onclick="return confirm('Bạn chắc chắn muốn xóa?')"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                                        title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                        <span class="hidden md:inline">Xóa</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="mt-6 flex justify-center gap-2">
+                    <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                       th:href="@{|/subjects?page=${i}&size=${size}&search=${keyword}|}"
+                       th:text="${i}"
+                       th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Modal for Add/Edit -->
+        <div id="subjectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 id="modalTitle" class="text-xl md:text-2xl font-semibold text-gray-800">Thêm môn học</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6 flex-1 overflow-y-auto">
+                    <form id="subjectForm" th:action="@{/subjects/save}" th:object="${editSubject}" method="post" class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="maMon" class="block text-sm font-medium text-gray-700 mb-1">Mã Môn</label>
+                            <input type="text" id="maMon" name="maMon" th:value="${editSubject?.maMon}"
+                                   th:readonly="${editSubject?.maMon != null}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="tenMon" class="block text-sm font-medium text-gray-700 mb-1">Tên Môn</label>
+                            <input type="text" id="tenMon" th:field="*{tenMon}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="soTietLT" class="block text-sm font-medium text-gray-700 mb-1">Số tiết LT</label>
+                            <input type="number" id="soTietLT" th:field="*{soTietLT}" min="0" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="soTietTH" class="block text-sm font-medium text-gray-700 mb-1">Số tiết TH</label>
+                            <input type="number" id="soTietTH" th:field="*{soTietTH}" min="0" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                    </form>
+                    <div class="flex justify-end border-t px-6 py-4 gap-3">
+                        <button type="button" id="cancelBtn" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Hủy
+                        </button>
+                        <button type="submit" form="subjectForm" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <span id="submitBtnText">Thêm mới</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("subjectModal");
+            const subjectForm = document.getElementById("subjectForm");
+            const modalTitle = document.getElementById("modalTitle");
+            const addBtn = document.getElementById("addBtn");
+            const submitBtnText = document.getElementById("submitBtnText");
+            // Hiển thị modal thêm mới
+            if (addBtn) {
+                addBtn.addEventListener("click", function () {
+                    subjectForm.reset();
+                    subjectForm.maMon.readOnly = false;
+                    subjectForm.maMon.value = "";
+                    subjectForm.tenMon.value = "";
+                    subjectForm.soTietLT.value = "";
+                    subjectForm.soTietTH.value = "";
+                    modalTitle.textContent = "Thêm môn học";
+                    submitBtnText.textContent = "Thêm mới";
+                    subjectForm.setAttribute("action", "/subjects/save");
+                    modal.classList.remove("hidden");
+                });
+            }
+            // Hiển thị modal sửa khi nhấn nút Sửa
+            document.querySelectorAll('a[href^="/subjects/edit/"]').forEach(function(editLink) {
+                editLink.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    // Lấy dòng hiện tại
+                    const row = editLink.closest("tr");
+                    // Lấy dữ liệu từ các cột
+                    const maMon = row.children[0].textContent.trim();
+                    const tenMon = row.children[1].textContent.trim();
+                    const soTietLT = row.children[2].textContent.trim();
+                    const soTietTH = row.children[3].textContent.trim();
+                    // Gán vào form
+                    subjectForm.maMon.value = maMon;
+                    subjectForm.maMon.readOnly = true;
+                    subjectForm.tenMon.value = tenMon;
+                    subjectForm.soTietLT.value = soTietLT;
+                    subjectForm.soTietTH.value = soTietTH;
+                    modalTitle.textContent = "Sửa thông tin môn học";
+                    submitBtnText.textContent = "Cập nhật";
+                    // Đổi action về /subjects/save (cập nhật)
+                    subjectForm.setAttribute("action", "/subjects/save");
+                    modal.classList.remove("hidden");
+                });
+            });
+            // Đóng modal khi click nền tối hoặc các nút đóng/hủy
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    modal.classList.add("hidden");
+                }
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    modal.classList.add("hidden");
+                }
+            });
+            const closeModal = document.getElementById("closeModal");
+            if (closeModal) {
+                closeModal.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            const cancelBtn = document.getElementById("cancelBtn");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            // Xác nhận xóa
+            document.querySelectorAll('a[href*="/subjects/delete/"]').forEach(function(link) {
+                link.addEventListener("click", function(e) {
+                    if (!confirm("Bạn chắc chắn muốn xóa môn học này?")) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+        /*]]>*/
+    </script>
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+</body>
+</html>

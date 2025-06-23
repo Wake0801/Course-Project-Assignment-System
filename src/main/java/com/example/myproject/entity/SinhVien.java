@@ -37,7 +37,6 @@ public class SinhVien {
 
     @Column(name = "NgaySinh", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
     @Column(name = "Email", length = 100, unique = true)

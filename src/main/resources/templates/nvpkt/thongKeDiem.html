@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê điểm lớp tín chỉ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for table */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 5rem); /* Trừ chiều cao header */
+            margin-top: 5rem; /* Chiều cao header */
+            position: relative;
+        }
+        
+
+        
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-4">
+            <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+                
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Thống kê điểm lớp tín chỉ</h1>
+                        <p class="text-gray-600 mt-1">Xem và quản lý điểm số của sinh viên theo từng đề tài</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a th:if="${thongKeDiem != null and !#lists.isEmpty(thongKeDiem)}"
+                           th:href="@{/nvpkt/thong-ke/diem/export(maLopTC=${maLopTCDaChon}, loaiCham=${loaiChamDaChon}, search=${searchKeyword})}" 
+                           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2">
+                            <i class="fas fa-file-export"></i>
+                            <span>Xuất Excel</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success and Error Messages -->
+                <div th:if="${successMessage}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${successMessage}"></span>
+                </div>
+                <div th:if="${errorMessage}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${errorMessage}"></span>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fas fa-filter text-blue-500"></i>
+                        Bộ lọc dữ liệu
+                    </h2>
+                    
+                    <form id="filterForm" th:action="@{/nvpkt/thong-ke/diem}" method="get" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chọn lớp tín chỉ</label>
+                                <div class="relative">
+                                    <select name="maLopTC" id="class-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 hover:border-gray-400 transition-colors">
+                                        <option value="" class="text-gray-500">-- Chọn lớp --</option>
+                                        <option th:each="ltc : ${danhSachLopTC}" 
+                                                th:value="${ltc.maLopTC}" 
+                                                th:text="${ltc.tenLopTC}"
+                                                th:selected="${ltc.maLopTC == maLopTCDaChon}"
+                                                class="text-gray-900"></option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Loại báo cáo</label>
+                                <div class="relative">
+                                    <select name="loaiCham" id="report-type-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 hover:border-gray-400 transition-colors">
+                                        <option value="" class="text-gray-500">-- Chọn loại báo cáo --</option>
+                                        <option value="mid" th:selected="${loaiChamDaChon == 'mid'}" class="text-gray-900">Giữa kì</option>
+                                        <option value="final" th:selected="${loaiChamDaChon == 'final'}" class="text-gray-900">Cuối kì</option>
+                                        <option value="both" th:selected="${loaiChamDaChon == 'both'}" class="text-gray-900">Cả hai (Tổng điểm)</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                                                        <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
+                                        <input type="text" name="search" th:value="${searchKeyword}" 
+                                               placeholder="Nhập mã SV, tên SV, mã đề tài..." 
+                                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400">
+                                    </div>
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                        <i class="fas fa-search mr-1"></i>Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Info Card -->
+                <div th:if="${lopTinChiDaChon != null}" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+                    <div class="flex items-start gap-4">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-blue-800" th:text="${lopTinChiDaChon.tenLopTC}">Thông tin lớp tín chỉ</h3>
+                            <p class="text-blue-700 mt-1">
+                                Giảng viên: <span th:text="${lopTinChiDaChon.giangVien.ho + ' ' + lopTinChiDaChon.giangVien.ten}"></span>
+                                | Môn học: <span th:text="${lopTinChiDaChon.monHoc.tenMon}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message when no class selected -->
+                <div th:if="${maLopTCDaChon == null or maLopTCDaChon == ''}" class="bg-white rounded-xl shadow-md p-12 border border-gray-200 text-center">
+                    <div class="flex flex-col items-center justify-center gap-4">
+                        <i class="fas fa-graduation-cap text-6xl text-gray-300"></i>
+                        <h3 class="text-xl font-semibold text-gray-600">Vui lòng chọn lớp tín chỉ</h3>
+                    </div>
+                </div>
+
+                <!-- Table Section (only show when class is selected) -->
+                <div th:if="${maLopTCDaChon != null and maLopTCDaChon != ''}" class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đề tài - Tên đề tài</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên nhóm</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số thành viên</th>
+                                <!-- Conditional column header based on report type -->
+                                <th th:if="${loaiChamDaChon == 'mid'}" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm giữa kì</th>
+                                <th th:if="${loaiChamDaChon == 'final'}" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm cuối kì</th>
+                                <th th:if="${loaiChamDaChon == 'both' or loaiChamDaChon == null or loaiChamDaChon == ''}" scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng kết</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Xem chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Data rows -->
+                            <th:block th:if="${thongKeDiem != null and !#lists.isEmpty(thongKeDiem)}">
+                                <tr th:each="dto, iterStat : ${thongKeDiem}" class="hover:bg-gray-50 transition duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${dto.maDT}"></div>
+                                        <div class="text-sm text-gray-500" th:text="${dto.tenDT}"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${dto.tenNhom}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${#lists.size(dto.thanhViens)}"></td>
+                                    
+                                    <!-- Conditional column display based on report type -->
+                                    <td th:if="${loaiChamDaChon == 'mid'}" class="px-6 py-4 whitespace-nowrap text-sm font-bold" 
+                                        th:classappend="${dto.diemGiuaKy != null and dto.diemGiuaKy >= 8.5} ? 'text-green-600' : (${dto.diemGiuaKy != null and dto.diemGiuaKy >= 7.0} ? 'text-blue-600' : (${dto.diemGiuaKy != null and dto.diemGiuaKy >= 5.5} ? 'text-yellow-600' : 'text-red-600'))"
+                                        th:text="${dto.diemGiuaKy != null ? #numbers.formatDecimal(dto.diemGiuaKy, 1, 1) : '-'}"></td>
+                                    
+                                    <td th:if="${loaiChamDaChon == 'final'}" class="px-6 py-4 whitespace-nowrap text-sm font-bold" 
+                                        th:classappend="${dto.diemCuoiKy != null and dto.diemCuoiKy >= 8.5} ? 'text-green-600' : (${dto.diemCuoiKy != null and dto.diemCuoiKy >= 7.0} ? 'text-blue-600' : (${dto.diemCuoiKy != null and dto.diemCuoiKy >= 5.5} ? 'text-yellow-600' : 'text-red-600'))"
+                                        th:text="${dto.diemCuoiKy != null ? #numbers.formatDecimal(dto.diemCuoiKy, 1, 1) : '-'}"></td>
+                                    
+                                    <td th:if="${loaiChamDaChon == 'both' or loaiChamDaChon == null or loaiChamDaChon == ''}" class="px-6 py-4 whitespace-nowrap text-sm font-bold" 
+                                        th:classappend="${dto.diemTongKet != null and dto.diemTongKet >= 8.5} ? 'text-green-600' : (${dto.diemTongKet != null and dto.diemTongKet >= 7.0} ? 'text-blue-600' : (${dto.diemTongKet != null and dto.diemTongKet >= 5.5} ? 'text-yellow-600' : 'text-red-600'))"
+                                        th:text="${dto.diemTongKet != null ? #numbers.formatDecimal(dto.diemTongKet, 1, 1) : '-'}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <button type="button" 
+                                                class="detail-modal-btn px-3 py-1 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-200"
+                                                th:data-index="${iterStat.index}"
+                                                onclick="openDetailModal(this)">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            Chi tiết
+                                        </button>
+                                    </td>
+                                </tr>
+                            </th:block>
+                            
+                            <!-- Empty state when class selected but no data -->
+                            <tr th:if="${thongKeDiem == null or #lists.isEmpty(thongKeDiem)}">
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i class="fas fa-search text-3xl text-gray-300"></i>
+                                        <p>Không tìm thấy dữ liệu phù hợp với bộ lọc</p>
+                                        <div class="text-sm text-gray-400 mt-2">
+                                            <span th:if="${searchKeyword != null and !searchKeyword.isEmpty()}">
+                                                Thử thay đổi từ khóa tìm kiếm hoặc 
+                                            </span>
+                                            <a th:href="@{/nvpkt/thong-ke/diem(maLopTC=${maLopTCDaChon})}" class="text-blue-600 hover:text-blue-800">Xóa bộ lọc</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-users text-blue-500"></i>
+                        <span id="modalTitle">Danh sách thành viên nhóm</span>
+                    </h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeDetailModal()">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Mã đề tài:</span>
+                            <span id="modalMaDT" class="text-sm font-semibold text-gray-900 ml-2"></span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Tên nhóm:</span>
+                            <span id="modalTenNhom" class="text-sm font-semibold text-gray-900 ml-2"></span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="text-sm font-medium text-gray-600">Tên đề tài:</span>
+                            <span id="modalTenDT" class="text-sm font-semibold text-gray-900 ml-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">STT</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Mã SV</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Tên sinh viên</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Lớp</th>
+                                <th id="modalScoreHeader" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Điểm</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalStudentList" class="bg-white divide-y divide-gray-200">
+                            <!-- Student rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-end mt-6">
+                    <button type="button" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                            onclick="closeDetailModal()">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data for JavaScript -->
+    <script th:if="${thongKeDiem != null}" th:inline="javascript">
+        var thongKeDiemData = /*[[${thongKeDiem}]]*/ [];
+        var loaiChamSelected = /*[[${loaiChamDaChon}]]*/ '';
+    </script>
+
+    <div th:replace="~{admin/layout/footer :: footer}"></div>
+
+    <script>
+        // Statistics page specific JavaScript functions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto submit form when selecting a class
+            const classSelect = document.getElementById('class-select');
+            if (classSelect) {
+                classSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        document.getElementById('filterForm').submit();
+                    }
+                });
+            }
+            
+            // Auto submit form when selecting report type
+            const reportTypeSelect = document.getElementById('report-type-select');
+            if (reportTypeSelect) {
+                reportTypeSelect.addEventListener('change', function() {
+                    const maLopTC = document.getElementById('class-select').value;
+                    if (maLopTC) {
+                        document.getElementById('filterForm').submit();
+                    }
+                });
+            }
+        });
+
+        function openDetailModal(button) {
+            const index = button.getAttribute('data-index');
+            
+            if (typeof thongKeDiemData !== 'undefined' && thongKeDiemData[index]) {
+                const data = thongKeDiemData[index];
+                
+                // Set modal title and header info
+                document.getElementById('modalMaDT').textContent = data.maDT;
+                document.getElementById('modalTenNhom').textContent = data.tenNhom;
+                document.getElementById('modalTenDT').textContent = data.tenDT;
+                
+                // Set score header based on selected type
+                const scoreHeader = document.getElementById('modalScoreHeader');
+                if (loaiChamSelected === 'mid') {
+                    scoreHeader.textContent = 'Điểm giữa kì';
+                } else if (loaiChamSelected === 'final') {
+                    scoreHeader.textContent = 'Điểm cuối kì';
+                } else {
+                    scoreHeader.textContent = 'Tổng điểm';
+                }
+                
+                // Populate student list
+                const studentList = document.getElementById('modalStudentList');
+                studentList.innerHTML = '';
+                
+                data.thanhViens.forEach((student, idx) => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    
+                    let score = '-';
+                    let scoreClass = 'text-gray-600';
+                    
+                    if (loaiChamSelected === 'mid' && student.diemGiuaKy !== null) {
+                        score = student.diemGiuaKy.toFixed(1);
+                        scoreClass = getScoreClass(student.diemGiuaKy);
+                    } else if (loaiChamSelected === 'final' && student.diemCuoiKy !== null) {
+                        score = student.diemCuoiKy.toFixed(1);
+                        scoreClass = getScoreClass(student.diemCuoiKy);
+                    } else if (student.diemTongKet !== null) {
+                        score = student.diemTongKet.toFixed(1);
+                        scoreClass = getScoreClass(student.diemTongKet);
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-sm text-gray-600">${idx + 1}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">${student.maSV}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${student.tenSV}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">${student.lopSV || '-'}</td>
+                        <td class="px-4 py-3 text-sm font-bold ${scoreClass}">${score}</td>
+                    `;
+                    
+                    studentList.appendChild(row);
+                });
+                
+                // Show modal
+                document.getElementById('detailModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function getScoreClass(score) {
+            if (score >= 8.5) return 'text-green-600';
+            if (score >= 7.0) return 'text-blue-600';
+            if (score >= 5.5) return 'text-yellow-600';
+            return 'text-red-600';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeDetailModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDetailModal();
+            }
+        });
+    </script>
+
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+</body>
+</html> 

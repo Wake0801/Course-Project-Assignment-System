@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="Orbitor,business,company,agency,modern,bootstrap4,tech,software">
+  <meta name="author" content="themefisher.com">
+
+  <title>Quản lý đề tài</title>
+  <th:block th:replace="~{client/layout/header :: headContent}"></th:block>
+  <div th:replace="~{client/layout/header :: header}"></div>
+  <style>
+	.modal {
+	position: fixed;
+	top: 0; left: 0; width: 100%; height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	display: none;
+	}
+	.modal-content {
+	background: white;
+	margin: 5% auto;
+	padding: 20px;
+	width: 80%;
+	}
+
+  </style>
+</head>
+<body id="top">
+
+<div class="main-layout">
+	<!-- Main Content Area -->
+	<div class="main-content">
+	  
+	  <!-- Content -->
+	<div class="content">
+		<!-- Filters -->
+		<div class="search-card">
+			<h2>Quản lí đề tài</h2>
+			<form th:action="@{/client/gv/topic}" method="get">
+				<div class="search-filters">
+				<div class="filter-group">
+					<label>Lớp tín chỉ</label>
+					<select name="maLopTC">
+					<option th:each="ltc : ${dsLopTinChi}" 
+							th:value="${ltc.maLopTC}"
+							th:text="${ltc.maLopTC + ' - ' + ltc.monHoc.tenMon}"
+							th:selected="${maLopTC != null && maLopTC == ltc.maLopTC}">
+					</option>
+					</select>
+				</div>
+				<div class="filter-group">
+					<label>Loại báo cáo</label>
+					<select name="maLoaiBaoCao">
+						<option value="1">Giữa Kỳ</option>
+						<option value="2">Cuối Kỳ</option>
+					</select>
+				</div>
+				</div>
+				<div class="search-actions">
+				<a th:href="@{/client/gv/topic}" class="btn btn-outline">
+					<i class="fas fa-redo"></i>Đặt lại
+				</a>
+				<button type="submit" class="btn btn-primary">
+					<i class="fas fa-search"></i>Tìm kiếm
+				</button>
+				</div>
+			</form>
+		</div>
+		
+		<!-- Actions -->
+		<div class="topics-header">
+			<div>
+				<h2>Danh sách đề tài</h2>
+				<p>Tổng cộng có <span th:text="${deTaiPage.totalElements}"></span> đề tài</p>
+			</div>
+
+			<div class="button-group">
+				<button onclick="openAddModal()" class="btn btn-primary">
+				<i class="fas fa-plus"></i> Thêm đề tài
+				</button>
+
+				<button onclick="openAssignModalForLop()" class="btn btn-secondary">
+				<i class="fas fa-users-cog"></i> Giao đề tài
+				</button>
+
+				<button onclick="openDiemModalForLop()" class="btn btn-secondary">
+				<i class="fas fa-clipboard-check"></i> Nhập điểm
+				</button>
+			</div>
+		</div>
+
+
+		<div class="topics-grid">
+			<!-- Thêm card cho mỗi đề tài -->
+			<div th:each="deTai : ${deTaiPage.content}" class="topic-card">
+				<div class="topic-card-content">
+				<div class="topic-card-header">
+					<span class="topic-badge" th:text="${deTai.lopTinChi.monHoc.tenMon}"></span>
+					<div class="topic-actions">
+					<button th:onclick="'openEditModal(' + ${deTai.maDT} + ')'" class="edit">
+						<i class="fas fa-edit"></i>
+					</button>
+					<button th:onclick="'deleteDeTai(' + ${deTai.maDT} + ')'" class="delete">
+						<i class="fas fa-trash"></i>
+					</button>
+					</div>
+				</div>
+				<h3 th:text="${deTai.maDT} + ' - ' + ${deTai.tenDT}"></h3>
+				<p th:text="${deTai.moTa}"></p>
+				<div class="topic-meta">
+					<span th:if="${deTai.nhom != null}">
+					<i class="fas fa-users"></i> Nhóm <span th:text="${deTai.nhom.tenNhom}"></span>
+					</span>
+					<span th:if="${deTai.nhom == null}">
+					<i class="fas fa-users"></i> Chưa giao nhóm
+					</span>
+					<span>
+					<i class="fas fa-calendar-alt"></i> 
+					<span th:text="${#temporals.format(deTai.ngayBatDau, 'dd/MM/yyyy')}"></span>
+					</span>
+				</div>
+				</div>
+				
+			</div>
+		</div>
+		
+		<!-- Pagination -->
+		<div class="pagination">
+			<div class="pagination-info">
+				Hiển thị <span th:text="${deTaiPage.number * deTaiPage.size + 1} + '-' + 
+				${(deTaiPage.number * deTaiPage.size + deTaiPage.numberOfElements)}"></span> 
+				của <span th:text="${deTaiPage.totalElements}"></span> đề tài
+			</div>
+			<nav class="pagination-nav">
+				<a th:href="@{'/client/gv/topic?page=' + ${deTaiPage.number - 1} + 
+							'&maLopTC=' + ${maLopTC} + '&maLoaiBaoCao=' + ${maLoaiBaoCao} + '&keyword=' + ${keyword}}" 
+				class="pagination-link" 
+				th:classappend="${deTaiPage.first} ? 'disabled'">
+				<i class="fas fa-chevron-left"></i>
+				</a>
+				
+				<a th:each="i : ${#numbers.sequence(1, deTaiPage.totalPages)}"
+				th:href="@{'/client/gv/topic?page=' + ${i - 1} + 
+							'&maLopTC=' + ${maLopTC} + '&maLoaiBaoCao=' + ${maLoaiBaoCao} + '&keyword=' + ${keyword}}"
+				class="pagination-link"
+				th:classappend="${i - 1 == deTaiPage.number} ? 'active'">
+				<span th:text="${i}">1</span>
+				</a>
+				
+				<a th:href="@{'/client/gv/topic?page=' + ${deTaiPage.number + 1} + 
+							'&maLopTC=' + ${maLopTC} + '&maLoaiBaoCao=' + ${maLoaiBaoCao} + '&keyword=' + ${keyword}}" 
+				class="pagination-link" 
+				th:classappend="${deTaiPage.last} ? 'disabled'">
+				<i class="fas fa-chevron-right"></i>
+				</a>
+			</nav>
+			</div>
+	  </div>
+	</div>
+  </div>
+  
+  <!-- Add Topic Modal -->
+  <div id="addModal" class="modal">
+	<div class="modal-content">
+		<div class="modal-header">
+		<h3>Thêm đề tài mới</h3>
+		<button onclick="closeAddModal()">
+			<i class="fas fa-times"></i>
+		</button>
+		</div>
+		<form th:action="@{/client/gv/topic/add}" method="post">
+		<div class="modal-body">
+			<div class="modal-grid">
+			<div class="form-group">
+				<label>Lớp tín chỉ*</label>
+				<select name="maLopTC" required>
+				<option value="">Chọn lớp tín chỉ</option>
+				<option th:each="ltc : ${dsLopTinChi}"
+						th:value="${ltc.maLopTC}"
+						th:text="${ltc.maLopTC + ' - ' + ltc.monHoc.tenMon}">
+				</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label>Loại báo cáo*</label>
+				<select name="loaiBaoCaoIds" multiple required>
+				<option th:each="lbc : ${loaiBaoCaoList}"
+						th:value="${lbc.maLoaiBaoCao}"
+						th:text="${lbc.tenLoaiBaoCao}">
+				</option>
+				</select>
+			</div>
+			</div>
+			<div class="form-group">
+			<label>Mã đề tài</label>
+			<input type="text" name="maDT" required placeholder="Nhập mã đề tài">
+			</div>
+			<div class="form-group">
+			<label>Tên đề tài*</label>
+			<input type="text" name="tenDT" required placeholder="Nhập tên đề tài">
+			</div>
+			<div class="form-group">
+			<label>Mô tả*</label>
+			<textarea name="moTa" rows="4" required placeholder="Nhập mô tả chi tiết đề tài"></textarea>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="button" onclick="closeAddModal()" class="btn btn-outline">
+			Hủy bỏ
+			</button>
+			<button type="submit" class="btn btn-primary">
+			<i class="fas fa-save"></i>Lưu đề tài
+			</button>
+		</div>
+		</form>
+	</div>
+</div>
+  
+  <!-- Edit Topic Modal -->
+  <div id="editModal" class="modal">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<h3>Chỉnh sửa đề tài</h3>
+		<button onclick="closeEditModal()">
+		  <i class="fas fa-times"></i>
+		</button>
+	  </div>
+	  <form>
+		<div class="modal-body">
+		  <div class="modal-grid">
+			
+			<div class="form-group">
+			  <label>Lớp tín chỉ*</label>
+			  <select required>
+				<option value="">Chọn lớp tín chỉ</option>
+				<option value="">Mã lớp tín chỉ - Tên môn </option>
+			  </select>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label>Mã đề tài*</label>
+			<input type="text" value="Xây dựng website bán hàng" required>
+		  </div>
+		  <div class="form-group">
+			<label>Tên đề tài*</label>
+			<input type="text" value="Xây dựng website bán hàng" required>
+		  </div>
+		  <div class="form-group">
+			<label>Mô tả*</label>
+			<textarea rows="4" required></textarea>
+		  </div>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" onclick="closeEditModal()" class="btn btn-outline">
+			Hủy bỏ
+		  </button>
+		  <button type="submit" class="btn btn-primary">
+			<i class="fas fa-save"></i>Cập nhật
+		  </button>
+		</div>
+	  </form>
+	</div>
+  </div>
+  <!-- Assign Modal -->
+   <div id="assignModal" class="modal" style="display:none;">
+		<div class="modal-content">
+			<div class="modal-header">
+			<h3>Giao đề tài cho nhóm</h3>
+			<button onclick="closeModal('assignModal')"><i class="fas fa-times"></i></button>
+			</div>
+			<form th:action="@{/client/gv/topic/assign}" method="post">
+			<input type="hidden" name="maLopTC" th:value="${maLopTC}" />
+			<input type="hidden" name="maLoaiBaoCao" th:value="${maLoaiBaoCao}" />
+			<div class="modal-body">
+				<table class="table table-bordered">
+				<thead>
+					<tr>
+					<th>Mã đề tài</th>
+					<th>Tên đề tài</th>
+					<th>Giao cho nhóm</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="dt : ${dsDeTai}">
+					<td th:text="${dt.maDT}"></td>
+					<td th:text="${dt.tenDT}"></td>
+					<td>
+						<select class="form-control" th:name="'giaoNhom[' + ${dt.maDT} + ']'">
+						<option value="">-- Chọn nhóm --</option>
+						<option th:each="nhom : ${dsNhom}"
+								th:value="${nhom.maNhom}"
+								th:text="${nhom.tenNhom}">
+						</option>
+						</select>
+					</td>
+					</tr>
+				</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Xác nhận</button>
+				<a href="#" onclick="closeModal('assignModal')" class="btn btn-outline">Hủy</a>
+				<a th:href="@{'/client/gv/topic/random-assign?maLopTC=' + ${maLopTC} + '&maLoaiBaoCao=' + ${maLoaiBaoCao}}" 
+				class="btn btn-secondary"><i class="fas fa-random"></i> Chia ngẫu nhiên</a>
+			</div>
+			</form>
+		</div>
+		</div>
+
+
+	<!-- Diem Modal -->
+	<div id="diemModal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Nhập điểm báo cáo</h3>
+				<button onclick="closeModal('diemModal')">
+					<i class="fas fa-times"></i>
+				</button>
+			</div>
+			<form>
+				<div class="modal-body">
+					<div class="form-group">
+						<label>Loại báo cáo</label>
+						<select id="diemLoaiBaoCaoSelect" class="form-control">
+							<option value="1">Giữa kỳ</option>
+							<option value="2">Cuối kỳ</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Áp dụng ngày cho tất cả</label>
+						<div class="input-group">
+							<input type="date" id="applyAllDate" class="form-control">
+							<button type="button" onclick="applyAllDate()" class="btn btn-secondary">
+								Áp dụng
+							</button>
+						</div>
+					</div>
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Mã đề tài</th>
+									<th>Tên đề tài</th>
+									<th>Ngày báo cáo</th>
+									<th>Điểm</th>
+								</tr>
+							</thead>
+							<tbody id="diemTableBody">
+								<!-- Dữ liệu sẽ được load bằng JavaScript -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" onclick="closeModal('diemModal')" class="btn btn-outline">
+						Hủy bỏ
+					</button>
+					<button type="submit" class="btn btn-primary">
+						<i class="fas fa-save"></i> Lưu điểm
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<script>
+
+		let selectedLopTC = '';
+		let selectedLoaiBaoCao = '';
+
+		// Khi chọn lớp tín chỉ
+		document.querySelector('select[name="maLopTC"]').addEventListener('change', function () {
+			selectedLopTC = this.value;
+		});
+
+		document.querySelector('select[name="maLoaiBaoCao"]').addEventListener('change', function () {
+			selectedLoaiBaoCao = this.value;
+		});
+
+		// Mở modal giao đề tài (toàn lớp)
+		function openAssignModalForLop() {
+			if (!selectedLopTC || !selectedLoaiBaoCao ) {
+				alert("Vui lòng chọn lớp tín chỉ và loại báo cáo.");
+				return;
+			}
+
+			fetch(`/client/gv/topic/assign?maLopTC=${selectedLopTC}&maLoaiBaoCao=${selectedLoaiBaoCao}`)
+				.then(res => res.text())
+				.then(html => {
+				const modalContainer = document.createElement('div');
+				modalContainer.innerHTML = html;
+
+				// Remove old modal if exists
+				const oldModal = document.getElementById('assignModal');
+				if (oldModal) oldModal.remove();
+
+				// Append new modal
+				document.body.appendChild(modalContainer);
+
+				// Show modal
+				document.getElementById("assignModal").style.display = "block";
+				});
+		}
+
+
+		// Mở modal nhập điểm
+		function openDiemModalForLop() {
+			if (!selectedLopTC || !selectedLoaiBaoCao) {
+			alert("Vui lòng chọn lớp tín chỉ và loại báo cáo.");
+			return;
+			}
+
+			fetch(`/api/topic/diem?maLopTC=${selectedLopTC}&maLoaiBaoCao=${selectedLoaiBaoCao}`)
+			.then(response => response.json())
+			.then(data => {
+				const table = document.getElementById('diemTableBody');
+				table.innerHTML = '';
+				data.forEach(item => {
+				const row = document.createElement('tr');
+				row.innerHTML = `
+					<td>${item.maDT}</td>
+					<td>${item.tenDT}</td>
+					<td>
+					<input type="date" class="form-control ngay-bao-cao" 
+							name="ngayBaoCao" value="${item.ngayBaoCao || ''}">
+					</td>
+					<td>
+					<input type="number" step="0.25" min="0" max="10" 
+							class="form-control diem" name="diem" value="${item.diem || ''}">
+					<input type="hidden" name="maDT" value="${item.maDT}">
+					<input type="hidden" name="maLoaiBaoCao" value="${selectedLoaiBaoCao}">
+					</td>
+				`;
+				table.appendChild(row);
+				});
+
+				document.getElementById('diemModal').style.display = 'block';
+			});
+		}
+
+		// Áp dụng ngày báo cáo cho tất cả
+		function applyAllDate() {
+			const date = document.getElementById("applyAllDate").value;
+			document.querySelectorAll('.ngay-bao-cao').forEach(el => {
+			el.value = date;
+			});
+		}
+
+		// Validate điểm trước khi gửi
+		function validateAllDiem() {
+			const diemInputs = document.querySelectorAll('.diem');
+			for (let input of diemInputs) {
+			const val = parseFloat(input.value);
+			if (isNaN(val) || val <= 0 || val >= 10 || (val % 0.25 !== 0 && val % 0.1 !== 0)) {
+				alert("Điểm không hợp lệ: " + input.value);
+				return false;
+			}
+			}
+			return true;
+		}
+
+		// Submit điểm
+		function submitDiem() {
+			if (!validateAllDiem()) return;
+
+			const rows = document.querySelectorAll('#diemTableBody tr');
+			const payload = Array.from(rows).map(row => ({
+			maDT: row.querySelector('input[name="maDT"]').value,
+			maLoaiBaoCao: row.querySelector('input[name="maLoaiBaoCao"]').value,
+			ngayBaoCao: row.querySelector('.ngay-bao-cao').value,
+			diem: row.querySelector('.diem').value
+			}));
+
+			fetch('/api/topic/diem/save', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(payload)
+			}).then(res => res.json())
+			.then(result => {
+				if (result.success) {
+				alert("Lưu điểm thành công!");
+				closeModal('diemModal');
+				} else {
+				alert(result.message || "Lỗi khi lưu điểm.");
+				}
+			});
+		}
+
+		function closeModal(id) {
+			document.getElementById(id).style.display = 'none';
+		}
+
+		function openAddModal() {
+			document.getElementById("addModal").style.display = "block";
+		}
+
+		function closeAddModal() {
+			document.getElementById("addModal").style.display = "none";
+		}
+</script>
+
+
+
+<!-- footer Start -->
+<div th:replace="~{client/layout/footer :: footer}"></div>
+<th:block th:replace="~{client/layout/footer :: scriptContent}"></th:block>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê tỉ lệ điểm lớp tín chỉ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 5rem);
+            margin-top: 5rem;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .chart-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .grade-row {
+            transition: all 0.3s ease;
+        }
+        
+        .grade-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-4">
+            <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+                
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Thống kê tỉ lệ điểm lớp tín chỉ</h1>
+                        <p class="text-gray-600 mt-1">Phân bố điểm số của sinh viên theo các khoảng điểm</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a th:if="${phanBoDiem != null}"
+                           th:href="@{/nvpkt/thong-ke/ty-le-diem/export(maLopTC=${maLopTCDaChon}, loaiCham=${loaiChamDaChon})}" 
+                           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2">
+                            <i class="fas fa-file-export"></i>
+                            <span>Xuất Excel</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fas fa-filter text-blue-500"></i>
+                        Bộ lọc dữ liệu
+                    </h2>
+                    
+                    <form id="filterForm" th:action="@{/nvpkt/thong-ke/ty-le-diem}" method="get" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chọn lớp tín chỉ</label>
+                                <div class="relative">
+                                    <select name="maLopTC" id="class-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 hover:border-gray-400 transition-colors">
+                                        <option value="" class="text-gray-500">-- Chọn lớp --</option>
+                                        <option th:each="ltc : ${danhSachLopTC}" 
+                                                th:value="${ltc.maLopTC}" 
+                                                th:text="${ltc.tenLopTC}"
+                                                th:selected="${ltc.maLopTC == maLopTCDaChon}"
+                                                class="text-gray-900"></option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Loại báo cáo</label>
+                                <div class="relative">
+                                    <select name="loaiCham" id="report-type-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-gray-900 hover:border-gray-400 transition-colors">
+                                        <option value="" class="text-gray-500">-- Chọn loại báo cáo --</option>
+                                        <option value="mid" th:selected="${loaiChamDaChon == 'mid'}" class="text-gray-900">Giữa kì</option>
+                                        <option value="final" th:selected="${loaiChamDaChon == 'final'}" class="text-gray-900">Cuối kì</option>
+                                        <option value="both" th:selected="${loaiChamDaChon == 'both'}" class="text-gray-900">Cả hai (Tổng điểm)</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Info Card -->
+                <div th:if="${phanBoDiem != null}" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+                    <div class="flex items-start gap-4">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i class="fas fa-chart-bar text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-blue-800" th:text="${phanBoDiem.tenLopTC}">Thông tin lớp tín chỉ</h3>
+                            <p class="text-blue-700 mt-1">
+                                Tổng số sinh viên: <span class="font-semibold" th:text="${phanBoDiem.tongSinhVien}"></span>
+                                <span th:if="${phanBoDiem.loaiCham == 'mid'}"> | Loại báo cáo: <span class="font-semibold">Giữa kì</span></span>
+                                <span th:if="${phanBoDiem.loaiCham == 'final'}"> | Loại báo cáo: <span class="font-semibold">Cuối kì</span></span>
+                                <span th:if="${phanBoDiem.loaiCham == 'both'}"> | Loại báo cáo: <span class="font-semibold">Tổng điểm</span></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade Distribution Chart -->
+                <div th:if="${phanBoDiem != null}" class="bg-white rounded-xl shadow-md border border-gray-200">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-green-500"></i>
+                            Bảng phân bố điểm số
+                        </h2>
+                        <p class="text-gray-600 text-sm mt-1">Thống kê tỉ lệ sinh viên theo các khoảng điểm</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-gradient-to-r from-blue-50 to-indigo-50">
+                                        <th class="border border-gray-300 px-6 py-4 text-left font-semibold text-gray-700">Điểm số</th>
+                                        <th class="border border-gray-300 px-6 py-4 text-center font-semibold text-gray-700">Số lượng sinh viên</th>
+                                        <th class="border border-gray-300 px-6 py-4 text-center font-semibold text-gray-700">Tỷ lệ (%)</th>
+                                        <th class="border border-gray-300 px-6 py-4 text-center font-semibold text-gray-700">Biểu đồ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="khoang : ${phanBoDiem.phanBoDiem}" 
+                                        class="grade-row hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="border border-gray-300 px-6 py-4 font-medium text-gray-800" th:text="${khoang.khoangDiem}"></td>
+                                        <td class="border border-gray-300 px-6 py-4 text-center">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800" 
+                                                  th:text="${khoang.soLuongSinhVien}"></span>
+                                        </td>
+                                        <td class="border border-gray-300 px-6 py-4 text-center">
+                                            <span class="font-semibold text-lg" th:text="${khoang.tyLe} + '%'"></span>
+                                        </td>
+                                        <td class="border border-gray-300 px-6 py-4">
+                                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                                <div class="progress-bar rounded-full h-3" 
+                                                     th:style="'width: ' + ${khoang.tyLe} + '%'"></div>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1 text-center" th:text="${khoang.tyLe} + '%'"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Summary Stats -->
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4" th:if="${phanBoDiem.tongSinhVien > 0}">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-trophy text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-green-600 font-medium">Xuất sắc (9.0-10.0)</p>
+                                        <p class="text-lg font-bold text-green-800" 
+                                           th:text="${phanBoDiem.phanBoDiem[0].soLuongSinhVien} + ' sinh viên'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-yellow-100 rounded-lg">
+                                        <i class="fas fa-star text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-yellow-600 font-medium">Khá-Giỏi (7.0-8.9)</p>
+                                        <p class="text-lg font-bold text-yellow-800" 
+                                           th:text="${phanBoDiem.phanBoDiem[1].soLuongSinhVien + phanBoDiem.phanBoDiem[2].soLuongSinhVien} + ' sinh viên'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-red-100 rounded-lg">
+                                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-red-600 font-medium">Trung bình- Yếu (<7.0)</p>
+                                        <p class="text-lg font-bold text-red-800" 
+                                           th:text="${phanBoDiem.phanBoDiem[3].soLuongSinhVien + phanBoDiem.phanBoDiem[4].soLuongSinhVien + phanBoDiem.phanBoDiem[5].soLuongSinhVien} + ' sinh viên'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Data Message -->
+                <div th:if="${phanBoDiem == null}" class="text-center py-16">
+                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-500 mb-2">Chưa có dữ liệu</h3>
+                    <p class="text-gray-400">Vui lòng chọn lớp tín chỉ để xem thống kê tỉ lệ điểm</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+    
+    <script>
+        // Auto submit form when select changes
+        document.getElementById('class-select').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('filterForm').submit();
+            }
+        });
+        
+        document.getElementById('report-type-select').addEventListener('change', function() {
+            const classSelect = document.getElementById('class-select');
+            if (classSelect.value) {
+                document.getElementById('filterForm').submit();
+            }
+        });
+        
+        // Progress bar animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html> 

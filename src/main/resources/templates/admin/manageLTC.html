@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lớp tín chỉ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/admin/images/favicon.png}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/admin/vendor/owl-carousel/css/owl.theme.default.min.css}" />
+    <link th:href="@{/admin/vendor/jqvmap/css/jqvmap.min.css}" rel="stylesheet" />
+    <link th:href="@{/admin/css/style.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .table-container::-webkit-scrollbar { height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        .layout { display: flex; min-height: calc(100vh - 5rem); margin-top: 5rem; position: relative; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div th:replace="~{admin/layout/header :: header}" id="header-include"></div>
+    <div class="layout flex">
+        <div th:replace="~{admin/layout/sidebar :: sidebar}" id="sidebar-include"></div>
+        <div class="flex-1 ml-[17.1875rem] p-2 md:p-4">
+            <div class="container mx-auto px-2 md:px-4 py-4 md:py-8 bg-white rounded-lg shadow-sm max-w-full">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-8 text-center">Quản lý lớp tín chỉ</h1>
+                <!-- Thông báo -->
+                <div th:if="${message != null}" class="mb-4 p-3 rounded bg-green-100 text-green-800 border border-green-200" th:text="${message}"></div>
+                <div th:if="${error != null}" class="mb-4 p-3 rounded bg-red-100 text-red-800 border border-red-200" th:text="${error}"></div>
+                <!-- Controls section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-2 md:gap-4">
+                    <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg shadow-md transition duration-300 flex items-center gap-2 text-sm md:text-base">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm lớp tín chỉ</span>
+                    </button>
+                    <div class="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
+                        <!-- Filter form không còn ô search -->
+                        <form th:action="@{/ltc}" method="get" class="flex flex-wrap gap-2 items-center">
+                            <select name="hocKi" class="border rounded-md px-2 py-2" th:value="${filterHocKi}">
+                                <option value="">Học kỳ</option>
+                                <option value="1" th:selected="${filterHocKi == 1}">1</option>
+                                <option value="2" th:selected="${filterHocKi == 2}">2</option>
+                                <option value="3" th:selected="${filterHocKi == 3}">3</option>
+                            </select>
+                            <select name="maGV" class="border rounded-md px-2 py-2" th:value="${filterMaGV}">
+                                <option value="">Giảng viên</option>
+                                <option th:each="gv : ${listGiangVien}" th:value="${gv.maGV}" th:text="${gv.maGV + ' - ' + gv.ho + ' ' + gv.ten}" th:selected="${gv.maGV == filterMaGV}"></option>
+                            </select>
+                            <select name="sortNgayMoLop" class="border rounded-md px-2 py-2" th:value="${sortNgayMoLop}">
+                                <option value="desc" th:selected="${sortNgayMoLop == 'desc'}">Ngày lập mới nhất</option>
+                                <option value="asc" th:selected="${sortNgayMoLop == 'asc'}">Ngày lập cũ nhất</option>
+                            </select>
+                            <select name="trangThai" class="border rounded-md px-2 py-2" th:value="${filterTrangThai}">
+                                <option value="">Trạng thái</option>
+                                <option value="true" th:selected="${filterTrangThai == true}">Mở</option>
+                                <option value="false" th:selected="${filterTrangThai == false}">Đóng</option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Lọc</button>
+                            <button type="button" onclick="resetLTCFilter()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-300 transition">Làm mới</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Table container -->
+                <div class="table-container overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200 max-w-full">
+                    <table class="min-w-[600px] w-full text-xs md:text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã lớp TC</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã môn</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="ltc,iterStat : ${ListLTC}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${ltc.maLopTC}"></td>
+                               <td class="px-6 py-4 text-sm text-gray-900" th:text="${ltc.monHoc.maMon}"></td>
+                                <td class="px-6 py-4 text-right text-sm font-medium flex gap-2 justify-end">
+                                    <button type="button"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300 transition"
+                                        th:attr="data-maltc=${ltc.maLopTC}"
+                                        title="Xem danh sách sinh viên"
+                                        onclick="showStudentList(this)">
+                                        <i class="fas fa-users"></i>
+                                        <span class="hidden md:inline">DS SV</span>
+                                    </button>
+                                    <button type="button"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 transition"
+                                        th:attr="data-maltc=${ltc.maLopTC}"
+                                        title="Chi tiết"
+                                        onclick="showLTCDetail(this)">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span class="hidden md:inline">Chi tiết</span>
+                                    </button>
+                                    <a th:href="@{'/ltc/edit/' + ${ltc.maLopTC}}"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border border-yellow-300 transition"
+                                        title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="hidden md:inline">Sửa</span>
+                                    </a>
+                                    <a th:href="@{'/ltc/delete/' + ${ltc.maLopTC}}"
+                                        onclick="return confirm('Bạn chắc chắn muốn xóa?')"
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 transition"
+                                        title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                        <span class="hidden md:inline">Xóa</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="mt-4 md:mt-6 flex justify-center gap-2">
+                    <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                       th:href="@{|/ltc?page=${i}&size=${size}&search=${keyword}|}"
+                       th:text="${i}"
+                       th:classappend="${i == currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-blue-100 transition">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Modal for Add/Edit -->
+        <div id="ltcModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-[95vw] max-w-lg mx-auto max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-4 md:px-6 py-3 md:py-4">
+                    <h3 id="modalTitle" class="text-lg md:text-xl font-semibold text-gray-800">Thêm lớp tín chỉ</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-6 overflow-y-auto">
+                    <form id="ltcForm" th:action="@{/ltc/save}" th:object="${editLTC}" method="post" class="grid grid-cols-1 gap-3">
+                        <div>
+                            <label for="maLopTC" class="block text-sm font-medium text-gray-700 mb-1">Mã lớp TC</label>
+                            <input type="text" id="maLopTC" name="maLopTC" th:value="${editLTC?.maLopTC}"
+                                   th:readonly="${editLTC?.maLopTC != null}" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="maMon" class="block text-sm font-medium text-gray-700 mb-1">Mã môn</label>
+                            <select id="maMon" name="maMon" required>
+                            <option value="">-- Chọn mã môn --</option>
+                            <option th:each="mh : ${listMonHoc}" 
+                                    th:value="${mh.maMon}" 
+                                    th:text="${mh.maMon + ' - ' + mh.tenMon}"
+                                    th:selected="${editLTC?.monHoc?.maMon == mh.maMon}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="maGV" class="block text-sm font-medium text-gray-700 mb-1">Mã GV</label>
+                            <select id="maGV" name="maGV" required>
+                            <option value="">-- Chọn mã GV --</option>
+                            <option th:each="gv : ${listGiangVien}" 
+                                    th:value="${gv.maGV}" 
+                                    th:text="${gv.maGV + ' - ' + gv.ho + ' ' + gv.ten}"
+                                    th:selected="${editLTC?.giangVien?.maGV == gv.maGV}"></option> 
+                        </div>
+                        <div>
+                            <label for="soLuongToiDa" class="block text-sm font-medium text-gray-700 mb-1">Số lượng tối đa</label>
+                            <input type="number" id="soLuongToiDa" name="soLuongToiDa" th:value="${editLTC?.soLuongToiDa}" min="1" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label for="soLuongToiThieu" class="block text-sm font-medium text-gray-700 mb-1">Số lượng tối thiểu</label>
+                            <input type="hidden" id="soLuongToiThieu" name="soLuongToiThieu" value="10">
+                            <input type="number" value="10" min="10" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label for="hocKi" class="block text-sm font-medium text-gray-700 mb-1">Học kỳ</label>
+                            <select id="hocKi" name="hocKi" th:value="${editLTC?.hocKi}" required
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                                <option value="">-- Chọn học kỳ --</option>
+                                <option value="1" th:selected="${editLTC?.hocKi == 1}">1</option>
+                                <option value="2" th:selected="${editLTC?.hocKi == 2}">2</option>
+                                <option value="3" th:selected="${editLTC?.hocKi == 3}">3</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="trangThai" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                            <select id="trangThai" name="trangThai"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                                    style="display:none;">
+                                <option value="true" th:selected="${editLTC?.trangThai == true}">Mở</option>
+                                <option value="false" th:selected="${editLTC?.trangThai == false}">Đóng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hệ số điểm các loại báo cáo</label>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 border">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Loại báo cáo</th>
+                                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Hệ số điểm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="lbc : ${listLoaiBaoCao}">
+                                            <td class="px-2 py-1" th:text="${lbc.tenLoaiBaoCao}"></td>
+                                            <td class="px-2 py-1">
+                                                <input type="number" step="0.01" min="0" max="1"
+                                                       th:name="'heSoDiem_' + ${lbc.maLoaiBaoCao}"
+                                                       th:value="${#lists.contains(#ids, lbc.maLoaiBaoCao) ? #maps.get(editHeSoDiemMap, lbc.maLoaiBaoCao) : ''}"
+                                                       class="border rounded px-2 py-1 w-24" required />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="flex justify-end border-t px-4 md:px-6 py-3 md:py-4 gap-2 md:gap-3">
+                        <button type="button" id="cancelBtn" 
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Hủy
+                        </button>
+                        <button type="submit" form="ltcForm" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <span id="submitBtnText">Thêm mới</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal danh sách sinh viên -->
+        <div id="studentListModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-4 md:px-6 py-3 md:py-4">
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-800 flex flex-wrap items-center gap-2">
+                        Danh sách sinh viên lớp tín chỉ <span id="modalMaLTC"></span>
+                        <span id="studentCountInfo" class="ml-2 text-blue-600 text-base"></span>
+                    </h3>
+                    <button type="button" onclick="closeStudentListModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-6 flex-1 flex flex-col min-h-0 overflow-y-auto">
+                    <!-- Cảnh báo nếu chưa đủ số lượng tối thiểu -->
+                    <div id="studentListMinAlert" class="mb-4 text-yellow-700 font-semibold bg-yellow-100 border border-yellow-300 rounded px-3 py-2 hidden">
+                        Lớp tín chỉ chưa đủ số lượng sinh viên tối thiểu!
+                    </div>
+                    <!-- Thêm sinh viên -->
+                    <div id="addStudentRow" class="mb-4 flex gap-2 items-center">
+                        <input type="text" id="addMaSVInput" placeholder="Nhập mã sinh viên" class="border rounded px-2 py-1 flex-1" />
+                        <button type="button" onclick="addStudentToLTC()" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">Thêm SV</button>
+                    </div>
+                    <div id="studentListFullAlert" class="mb-4 text-red-600 font-semibold hidden">Lớp đã đủ số lượng sinh viên tối đa, không thể thêm nữa.</div>
+                    <div id="studentListLoading" class="text-center text-gray-500 hidden">Đang tải...</div>
+                    <div id="studentListError" class="text-center text-red-500 hidden"></div>
+                    <div id="studentListTableContainer" class="overflow-x-auto flex-1 min-h-0">
+                        <table class="min-w-full divide-y divide-gray-200" id="studentListTable">
+                            <thead class="bg-gray-50 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mã SV</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ tên</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Giới tính</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ngày sinh</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentListBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Nội dung sẽ được render bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal chi tiết lớp tín chỉ -->
+        <div id="ltcDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-[95vw] max-w-md mx-auto max-h-[95vh] flex flex-col">
+                <div class="flex justify-between items-center border-b px-4 md:px-6 py-3 md:py-4">
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-800">Chi tiết lớp tín chỉ</h3>
+                    <button type="button" onclick="closeLTCDetailModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-6 overflow-y-auto">
+                    <dl class="divide-y divide-gray-200 text-xs md:text-sm">
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Mã lớp TC</dt>
+                            <dd id="detailMaLopTC" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Mã môn</dt>
+                            <dd id="detailMaMon" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Mã GV</dt>
+                            <dd id="detailMaGV" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Số lượng tối đa</dt>
+                            <dd id="detailSoLuongToiDa" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Số lượng tối thiểu</dt>
+                            <dd id="detailSoLuongToiThieu" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Học kỳ</dt>
+                            <dd id="detailHocKi" class="text-gray-900"></dd>
+                        </div>
+                        
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700">Trạng thái</dt>
+                            <dd id="detailTrangThai" class="text-gray-900"></dd>
+                        </div>
+                        <div class="py-2 flex justify-between">
+                            <dt class="font-medium text-gray-700" id="detailNgayLapLabel">Ngày lập</dt>
+                            <dd id="detailNgayLap" class="text-gray-900"></dd>
+                        </div>
+                    </dl>
+                    <!-- Bảng hệ số điểm các loại báo cáo -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hệ số điểm các loại báo cáo</label>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 border">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Loại báo cáo</th>
+                                        <th class="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">Hệ số điểm</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailHeSoDiemBody">
+                                    <!-- JS sẽ render -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{admin/layout/footer :: footer}" id="footer-include"></div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("ltcModal");
+            const ltcForm = document.getElementById("ltcForm");
+            const modalTitle = document.getElementById("modalTitle");
+            const addBtn = document.getElementById("addBtn");
+            const submitBtnText = document.getElementById("submitBtnText");
+            // Hiển thị modal thêm mới
+            if (addBtn) {
+                addBtn.addEventListener("click", function () {
+                    ltcForm.reset();
+                    // Lấy mã lớp TC mới từ API và set readonly
+                    fetch('/ltc/next-maLopTC')
+                        .then(res => res.text())
+                        .then(maLopTC => {
+                            ltcForm.maLopTC.value = maLopTC;
+                            ltcForm.maLopTC.readOnly = true;
+                        });
+                    ltcForm.maMon.value = "";
+                    ltcForm.maGV.value = "";
+                    ltcForm.soLuongToiDa.value = "";
+                    ltcForm.soLuongToiThieu.value = "";
+                    ltcForm.hocKi.value = "";
+
+                    // Trạng thái luôn là mở khi thêm mới
+                    ltcForm.trangThai.value = "true";
+                    // Ẩn trường trạng thái khi thêm mới
+                    ltcForm.trangThai.style.display = "none";
+                    modalTitle.textContent = "Thêm lớp tín chỉ";
+                    submitBtnText.textContent = "Thêm mới";
+                    ltcForm.setAttribute("action", "/ltc/save");
+                    modal.classList.remove("hidden");
+                });
+            }
+            // Hiển thị modal sửa khi nhấn nút Sửa
+            document.querySelectorAll('a[href^="/ltc/edit/"]').forEach(function(editLink) {
+                editLink.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    // Lấy mã lớp TC từ link
+                    const href = editLink.getAttribute("href");
+                    const maLopTC = href.split("/").pop();
+                    // Gọi API lấy thông tin lớp
+                    fetch(`/ltc/${maLopTC}/info`)
+                        .then(res => res.json())
+                        .then(data => {
+                            ltcForm.maLopTC.value = data.maLopTC;
+                            ltcForm.maLopTC.readOnly = true;
+                            ltcForm.maMon.value = data.maMon;
+                            ltcForm.maGV.value = data.maGV;
+                            ltcForm.soLuongToiDa.value = data.soLuongToiDa;
+                            ltcForm.soLuongToiThieu.value = data.soLuongToiThieu;
+                            ltcForm.hocKi.value = data.hocKi;
+
+                            ltcForm.trangThai.value = data.trangThai ? "true" : "false";
+                            // Hiện trường trạng thái khi sửa
+                            ltcForm.trangThai.style.display = "";
+                            modalTitle.textContent = "Sửa thông tin lớp tín chỉ";
+                            submitBtnText.textContent = "Cập nhật";
+                            ltcForm.setAttribute("action", "/ltc/save");
+                            modal.classList.remove("hidden");
+                        })
+                        .catch(() => alert("Không thể lấy thông tin lớp tín chỉ!"));
+                });
+            });
+            // Đóng modal khi click nền tối hoặc các nút đóng/hủy
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    modal.classList.add("hidden");
+                }
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    modal.classList.add("hidden");
+                }
+            });
+            const closeModal = document.getElementById("closeModal");
+            if (closeModal) {
+                closeModal.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            const cancelBtn = document.getElementById("cancelBtn");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function () {
+                    modal.classList.add("hidden");
+                });
+            }
+            // Xác nhận xóa
+            document.querySelectorAll('a[href*="/ltc/delete/"]').forEach(function(link) {
+                link.addEventListener("click", function(e) {
+                    if (!confirm("Bạn chắc chắn muốn xóa lớp tín chỉ này?")) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            // Hiển thị lại modal nếu có lỗi/thông báo từ backend
+            /*[[${showModal}]]*/ 
+            var showModal = /*[[${showModal}]]*/ false;
+            if (showModal) {
+                setTimeout(function() {
+                    document.getElementById("ltcModal").classList.remove("hidden");
+                }, 200);
+            }
+        });
+        function renderStudentList(data, maLTC) {
+            const tbody = document.getElementById('studentListBody');
+            const countInfo = document.getElementById('studentCountInfo');
+            const minAlert = document.getElementById('studentListMinAlert');
+            // Hiển thị số lượng sinh viên hiện tại / tối đa dạng 10/30
+            if (typeof window.studentListMaxCount === "number" && window.studentListMaxCount > 0) {
+                countInfo.textContent = `${data.length}/${window.studentListMaxCount}`;
+            } else {
+                countInfo.textContent = `${data.length}`;
+            }
+            // Hiển thị cảnh báo nếu chưa đủ số lượng tối thiểu
+            if (typeof window.studentListMinCount === "number" && data.length < window.studentListMinCount) {
+                minAlert.classList.remove('hidden');
+            } else {
+                minAlert.classList.add('hidden');
+            }
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-4">Không có sinh viên</td></tr>';
+            } else {
+                tbody.innerHTML = data.map((sv, idx) =>
+                    `<tr>
+                        <td class="px-2 py-2 text-center">${idx + 1}</td>
+                        <td class="px-4 py-2">${sv.maSV}</td>
+                        <td class="px-4 py-2">${sv.ho} ${sv.ten}</td>
+                        <td class="px-4 py-2">${sv.gioiTinh ? 'Nam' : 'Nữ'}</td>
+                        <td class="px-4 py-2">${sv.ngaySinh || ''}</td>
+                        <td class="px-4 py-2">${sv.email || ''}</td>
+                        <td class="px-4 py-2 text-center">
+                            <button type="button" class="text-red-600 hover:text-red-800" onclick="removeStudentFromLTC('${maLTC}','${sv.maSV}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`
+                ).join('');
+            }
+        }
+
+        function refreshStudentList(maLTC) {
+            document.getElementById('studentListLoading').classList.remove('hidden');
+            document.getElementById('studentListError').classList.add('hidden');
+            // Lấy số lượng tối đa từ bảng LTC
+            fetch('/ltc/' + maLTC + '/students')
+                .then(res => {
+                    if (!res.ok) throw new Error('Không thể tải danh sách sinh viên');
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('studentListLoading').classList.add('hidden');
+                    renderStudentList(data, maLTC);
+                    // Lấy số lượng tối đa từ bảng lớp tín chỉ
+                    fetch('/ltc?search=' + maLTC)
+                        .then(res2 => res2.text())
+                        .then(html => {
+                            // Parse số lượng tối đa từ HTML (ẩn trong bảng hoặc modal)
+                            // Đơn giản nhất: truyền số lượng tối đa qua thuộc tính data khi mở modal
+                            // (giải pháp dưới đây dùng biến toàn cục)
+                        });
+                    // Kiểm tra số lượng hiện tại và tối đa
+                    if (window.studentListMaxCount !== undefined) {
+                        if (data.length >= window.studentListMaxCount) {
+                            document.getElementById('addStudentRow').classList.add('hidden');
+                            document.getElementById('studentListFullAlert').classList.remove('hidden');
+                        } else {
+                            document.getElementById('addStudentRow').classList.remove('hidden');
+                            document.getElementById('studentListFullAlert').classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('studentListLoading').classList.add('hidden');
+                    document.getElementById('studentListError').classList.remove('hidden');
+                    document.getElementById('studentListError').textContent = err.message;
+                });
+        }
+
+        function showStudentList(btn) {
+            const maLTC = btn.getAttribute('data-maltc');
+            document.getElementById('modalMaLTC').textContent = maLTC;
+            document.getElementById('studentListModal').classList.remove('hidden');
+            document.getElementById('addMaSVInput').value = '';
+            // Lấy số lượng tối đa và tối thiểu từ backend (API)
+            fetch(`/ltc/${maLTC}/info`)
+                .then(res => res.json())
+                .then(data => {
+                    window.studentListMaxCount = data.soLuongToiDa || 0;
+                    window.studentListMinCount = data.soLuongToiThieu || 0;
+                    refreshStudentList(maLTC);
+                })
+                .catch(() => {
+                    window.studentListMaxCount = 0;
+                    window.studentListMinCount = 0;
+                    refreshStudentList(maLTC);
+                });
+        }
+
+        function addStudentToLTC() {
+            const maLTC = document.getElementById('modalMaLTC').textContent;
+            const maSV = document.getElementById('addMaSVInput').value.trim();
+            if (!maSV) {
+                alert('Vui lòng nhập mã sinh viên!');
+                return;
+            }
+            fetch(`/ltc/${maLTC}/students`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({maSV})
+            })
+            .then(res => res.json())
+            .then(resp => {
+                if (resp.success) {
+                    refreshStudentList(maLTC);
+                    document.getElementById('addMaSVInput').value = '';
+                } else {
+                    alert(resp.message || 'Thêm sinh viên thất bại');
+                }
+            })
+            .catch(() => alert('Lỗi khi thêm sinh viên'));
+        }
+
+        function removeStudentFromLTC(maLTC, maSV) {
+            if (!confirm('Bạn chắc chắn muốn xóa sinh viên này khỏi lớp?')) return;
+            fetch(`/ltc/${maLTC}/students/${maSV}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(resp => {
+                    if (resp.success) {
+                        refreshStudentList(maLTC);
+                    } else {
+                        alert(resp.message || 'Xóa sinh viên thất bại');
+                    }
+                })
+                .catch(() => alert('Lỗi khi xóa sinh viên'));
+        }
+
+        function closeStudentListModal() {
+            document.getElementById('studentListModal').classList.add('hidden');
+        }
+
+        function showLTCDetail(btn) {
+            const maLTC = btn.getAttribute('data-maltc');
+            fetch(`/ltc/${maLTC}/info`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('detailMaLopTC').textContent = data.maLopTC || '';
+                    document.getElementById('detailMaMon').textContent = data.monHoc?.maMon || data.maMon || '';
+                    document.getElementById('detailMaGV').textContent = data.giangVien?.maGV || data.maGV || '';
+                    document.getElementById('detailSoLuongToiDa').textContent = data.soLuongToiDa ?? '';
+                    document.getElementById('detailSoLuongToiThieu').textContent = data.soLuongToiThieu ?? '';
+                    document.getElementById('detailHocKi').textContent = data.hocKi ?? '';
+
+                    document.getElementById('detailTrangThai').textContent = data.trangThai ? 'Mở' : 'Đóng';
+                    document.getElementById('detailNgayLap').textContent = data.ngayMoLop ? data.ngayMoLop : '';
+                    // Đổi nhãn ngày lập thành ngày mở/ngày đóng dựa vào trạng thái
+                    const label = document.getElementById('detailNgayLapLabel');
+                    if (data.trangThai) {
+                        label.textContent = 'Ngày mở';
+                    } else {
+                        label.textContent = 'Ngày đóng';
+                    }
+                    // Lấy hệ số điểm các loại báo cáo
+                    fetch(`/ltc/${maLTC}/hesodiem`)
+                        .then(res => res.json())
+                        .then(list => {
+                            const tbody = document.getElementById('detailHeSoDiemBody');
+                            if (Array.isArray(list) && list.length > 0) {
+                                tbody.innerHTML = list.map(item =>
+                                    `<tr>
+                                        <td class="px-2 py-1">${item.tenLoaiBaoCao || item.maLoaiBaoCao}</td>
+                                        <td class="px-2 py-1">${item.heSoDiem}</td>
+                                </tr>`
+                                ).join('');
+                            } else {
+                                tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-500">Không có dữ liệu</td></tr>';
+                            }
+                        });
+                    document.getElementById('ltcDetailModal').classList.remove('hidden');
+                })
+                .catch(() => alert('Không thể lấy thông tin chi tiết lớp tín chỉ!'));
+        }
+
+        function closeLTCDetailModal() {
+            document.getElementById('ltcDetailModal').classList.add('hidden');
+        }
+
+        function resetLTCFilter() {
+            // Xóa tất cả select và input trong form lọc về mặc định
+            const form = document.querySelector('form[th\\:action="@{/ltc}"], form[action="/ltc"]');
+            if (!form) return;
+            form.querySelectorAll('select, input[type="text"], input[type="number"]').forEach(el => {
+                if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                else el.value = '';
+            });
+            // Submit lại form để làm mới kết quả
+            form.submit();
+        }
+        /*]]>*/
+    </script>
+    <script th:src="@{/admin/vendor/global/global.min.js}"></script>
+    <script th:src="@{/admin/js/quixnav-init.js}"></script>
+    <script th:src="@{/admin/js/custom.min.js}"></script>
+</body>
+</html>

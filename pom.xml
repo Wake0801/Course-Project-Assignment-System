@@ -36,7 +36,16 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+		</dependency>
 		<!-- SQL Server JDBC Driver: Driver để kết nối ứng dụng với cơ sở dữ liệu SQL Server -->
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>

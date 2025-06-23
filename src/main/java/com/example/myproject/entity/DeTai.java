@@ -25,7 +25,6 @@ public class DeTai {
 
     @Column(name = "NgayBatDau", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngayBatDau;
 
     @ManyToOne

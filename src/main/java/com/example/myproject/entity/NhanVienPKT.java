@@ -27,7 +27,6 @@ public class NhanVienPKT {
 
     @Column(name = "NgaySinh", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngaySinh;
 
     @ManyToOne

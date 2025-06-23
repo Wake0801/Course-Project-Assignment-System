@@ -26,19 +26,17 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, 
-                                      HttpServletResponse response,
-                                      Authentication authentication) throws IOException {
-       try {
+                                    HttpServletResponse response,
+                                    Authentication authentication) throws IOException {
+    try {
             HttpSession session = request.getSession();
             
-            // 1. Kiểm tra principal an toàn
             if (!(authentication.getPrincipal() instanceof CustomUserDetails)) {
                 throw new IllegalStateException("Principal không phải CustomUserDetails");
             }
             
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             
-            // 2. Kiểm tra null cho các đối tượng lồng nhau
             if (userDetails.getTaiKhoan() == null) {
                 throw new IllegalStateException("Đối tượng TaiKhoan là null");
             }
@@ -50,73 +48,68 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             session.setAttribute("username", userDetails.getUsername());
             session.setAttribute("role", taiKhoan.getQuyen().getTenQuyen());
             
-            // 3. Kiểm tra Quyen
             if (taiKhoan.getQuyen() == null) {
                 throw new IllegalStateException("Đối tượng Quyen là null");
             }
             
-            
-            
-            // 4. Xử lý từng loại tài khoản với kiểm tra nghiêm ngặt
-            Object userDetailObj = userDetails.getUserDetails();
-            if (userDetailObj == null) {
-                throw new IllegalStateException("UserDetails là null");
-            }
-            
-            switch (taiKhoan.getQuyen().getTenQuyen()) {
-                case "SINH_VIEN":
-                    if (!(userDetailObj instanceof SinhVien)) {
-                        throw new ClassCastException("Kiểu userDetails không phải SinhVien");
-                    }
-                    SinhVien sinhVien = (SinhVien) userDetailObj;
-                    session.setAttribute("maSV", sinhVien.getMaSV());
-                    session.setAttribute("hoTen", sinhVien.getHo() + " " + sinhVien.getTen());
-                    session.setAttribute("email", sinhVien.getEmail());
-                    session.setAttribute("maLop", sinhVien.getLop().getMaLop());
-                    // Thêm các thông tin khác nếu cần
-                    break;
-                    
-                case "GIANG_VIEN":
-                    if (!(userDetailObj instanceof GiangVien)) {
-                        throw new ClassCastException("Kiểu userDetails không phải GiangVien");
-                    }
-                    GiangVien giangVien = (GiangVien) userDetailObj;
-                    session.setAttribute("maGV", giangVien.getMaGV());
-                    session.setAttribute("hoTen", giangVien.getHo() + " " + giangVien.getTen());
-                    session.setAttribute("email", giangVien.getEmail());
-                    // Thêm các thông tin khác nếu cần
-                    break;
-                    
-                case "NHAN_VIEN":
-                if (!(userDetailObj instanceof NhanVienPKT)) {
-                        throw new ClassCastException("Kiểu userDetails không phải NhanVien");
-                    }
-                    NhanVienPKT nhanVien = (NhanVienPKT) userDetailObj;
-                    session.setAttribute("maNV", nhanVien.getMaNV());
-                    session.setAttribute("hoTen", nhanVien.getHo() + " " + nhanVien.getTen());
-                    // Thêm các thông tin khác nếu cần
-                    break;
+            // Chỉ xử lý userDetails nếu không phải ADMIN
+            if (!"ADMIN".equals(taiKhoan.getQuyen().getTenQuyen())) {
+                Object userDetailObj = userDetails.getUserDetails();
+                if (userDetailObj == null) {
+                    throw new IllegalStateException("UserDetails là null");
+                }
+                
+                switch (taiKhoan.getQuyen().getTenQuyen()) {
+                    case "SINH_VIEN":
+                        if (!(userDetailObj instanceof SinhVien)) {
+                            throw new ClassCastException("Kiểu userDetails không phải SinhVien");
+                        }
+                        SinhVien sinhVien = (SinhVien) userDetailObj;
+                        session.setAttribute("maSV", sinhVien.getMaSV());
+                        session.setAttribute("hoTen", sinhVien.getHo() + " " + sinhVien.getTen());
+                        session.setAttribute("email", sinhVien.getEmail());
+                        session.setAttribute("maLop", sinhVien.getLop().getMaLop());
+                        break;
+                        
+                    case "GIANG_VIEN":
+                        if (!(userDetailObj instanceof GiangVien)) {
+                            throw new ClassCastException("Kiểu userDetails không phải GiangVien");
+                        }
+                        GiangVien giangVien = (GiangVien) userDetailObj;
+                        session.setAttribute("maGV", giangVien.getMaGV());
+                        session.setAttribute("hoTen", giangVien.getHo() + " " + giangVien.getTen());
+                        session.setAttribute("email", giangVien.getEmail());
+                        break;
+                        
+                    case "NHAN_VIEN":
+                        if (!(userDetailObj instanceof NhanVienPKT)) {
+                            throw new ClassCastException("Kiểu userDetails không phải NhanVien");
+                        }
+                        NhanVienPKT nhanVien = (NhanVienPKT) userDetailObj;
+                        session.setAttribute("maNV", nhanVien.getMaNV());
+                        session.setAttribute("hoTen", nhanVien.getHo() + " " + nhanVien.getTen());
+                        break;
+                }
             }
 
             // Redirect đến trang phù hợp
-           if (!response.isCommitted()) {
-            String targetUrl = determineTargetUrl(authentication);
-            redirectStrategy.sendRedirect(request, response, targetUrl);
-        } else {
-            System.out.println("Không thể redirect vì response đã committed");
-        }
+            if (!response.isCommitted()) {
+                String targetUrl = determineTargetUrl(authentication);
+                redirectStrategy.sendRedirect(request, response, targetUrl);
+            }
         } catch (Exception e) {
             System.out.println("Lỗi xử lí đăng nhập "+ e.getMessage());
             if (!response.isCommitted()) {
                 response.sendRedirect("/login?error=system_error");
             }
-        }}
+        }
+    }
 
     protected String determineTargetUrl(final Authentication authentication) {
         Map<String, String> roleTargetUrlMap = new HashMap<>();
         roleTargetUrlMap.put("SINH_VIEN", "/client/public/home"); 
         roleTargetUrlMap.put("GIANG_VIEN", "/client/public/home");
-        roleTargetUrlMap.put("NHAN_VIEN", "/admin/index");
+        roleTargetUrlMap.put("NHAN_VIEN", "/nvpkt/thong-ke/diem");
         roleTargetUrlMap.put("ADMIN", "/admin/index");
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();

@@ -28,12 +28,10 @@ public class SinhVienNhom {
 
     @Column(name = "NgayGiaNhap", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngayGiaNhap;
 
     @Column(name = "NgayRoiNhom")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate ngayRoiNhom;
 
 }
