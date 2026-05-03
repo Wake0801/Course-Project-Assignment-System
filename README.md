@@ -22,8 +22,7 @@
 
 Đóng gói: **`war`** — có thể triển khai trên Tomcat hoặc chạy trực tiếp bằng Spring Boot.
 
-## Vai trò người dùng (tóm tắt theo thiết kế)
-
+## Vai trò người dùng 
 - **Sinh viên**: trang cá nhân, nhóm, đề tài, điểm; tham gia nhóm theo form do giảng viên tạo; (theo quy trình báo cáo) gửi đơn chuyển nhóm, v.v.
 - **Giảng viên** (`/client/gv/**`): danh sách sinh viên, nhóm, giao/ quản lý đề tài, nhập điểm, xử lý đơn theo nghiệp vụ.
 - **Nhân viên phòng khảo thí / quản trị** (`/admin/**`): quản lý sinh viên, giảng viên, nhân viên PKT, tài khoản, nhóm, đề tài — đồng bộ với nghiệp vụ tổng hợp điểm, lịch báo cáo, báo cáo thống kê (mô tả chi tiết trong báo cáo Word).
