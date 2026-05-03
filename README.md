@@ -73,9 +73,6 @@ Mặc định ứng dụng lắng nghe cổng **8080** (`server.port=8080`).
 
 **Lưu ý JPA:** `spring.jpa.hibernate.ddl-auto=none` — schema do DBA/script quản lý, không tự tạo bảng từ entity.
 
-## Tài liệu tham chi tiết
-
-Mô tả nghiệp vụ, use case, ERD, từ điển dữ liệu và ràng buộc toàn vẹn: xem file **`Báo Cáo Full.docx`** trong thư mục gốc dự án.
 
 ## Giấy phép & đóng góp
 
